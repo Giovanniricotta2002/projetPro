@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Vue + Symfony{% endblock %}</title>
+    {% block stylesheets %}
+      {{ vite_entry_link_tags('js/app.js') }}
+    {% endblock %}
+  </head>
+  <body>
+    <div id="app"></div>
+
+    {% block javascripts %}
+      {{ vite_entry_script_tags('js/app.js') }}
+    {% endblock %}
+  </body>
+</html>
