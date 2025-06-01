@@ -1,0 +1,5 @@
+pentatrion_vite:
+  build_directory: '%kernel.project_dir%/public/build'
+  public_directory: '%kernel.project_dir%/public'
+  builds: assets/main.ts
+  default_build: app
