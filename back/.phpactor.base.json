@@ -1,0 +1,15 @@
+{
+    "$schema-vscode": "/home/gio/.vscode-server/data/User/globalStorage/dantleech.vscode-phpactor/phpactor/phpactor.schema.json",
+    "$schema-user": "/home/user/bin/phpactor/phpactor.schema.json",
+    "symfony.enabled": true,
+    "indexer.exclude_patterns": [
+        "/vendor/**/Tests/**/*",
+        "/vendor/**/tests/**/*",
+        "/var/cache/**/*",
+        "/vendor/composer/**/*"
+    ],
+    "language_server_phpstan.enabled": false,
+    "language_server_php_cs_fixer.enabled": true,
+    "php_code_sniffer.enabled": true,
+    "behat.enabled": true
+}
