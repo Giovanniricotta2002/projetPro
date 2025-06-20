@@ -17,12 +17,12 @@ security:
             lazy: true
             provider: app_user_provider
 
-        remember_me:
-            secret: '%kernel.secret%'
-            lifetime: 86400
-            path: /
-            always_remember_me: true
-            #always_remember_me: true
+            remember_me:
+                name: REMEMBERME
+                secret: '%kernel.secret%'
+                lifetime: 604800        # en secondes
+                path: /
+                secure: auto
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
