@@ -1,6 +1,6 @@
 services:
   app:
-    image: cours
+    image: backend:latest
     build:
       context: ./web
     volumes:
@@ -25,6 +25,11 @@ services:
       - "/etc/localtime:/etc/localtime:ro"
     networks:
       - app
+
+  grafana:
+    image: grafana/grafana-oss:12.0.2-ubuntu
+    ports:
+      - 3000:3000
 
 networks:
   app:
