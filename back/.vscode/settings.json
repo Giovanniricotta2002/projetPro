@@ -1,0 +1,15 @@
+{
+    "phpactor.enable": true,
+    "phpactor.remote.enabled": false,
+    "phpactor.path": "/usr/local/bin/phpactor",
+    "phpactor.launchServerArgs": [
+        "-vvv"
+    ],
+    "phpactor.trace.server": {
+        "verbosity": "verbose",
+        "format": "text"
+    },
+    "symfony-vscode.phpExecutablePath": "/usr/local/bin/php",
+    "symfony-vscode.consolePath": "/Users/giomac/Desktop/projetPro/back/bin/console",
+    "phpcs.executablePath": "/Users/giomac/bin/PHP_CodeSniffer/bin/phpcs"
+}

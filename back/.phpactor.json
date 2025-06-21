@@ -1,5 +1,5 @@
 {
-    "$schema": "/home/gio/bin/phpactor/phpactor.schema.json",
+    "$schema": "/Users/giomac/bin/phpactor/phpactor.schema.json",
     "language_server_phpstan.enabled": true,
     "language_server_phpstan.mem_limit": "512M",
     "language_server_php_cs_fixer.enabled": true,
@@ -51,13 +51,13 @@
     "composer.autoloader_path": "%project_root%\/vendor\/autoload.php",
     "composer.autoload_deregister": true,
     "composer.class_maps_only": true,
-    "language_server.phpactor_bin": "/home/gio/bin/phpactor/bin/phpactor",
+    "language_server.phpactor_bin": "/usr/local/bin/phpactor",
     "indexer.enabled_watchers": [
         "lsp",
         "inotify",
         "find",
         "php"
     ],
-    "php_code_sniffer.bin": "/home/gio/bin/PHP_CodeSniffer/bin/phpcs"
+    "php_code_sniffer.bin": "/Users/giomac/bin/PHP_CodeSniffer/bin/phpcs"
 
 }
