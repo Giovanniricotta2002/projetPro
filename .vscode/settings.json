@@ -25,5 +25,6 @@
     "phpstan.suppressWorkspaceMessage": false,
     "phpstan.pro": false,
     "phpstan.tmpDir": "",
-    "phpstan.checkValidity": false
+    "phpstan.checkValidity": false,
+    "azureTerraform.checkTerraformCmd": false
 }
