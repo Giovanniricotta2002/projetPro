@@ -120,14 +120,13 @@ flowchart TD
 flowchart TD
     A[fa:fa-user Utilisateur]
 
-    CF([aws-cloudfront CloudFront<br/>CDN])
-    S3F([aws-s3 S3<br/>Frontend statique])
-    EC2([aws-ec2 EC2<br/>Backend PHP<br/>Gestion Auth interne])
-    RDS([aws-rds RDS<br/>Base de données])
-    S3([aws-s3 S3<br/>Stockage fichiers])
+    CF[CloudFront<br/>CDN]
+    S3F([S3<br/>Frontend statique])
+    EC2([EC2<br/>Backend PHP<br/>Gestion Auth interne])
+    RDS([RDS<br/>Base de données])
+    S3([S3<br/>Stockage fichiers])
     CloudWatch([aws-cloudwatch CloudWatch<br/>Monitoring])
 
-    %% Relations
     A -- "HTTP/HTTPS" --> CF
     CF -- "Fichiers statiques" --> S3F
     CF -- "Appels API & Auth" --> EC2
@@ -136,6 +135,14 @@ flowchart TD
     EC2 -- "Fichiers" --> S3
     EC2 -- "Logs" --> CloudWatch
     S3 -- "Logs" --> CloudWatch
+
+
+    CF@{ icon: "aws:arch-amazon-cloudfront", pos: "b"}
+    S3F@{ icon: "aws:arch-amazon-simple-storage-service", pos: "b"}
+    S3@{ icon: "aws:arch-amazon-simple-storage-service", pos: "b"}
+    EC2@{ icon: "aws:ec2-instance-contents", pos: "b"}
+    RDS@{ icon: "aws:arch-amazon-elastic-block-store", pos: "b"}
+    CloudWatch@{ icon: "aws:arch-amazon-cloudwatch", pos: "b"}
 ```
 
 ## Infrastructure cloud cible (Azure, avec icônes)
@@ -144,12 +151,12 @@ flowchart TD
 flowchart TD
     A[fa:fa-user Utilisateur]
 
-    AF([azure-frontdoor Front Door<br/>CDN / Load Balancer])
-    STAF([azure-storage Storage Account<br/>Static Website<br/>Frontend])
+    AF([Front Door<br/>CDN / Load Balancer])
+    STAF([Storage Account<br/>Static Website<br/>Frontend])
     WA([azure-appservice App Service<br/>Backend PHP<br/>Gestion Auth interne])
-    SQL([azure-sql SQL Database])
-    ST([azure-storage Storage Account<br/>Fichiers backend])
-    Monitor([azure-monitor Monitor<br/>Logs/Monitoring])
+    SQL([SQL Database])
+    ST([Storage Account<br/>Fichiers backend])
+    Monitor([Monitor<br/>Logs/Monitoring])
 
     %% Relations
     A -- "HTTP/HTTPS" --> AF
@@ -161,3 +168,10 @@ flowchart TD
     WA -- "Logs" --> Monitor
     ST -- "Logs" --> Monitor
 
+    AF@{ icon: "azure:front-door-and-cdn-profiles", pos: "b"}
+    STAF@{ icon: "azure:storage-accounts-classic", pos: "b"}
+    WA@{ icon: "", pos: "b"}
+    SQL@{ icon: "azure:arc-postgresql", pos: "b"}
+    ST@{ icon: "azure:storage-accounts-classic", pos: "b"}
+    Monitor@{ icon: "azure:monitor", pos: "b"}
+```
