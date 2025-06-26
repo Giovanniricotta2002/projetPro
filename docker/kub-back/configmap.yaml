@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  namespace: local
+data:
+  DATABASE_HOST: "postgres-postgres.infra.svc.cluster.local"
+  DATABASE_NAME: "projetPro"
