@@ -83,7 +83,12 @@ export default defineConfig({
     ],
   },
   server: {
-    port: 4000,
+    host: true,             // ← permet d'exposer à l'extérieur (ex: localhost ou Docker host)
+    port: 5173,
+    strictPort: true,
+    hmr: {
+      port: 24678,          // ← nécessaire pour Docker sinon HMR échoue
+    }
   },
   css: {
     preprocessorOptions: {

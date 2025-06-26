@@ -12,21 +12,18 @@
                             <v-col>
                                 <v-text-field label="Username" required></v-text-field>
                             </v-col>
-                            <v-col>
-                                <v-text-field label="Mail" required></v-text-field>
-                            </v-col>
                         </v-row>
                         <v-row>
-                            <v-col>
+                            <v-col cols="6">
                                 <v-text-field label="Password" required></v-text-field>
                             </v-col>
-                            <v-col>
+                            <v-col cols="6">
                                 <v-text-field label="Confirmer le password" required></v-text-field>
                             </v-col>
                         </v-row>
                         <v-row>
-                            <v-col>
-                                <v-btn>Crée</v-btn>
+                            <v-col cols="12">
+                                <v-btn variant="text">Crée</v-btn>
                             </v-col>
                         </v-row>
                         <v-row>
@@ -43,6 +40,7 @@
 </template>
 
 <script setup lang="ts">
+import { useCSRFToken } from '@/stores/useCSRFToken'
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -78,7 +76,16 @@ async function newUser() {
         console.error(err.message)
     }
 }
+
+const csrfToken = useCSRFToken()
+
+onMounted(() => {
+    csrfToken.fetchCSRFToken()
+    csrf_token.value = csrfToken.token
+})
 </script>
+
+
 <style>
 .v-toolbar__content{
     max-height: 50%;
@@ -100,7 +107,7 @@ img {
 	align-items: center;
 	justify-content: space-between;
 	margin: auto;
-  width: 300px;
+    width: 300px;
 }
 .form {
   width: 300px;

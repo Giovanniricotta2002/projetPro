@@ -9,8 +9,8 @@ import Register from './views/Register.vue'
 
 const routes = [
   { path: '/', component: HelloWorld },
-  { path: '/login', name: 'Login', component: Login },
-  { path: '/register', name: 'Crée un compte', component: Register },
+  { path: '/login', name: 'Login', component: Login, meta: { requiresAuth: false} },
+  { path: '/register', name: 'Crée un compte', component: Register, meta: { requiresAuth: false} },
 ]
 
 const router = createRouter({
@@ -20,8 +20,11 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token')
-  console.log(token, to.meta.requiresAuth)
-  if (to.meta.requiresAuth && !token) {
+  console.log(token, to.meta)
+
+  const requiresAuth = to.meta.requiresAuth !== false // true si undefined ou true, false uniquement si false
+
+  if (requiresAuth && !token) {
     // Redirect to login if the route requires authentication and no token is present
     next('/login')
   } else {
@@ -46,6 +49,7 @@ router.onError((err, to) => {
 
 router.isReady().then(() => {
   localStorage.removeItem('vuetify:dynamic-reload')
+  console.log('Router is ready')
 })
 
 export default router

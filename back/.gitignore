@@ -54,3 +54,7 @@ phpstan.neon
 __pycache__
 /doc/_ext/__pycache__
 .phpunit.result.cache
+###> phpunit/phpunit ###
+/phpunit.xml
+/.phpunit.cache/
+###< phpunit/phpunit ###
