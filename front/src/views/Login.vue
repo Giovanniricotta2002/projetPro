@@ -11,7 +11,7 @@
                     <v-text-field label="Password" v-model="password" required @keydown.enter="fLogin" :type="show1 ? 'text' : 'password'" name="password" :rules="[rules.passwordRule]"></v-text-field>
                     <v-btn class="mt-2" type="submit" block :disabled="!valid" @click="fLogin">Se connecter</v-btn>
                     <v-btn class="mt-2" type="submit" block @click="redirect">Cree un compte</v-btn>
-                    <input type="hidden" name="_csrf_token" v-model="csrf_token">
+                    <input type="text" name="_csrf_token" v-model="csrfToken.token">
                     <v-alert v-if="error" type="error" class="mt-2">{{ error }}</v-alert>
                 </v-form>
             </div>
@@ -24,6 +24,7 @@ import { useRuleInput } from '@/stores/ruleInput'
 import { useCSRFToken } from '@/stores/useCSRFToken'
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { apiEndpoint, corsRequestHeaders } from '../config'
 
 const login = ref('')
 const password = ref('')
@@ -37,20 +38,34 @@ const router = useRouter()
 
 const rules = useRuleInput()
 
+const csrfToken = useCSRFToken()
+
+onMounted(() => {
+    csrfToken.fetchCSRFToken()
+    csrf_token.value = csrfToken.token
+})
 
 async function fLogin() {
     const body = {
         login: login.value,
-        password: password.value
+        password: password.value,
+        'X-CSRF-Token': csrfToken.token,
     }
 
-    localStorage.setItem('token', 'true')
-    router.push('/')
+    // localStorage.setItem('token', 'true')
+    // router.push('/')
     
-    /*try {
-        const response = await fetch('/exemple.com/api/login', {
+    console.log(csrf_token.value);
+    
+    try {
+        const url = new URL('/api/login', `${apiEndpoint}`)
+        const response = await fetch(url, {
             method: 'POST',
             credentials: 'include',
+            headers: {
+              ...corsRequestHeaders,
+              'X-CSRF-Token': csrfToken.token,
+            },
             body: JSON.stringify(body)
         });
             
@@ -63,7 +78,7 @@ async function fLogin() {
         router.push('/')
     } catch (err: any) {
         error.value = err.message
-    }*/
+    }
 }
 
 
@@ -71,12 +86,7 @@ const redirect = () => {
     router.push('/register')
 }
 
-const csrfToken = useCSRFToken()
 
-onMounted(() => {
-    csrfToken.fetchCSRFToken()
-    csrf_token.value = csrfToken.token
-})
 
 const formRef = ref()
 

@@ -1,4 +1,5 @@
 // Utilities
+import {apiEndpoint, corsRequestHeaders} from '@/config';
 import { defineStore } from 'pinia'
 
 export const useCSRFToken = defineStore('csrf_tocken', {
@@ -9,17 +10,17 @@ export const useCSRFToken = defineStore('csrf_tocken', {
   }),
   actions: {
     async fetchCSRFToken() {
-      console.log("fezfzefzefze");
       
       this.loading = true;
       this.error = null;
 
       try {
-        const url = new URL('/api/csrfToken', 'http://backend:80/')
+        const url = new URL('/api/csrfToken', `${apiEndpoint}`)
 
         const response = await fetch(url, {
           method: 'GET',
           credentials: 'include',
+          headers: corsRequestHeaders,
         });
 
         if (!response.ok) {
@@ -27,7 +28,8 @@ export const useCSRFToken = defineStore('csrf_tocken', {
         }
 
         const data = await response.json();
-        this.token = data.token || '';
+        
+        this.token = data.csrfToken || '';
       } catch (error) {
         this.error = error instanceof Error ? error.message : 'An unknown error occurred';
       }

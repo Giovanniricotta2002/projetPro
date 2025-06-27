@@ -31,14 +31,14 @@ final class ApiCSRFTokenController extends AbstractController
         $this->serializer = new Serializer($normalizer, $encoders);
     }
 
-    #[Route('', name: '_generate', methods: ['GET'])]
+    #[Route('', name: '_generate', methods: ['GET', 'OPTIONS'])]
     public function generateToken(CsrfTokenManagerInterface $csrfTokenManager): Response
     {
         $token = $csrfTokenManager->getToken('authenticate')->getValue();
 
         return $this->json([
             'csrfToken' => $token,
-        ]);
+        ], Response::HTTP_OK);
     }
 
     #[Route('/verify', name: '_verify', methods: ['POST'])]

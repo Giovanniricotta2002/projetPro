@@ -10,9 +10,15 @@ security:
                 class: App\Entity\Utilisateur
                 property: username
     firewalls:
+        csrf_protection: true
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+        api:
+            pattern: ^/api/
+            stateless: false
+            # anonymous: true
+            provider: app_user_provider
         main:
             lazy: true
             provider: app_user_provider
