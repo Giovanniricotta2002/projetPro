@@ -1,11 +1,20 @@
-variable "pg_admin_user" {
-  description = "Nom d'utilisateur admin pour PostgreSQL"
-  type        = string
-  default     = "adminuser"
+variable "resource_group_name" {
+  default = "rg-projet-pro"
 }
 
-variable "pg_admin_password" {
-  description = "Mot de passe admin pour PostgreSQL"
-  type        = string
-  sensitive   = true
+variable "location" {
+  default = "swedencentral"
+}
+
+variable "dockerhub_user" {
+  default = "gio"
+}
+
+variable "jwt_secret" {
+  type = string
+}
+
+variable "postgres_password" {
+  description = "PostgreSQL admin password"
+  sensitive = true
 }

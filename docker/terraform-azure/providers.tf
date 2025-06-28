@@ -6,9 +6,13 @@ terraform {
     }
   }
 }
-provider "azurerm" {
-  subscription_id = "d9321465-d604-4622-bda3-42776fbb288b"
 
+provider "azurerm" {
   features {
+    resource_group {
+      prevent_deletion_if_contains_resources = true
+    }
   }
+
+  subscription_id = "d9321465-d604-4622-bda3-42776fbb288b"
 }
