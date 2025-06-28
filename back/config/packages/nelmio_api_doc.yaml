@@ -1,9 +1,36 @@
 nelmio_api_doc:
     documentation:
         info:
-            title: My App
-            description: This is an awesome app!
-            version: 1.0.0
-    areas: # to filter documented areas
+            title: 'API ProjetPro'
+            description: |
+                API REST pour l'application ProjetPro avec système d'authentification sécurisé.
+
+                ## Fonctionnalités principales:
+                - Authentification avec protection anti-force brute
+                - Gestion des tokens CSRF
+                - Logging automatique des tentatives de connexion
+                - Système de blocage par IP et par login
+
+                ## Sécurité:
+                - Protection CSRF obligatoire
+                - Tokens d'authentification
+                - Blocage automatique après échecs répétés
+
+                ## Headers requis:
+                - `X-CSRF-Token`: Token CSRF pour les requêtes POST
+                - `Content-Type: application/json`
+            version: '1.0.0'
+        components:
+            securitySchemes:
+                csrfToken:
+                    type: apiKey
+                    in: header
+                    name: X-CSRF-Token
+                    description: 'Token CSRF pour la protection contre les attaques CSRF'
+        security:
+          - csrfToken: []
+    areas:
         path_patterns:
-            - ^/api(?!/doc$) # Accepts routes under /api except /api/doc
+          - ^/api(?!/doc$) # Accepts routes under /api except /api/doc
+    models:
+        use_jms: false
