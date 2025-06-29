@@ -5,7 +5,7 @@ resource "azurerm_resource_group" "rg" {
 
 resource "azurerm_virtual_network" "projet_pro" {
   name = "projet-pro-vn"
-  location = azuezrm_resource_group.rg.location
+  location = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   address_space = ["10.0.0.0/16"]
 }
@@ -93,7 +93,7 @@ resource "azurerm_container_app" "backend-api" {
 
     container {
       name = "backend-api"
-      image = "docker.io/${var.dockerhub_user}/backend-api:0.0.2"
+      image = "docker.io/${var.dockerhub_user}/muscuscope-backend:latest"
       cpu = "0.5"
       memory = "1.0Gi"
 
@@ -121,6 +121,26 @@ resource "azurerm_container_app" "backend-api" {
         name = "JWT_SECRET"
         value = var.jwt_secret
       }
+
+      env {
+        name = "AZURE_STORAGE_ACCOUNT_NAME"
+        value = azurerm_storage_account.projet_pro.name
+      }
+
+      env {
+        name = "AZURE_STORAGE_ACCOUNT_KEY"
+        value = azurerm_storage_account.projet_pro.primary_access_key
+      }
+
+      env {
+        name = "AZURE_STORAGE_CONNECTION_STRING"
+        value = azurerm_storage_account.projet_pro.primary_connection_string
+      }
+
+      env {
+        name = "AZURE_BLOB_CONTAINER_IMAGES"
+        value = azurerm_storage_container.machine_images.name
+      }
     }
   }
 
@@ -128,7 +148,7 @@ resource "azurerm_container_app" "backend-api" {
 
   ingress {
     external_enabled = true
-    target_port = 3000
+    target_port = 80  # Port du backend (Apache)
     traffic_weight {
       latest_revision = true
       percentage = 100
@@ -148,23 +168,100 @@ resource "azurerm_container_app" "front-end" {
 
     container {
       name = "front-end"
-      image = "docker.io/${var.dockerhub_user}/front-end:0.0.2"
+      image = "docker.io/${var.dockerhub_user}/muscuscope-frontend:latest"
       cpu = "0.5"
       memory = "1.0Gi"
 
       env {
-        name = "VITE_BACKEND_URL"
-        value = "https://${azurerm_container_app.backend-api.fqdn}"
+        name = "VITE_API_URL"
+        value = "https://backend-api.${azurerm_container_app_environment.projetc_pro_env.default_domain}"
+      }
+
+      env {
+        name = "VITE_APP_NAME"
+        value = "MuscuScope"
+      }
+
+      env {
+        name = "VITE_ENVIRONMENT"
+        value = "production"
       }
     }
   }
 
   ingress {
     external_enabled = true
-    target_port = 3080
+    target_port = 80  # Port du frontend (Nginx)
     traffic_weight {
       latest_revision = true
       percentage = 100
     }
   }
+
+  depends_on = [azurerm_container_app.backend-api]
+}
+
+# Azure Storage Account pour Blob Storage (configuration économique)
+resource "azurerm_storage_account" "projet_pro" {
+  name                     = "stprojetpro${random_string.storage_suffix.result}"
+  resource_group_name      = azurerm_resource_group.rg.name
+  location                 = azurerm_resource_group.rg.location
+  
+  # Configuration la moins chère
+  account_tier             = "Standard"        # Standard (moins cher que Premium)
+  account_replication_type = "LRS"            # Locally Redundant Storage (le moins cher)
+  account_kind            = "StorageV2"       # StorageV2 pour les fonctionnalités modernes
+  
+  # Optimisations de coût
+  access_tier             = "Cool"            # Cool tier (moins cher pour accès occasionnel)
+  min_tls_version         = "TLS1_2"
+  
+  # Sécurité
+  https_traffic_only_enabled = true
+  allow_nested_items_to_be_public = false
+  
+  # Pas de versioning par défaut (économise l'espace)
+  blob_properties {
+    versioning_enabled = false
+    delete_retention_policy {
+      days = 7  # Rétention minimale (7 jours)
+    }
+    container_delete_retention_policy {
+      days = 7  # Rétention minimale (7 jours)
+    }
+  }
+
+  tags = {
+    Environment = "production"
+    Project     = "MuscuScope"
+    CostCenter  = "development"
+  }
+}
+
+# Génération d'un suffixe aléatoire pour l'unicité du nom du storage
+resource "random_string" "storage_suffix" {
+  length  = 6
+  special = false
+  upper   = false
+}
+
+# Container pour les images des machines de musculation
+resource "azurerm_storage_container" "machine_images" {
+  name                  = "machine-images"
+  storage_account_id    = azurerm_storage_account.projet_pro.id
+  container_access_type = "private"  # Accès privé pour la sécurité
+}
+
+# Container pour les uploads temporaires
+resource "azurerm_storage_container" "temp_uploads" {
+  name                  = "temp-uploads"
+  storage_account_id    = azurerm_storage_account.projet_pro.id
+  container_access_type = "private"
+}
+
+# Container pour les assets publics (si nécessaire)
+resource "azurerm_storage_container" "public_assets" {
+  name                  = "public-assets"
+  storage_account_id    = azurerm_storage_account.projet_pro.id
+  container_access_type = "blob"  # Accès public en lecture seule
 }

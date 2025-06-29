@@ -1,0 +1,49 @@
+# Dépendances
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Fichiers de build
+dist
+build
+
+# Fichiers de cache
+.cache
+.vite
+*.log
+
+# Environnement et config
+.env
+.env.local
+.env.*.local
+
+# Tests
+coverage
+.nyc_output
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Documentation
+README.md
+*.md
+
+# Fichiers temporaires
+*.tmp
+*.temp

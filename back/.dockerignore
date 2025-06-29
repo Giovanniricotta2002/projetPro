@@ -1,0 +1,70 @@
+# Vendor et dépendances
+vendor/
+node_modules/
+
+# Cache et logs
+var/cache/*
+var/log/*
+var/sessions/*
+!var/cache/.gitkeep
+!var/log/.gitkeep
+
+# Fichiers de configuration locale
+.env.local
+.env.*.local
+.env.test
+
+# Base de données SQLite
+*.db
+*.sqlite
+
+# Fichiers de développement
+.phpunit.result.cache
+.phpunit.cache
+phpunit.xml
+
+# IDE et éditeurs
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# Documentation
+README.md
+*.md
+docs/
+
+# Tests
+tests/
+behat.yml
+phpcs.xml.dist
+phpstan.dist.neon
+
+# Fichiers temporaires
+*.tmp
+*.temp
+*.bak
+
+# Configuration Symfony locale
+config/secrets/dev/
+public/bundles/
+
+# Assets compilés (si vous en avez)
+public/build/
+assets/
+
+# Fichiers de sauvegarde
+*.orig
+*.rej

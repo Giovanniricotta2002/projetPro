@@ -6,3 +6,7 @@ metadata:
 data:
   DATABASE_HOST: "postgres-postgres.infra.svc.cluster.local"
   DATABASE_NAME: "projetPro"
+  DATABASE_PORT: "5432"
+  APP_ENV: "prod"
+  AZURE_BLOB_CONTAINER: "muscuscope-files"
+  CORS_ALLOW_ORIGIN: "https://muscuscope.azurewebsites.net"
