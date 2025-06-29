@@ -43,9 +43,7 @@ class Post
     {
         $this->dateCreation = new \DateTime();
         $this->verrouille = false;
-
         $this->messages = new ArrayCollection();
-        $this->forums = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -65,14 +63,14 @@ class Post
         return $this;
     }
 
-    public function getDatCreation(): ?\DateTime
+    public function getDateCreation(): ?\DateTime
     {
-        return $this->datCreation;
+        return $this->dateCreation;
     }
 
-    public function setDatCreation(\DateTime $datCreation): static
+    public function setDateCreation(\DateTime $dateCreation): static
     {
-        $this->datCreation = $datCreation;
+        $this->dateCreation = $dateCreation;
 
         return $this;
     }
@@ -154,4 +152,5 @@ class Post
 
         return $this;
     }
+
 }

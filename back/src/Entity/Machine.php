@@ -46,7 +46,6 @@ class Machine
 
     public function __construct()
     {
-        $this->createdAt = new \DateTime();
         $this->uuid = Uuid::v7();
         $this->dateCreation = new \DateTime();
         $this->visible = true;

@@ -108,4 +108,28 @@ class Droit
 
         return $this;
     }
+
+    public function getScope(): ?string
+    {
+        return $this->scope;
+    }
+
+    public function setScope(string $scope): static
+    {
+        $this->scope = $scope;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTime
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTime $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
 }
