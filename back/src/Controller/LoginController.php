@@ -6,9 +6,8 @@ use App\Attribute\LogLogin;
 use App\DTO\ErrorResponseDTO;
 use App\DTO\JWTLoginResponseDTO;
 use App\DTO\JWTTokensDTO;
-use App\DTO\LoginResponseDTO;
-use App\DTO\LoginSuccessResponseDTO;
 use App\DTO\LoginUserDTO;
+use App\Repository\UtilisateurRepository;
 use App\Service\JWTService;
 use App\Services\InitSerializerService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -22,11 +21,10 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsCsrfTokenValid;
 use Symfony\Component\Serializer\Serializer;
-use App\Repository\UtilisateurRepository;
 
 #[Route('/api/login', name: 'app_login')]
 #[OA\Tag(
-    name: 'Authentication', 
+    name: 'Authentication',
     description: 'Endpoints de gestion de l\'authentification utilisateur avec système de logging automatique et protection anti-brute force'
 )]
 #[OA\Info(
@@ -60,12 +58,11 @@ final class LoginController extends AbstractController
         private readonly UtilisateurRepository $userRepository,
         private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly EntityManagerInterface $entityManager,
-        private readonly JWTService $jwtService
+        private readonly JWTService $jwtService,
     ) {
         $init = new InitSerializerService();
         $this->serializer = $init->serializer;
     }
-
 
     #[Route('', name: '_log', methods: ['POST'])]
     #[IsCsrfTokenValid('authenticate', tokenKey: 'X-CSRF-Token', methods: ['POST'])]
@@ -115,11 +112,11 @@ final class LoginController extends AbstractController
                         minLength: 8,
                         maxLength: 255,
                         example: 'motDePasseSecret123'
-                    )
+                    ),
                 ],
                 example: [
                     'login' => 'john.doe',
-                    'password' => 'motDePasseSecret123'
+                    'password' => 'motDePasseSecret123',
                 ]
             ),
             new OA\XmlContent(
@@ -127,9 +124,9 @@ final class LoginController extends AbstractController
                 xml: new OA\Xml(name: 'loginRequest'),
                 properties: [
                     new OA\Property(property: 'login', type: 'string'),
-                    new OA\Property(property: 'password', type: 'string')
+                    new OA\Property(property: 'password', type: 'string'),
                 ]
-            )
+            ),
         ]
     )]
     #[OA\Parameter(
@@ -138,7 +135,7 @@ final class LoginController extends AbstractController
         in: 'header',
         required: true,
         schema: new OA\Schema(
-            type: 'string', 
+            type: 'string',
             minLength: 32,
             maxLength: 128,
             pattern: '^[a-zA-Z0-9_-]+$',
@@ -154,7 +151,7 @@ final class LoginController extends AbstractController
                 example: 'session_token',
                 summary: 'Token de session',
                 value: 'sess_abcdef123456789'
-            )
+            ),
         ]
     )]
     #[OA\Response(
@@ -165,25 +162,25 @@ final class LoginController extends AbstractController
         ),
         headers: [
             new OA\Header(
-                header: 'X-Login-Logged', 
-                description: 'Indique si la tentative a été loggée automatiquement', 
+                header: 'X-Login-Logged',
+                description: 'Indique si la tentative a été loggée automatiquement',
                 schema: new OA\Schema(type: 'boolean', example: true)
             ),
             new OA\Header(
-                header: 'X-Login-Status', 
-                description: 'Statut de la connexion pour debugging', 
+                header: 'X-Login-Status',
+                description: 'Statut de la connexion pour debugging',
                 schema: new OA\Schema(type: 'string', enum: ['success', 'failure'], example: 'success')
             ),
             new OA\Header(
-                header: 'X-Login-Attempt-Count', 
-                description: 'Nombre de tentatives de connexion pour cet utilisateur', 
+                header: 'X-Login-Attempt-Count',
+                description: 'Nombre de tentatives de connexion pour cet utilisateur',
                 schema: new OA\Schema(type: 'integer', example: 1)
             ),
             new OA\Header(
-                header: 'X-JWT-Token-ID', 
-                description: 'Identifiant unique du token JWT généré', 
+                header: 'X-JWT-Token-ID',
+                description: 'Identifiant unique du token JWT généré',
                 schema: new OA\Schema(type: 'string', example: 'jwt_64f5b2c1a8e9f')
-            )
+            ),
         ]
     )]
     #[OA\Response(
@@ -194,10 +191,10 @@ final class LoginController extends AbstractController
         ),
         headers: [
             new OA\Header(
-                header: 'X-Validation-Errors', 
-                description: 'Nombre d\'erreurs de validation détectées', 
+                header: 'X-Validation-Errors',
+                description: 'Nombre d\'erreurs de validation détectées',
                 schema: new OA\Schema(type: 'integer', example: 1)
-            )
+            ),
         ]
     )]
     #[OA\Response(
@@ -211,7 +208,7 @@ final class LoginController extends AbstractController
                     summary: 'Identifiants incorrects',
                     value: [
                         'error' => 'Invalid credentials',
-                        'message' => 'The provided username or password is incorrect'
+                        'message' => 'The provided username or password is incorrect',
                     ]
                 ),
                 new OA\Examples(
@@ -219,27 +216,27 @@ final class LoginController extends AbstractController
                     summary: 'Utilisateur non trouvé',
                     value: [
                         'error' => 'Invalid credentials',
-                        'message' => 'User account does not exist'
+                        'message' => 'User account does not exist',
                     ]
-                )
+                ),
             ]
         ),
         headers: [
             new OA\Header(
-                header: 'X-Login-Logged', 
-                description: 'Tentative d\'échec loggée automatiquement', 
+                header: 'X-Login-Logged',
+                description: 'Tentative d\'échec loggée automatiquement',
                 schema: new OA\Schema(type: 'boolean', example: true)
             ),
             new OA\Header(
-                header: 'X-Login-Status', 
-                description: 'Statut d\'échec pour debugging', 
+                header: 'X-Login-Status',
+                description: 'Statut d\'échec pour debugging',
                 schema: new OA\Schema(type: 'string', example: 'failure')
             ),
             new OA\Header(
-                header: 'X-Failed-Attempts', 
-                description: 'Nombre de tentatives échouées pour cet utilisateur/IP', 
+                header: 'X-Failed-Attempts',
+                description: 'Nombre de tentatives échouées pour cet utilisateur/IP',
                 schema: new OA\Schema(type: 'integer', example: 2)
-            )
+            ),
         ]
     )]
     #[OA\Response(
@@ -252,26 +249,26 @@ final class LoginController extends AbstractController
                     type: 'object',
                     properties: [
                         new OA\Property(
-                            property: 'retry_after', 
-                            type: 'integer', 
-                            description: 'Temps d\'attente en secondes avant la prochaine tentative', 
+                            property: 'retry_after',
+                            type: 'integer',
+                            description: 'Temps d\'attente en secondes avant la prochaine tentative',
                             example: 3600
                         ),
                         new OA\Property(
-                            property: 'block_type', 
-                            type: 'string', 
-                            description: 'Type de blocage appliqué', 
-                            enum: ['ip_blocked', 'login_blocked', 'both_blocked'], 
+                            property: 'block_type',
+                            type: 'string',
+                            description: 'Type de blocage appliqué',
+                            enum: ['ip_blocked', 'login_blocked', 'both_blocked'],
                             example: 'ip_blocked'
                         ),
                         new OA\Property(
-                            property: 'attempts_remaining', 
-                            type: 'integer', 
-                            description: 'Nombre de tentatives restantes (0 si bloqué)', 
+                            property: 'attempts_remaining',
+                            type: 'integer',
+                            description: 'Nombre de tentatives restantes (0 si bloqué)',
                             example: 0
-                        )
+                        ),
                     ]
-                )
+                ),
             ],
             examples: [
                 new OA\Examples(
@@ -281,7 +278,7 @@ final class LoginController extends AbstractController
                         'error' => 'Too many failed attempts. IP temporarily blocked.',
                         'retry_after' => 3600,
                         'block_type' => 'ip_blocked',
-                        'attempts_remaining' => 0
+                        'attempts_remaining' => 0,
                     ]
                 ),
                 new OA\Examples(
@@ -291,32 +288,32 @@ final class LoginController extends AbstractController
                         'error' => 'Too many failed attempts for this login. Account temporarily blocked.',
                         'retry_after' => 1800,
                         'block_type' => 'login_blocked',
-                        'attempts_remaining' => 0
+                        'attempts_remaining' => 0,
                     ]
-                )
+                ),
             ]
         ),
         headers: [
             new OA\Header(
-                header: 'Retry-After', 
-                description: 'Temps d\'attente recommandé en secondes', 
+                header: 'Retry-After',
+                description: 'Temps d\'attente recommandé en secondes',
                 schema: new OA\Schema(type: 'integer', example: 3600)
             ),
             new OA\Header(
-                header: 'X-RateLimit-Limit', 
-                description: 'Limite de tentatives par période', 
+                header: 'X-RateLimit-Limit',
+                description: 'Limite de tentatives par période',
                 schema: new OA\Schema(type: 'integer', example: 5)
             ),
             new OA\Header(
-                header: 'X-RateLimit-Remaining', 
-                description: 'Tentatives restantes dans la période', 
+                header: 'X-RateLimit-Remaining',
+                description: 'Tentatives restantes dans la période',
                 schema: new OA\Schema(type: 'integer', example: 0)
             ),
             new OA\Header(
-                header: 'X-RateLimit-Reset', 
-                description: 'Timestamp de remise à zéro du compteur', 
+                header: 'X-RateLimit-Reset',
+                description: 'Timestamp de remise à zéro du compteur',
                 schema: new OA\Schema(type: 'integer', example: 1640995200)
-            )
+            ),
         ]
     )]
     #[OA\Response(
@@ -331,7 +328,7 @@ final class LoginController extends AbstractController
                     value: [
                         'error' => 'An error occurred during authentication',
                         'message' => 'Database connection failed',
-                        'code' => 500
+                        'code' => 500,
                     ]
                 ),
                 new OA\Examples(
@@ -340,32 +337,33 @@ final class LoginController extends AbstractController
                     value: [
                         'error' => 'An error occurred during authentication',
                         'message' => 'Authentication service temporarily unavailable',
-                        'code' => 503
+                        'code' => 503,
                     ]
-                )
+                ),
             ]
         ),
         headers: [
             new OA\Header(
-                header: 'X-Error-ID', 
-                description: 'Identifiant unique de l\'erreur pour le support technique', 
+                header: 'X-Error-ID',
+                description: 'Identifiant unique de l\'erreur pour le support technique',
                 schema: new OA\Schema(type: 'string', example: 'err_123456789')
             ),
             new OA\Header(
-                header: 'X-Login-Logged', 
-                description: 'Erreur loggée automatiquement', 
+                header: 'X-Login-Logged',
+                description: 'Erreur loggée automatiquement',
                 schema: new OA\Schema(type: 'boolean', example: true)
-            )
+            ),
         ]
     )]
     public function login(Request $request): Response
     {
         $data = new ParameterBag($this->serializer->normalize(json_decode($request->getContent()), 'json'));
-        
+
         // Validation des paramètres requis
         foreach (['login', 'password'] as $key) {
             if (!$data->has($key)) {
-                $errorDto = ErrorResponseDTO::create("Missing parameter: $key");
+                $errorDto = ErrorResponseDTO::create("Missing parameter: {$key}");
+
                 return $this->json($errorDto->toArray(), Response::HTTP_BAD_REQUEST);
             }
         }
@@ -376,10 +374,11 @@ final class LoginController extends AbstractController
         try {
             // Rechercher l'utilisateur
             $user = $this->userRepository->findOneBy(['username' => $login]);
-            
+
             if (!$user) {
                 // Utilisateur non trouvé - le logging sera automatique via l'attribut
                 $errorDto = ErrorResponseDTO::create('Invalid credentials');
+
                 return $this->json($errorDto->toArray(), Response::HTTP_UNAUTHORIZED);
             }
 
@@ -387,13 +386,14 @@ final class LoginController extends AbstractController
             if (!$this->passwordHasher->isPasswordValid($user, $password)) {
                 // Mot de passe incorrect - le logging sera automatique via l'attribut
                 $errorDto = ErrorResponseDTO::create('Invalid credentials');
+
                 return $this->json($errorDto->toArray(), Response::HTTP_UNAUTHORIZED);
             }
 
             // Connexion réussie - le logging sera automatique via l'attribut
             // Mettre à jour la dernière visite
             $user->setLastVisit(new \DateTime());
-            
+
             // Persister les changements
             $this->entityManager->persist($user);
             $this->entityManager->flush();
@@ -402,7 +402,7 @@ final class LoginController extends AbstractController
             $tokens = $this->jwtService->generateTokenPair($user, [
                 'ip_address' => $request->getClientIp(),
                 'user_agent' => $request->headers->get('User-Agent'),
-                'login_method' => 'password'
+                'login_method' => 'password',
             ]);
 
             // Créer le DTO utilisateur
@@ -422,7 +422,7 @@ final class LoginController extends AbstractController
             );
 
             $response = $this->json($jwtResponse->toArray(), Response::HTTP_OK);
-            
+
             // Ajouter les headers de debugging JWT
             $tokenInfo = $this->jwtService->getTokenInfo($tokens['access_token']);
             if ($tokenInfo['valid']) {
@@ -430,13 +430,13 @@ final class LoginController extends AbstractController
             }
 
             return $response;
-
         } catch (\Exception $e) {
             // Log l'erreur - le logging sera automatique via l'attribut
             $errorDto = ErrorResponseDTO::withMessage(
                 'An error occurred during authentication',
                 $e->getMessage()
             );
+
             return $this->json($errorDto->toArray(), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
@@ -467,10 +467,10 @@ final class LoginController extends AbstractController
                 header: 'Access-Control-Allow-Headers',
                 description: 'Headers autorisés dans les requêtes',
                 schema: new OA\Schema(type: 'string', example: 'Content-Type, X-CSRF-Token')
-            )
+            ),
         ]
     )]
-    public function loginOptions(Request $request) : Response
+    public function loginOptions(Request $request): Response
     {
         return new Response('', Response::HTTP_OK, [
             'Access-Control-Allow-Origin' => '*',

@@ -230,5 +230,4 @@ class Forum
 
         return $this;
     }
-
 }

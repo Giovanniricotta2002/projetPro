@@ -19,7 +19,7 @@ class UtilisateurRepositoryTest extends KernelTestCase
         $this->entityManager = $kernel->getContainer()
             ->get('doctrine')
             ->getManager();
-        
+
         $this->repository = $this->entityManager->getRepository(Utilisateur::class);
     }
 
@@ -41,12 +41,12 @@ class UtilisateurRepositoryTest extends KernelTestCase
         $user = new Utilisateur();
         $user->setUsername('testuser');
         $user->setPassword('oldpassword');
-        
+
         $newHashedPassword = 'newhashedpassword123';
-        
+
         // Tester la mise à jour du mot de passe
         $this->repository->upgradePassword($user, $newHashedPassword);
-        
+
         // Vérifier que le mot de passe a été mis à jour
         self::assertEquals($newHashedPassword, $user->getPassword());
     }
@@ -55,11 +55,11 @@ class UtilisateurRepositoryTest extends KernelTestCase
     {
         // Créer un mock d'une autre classe implémentant PasswordAuthenticatedUserInterface
         $invalidUser = $this->createMock(\Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface::class);
-        
+
         // Attendre une exception UnsupportedUserException
         $this->expectException(UnsupportedUserException::class);
         $this->expectExceptionMessage('Instances of');
-        
+
         $this->repository->upgradePassword($invalidUser, 'newpassword');
     }
 
@@ -67,21 +67,21 @@ class UtilisateurRepositoryTest extends KernelTestCase
     {
         // Test d'intégration - nécessite une base de données de test configurée
         // Ce test ne s'exécutera que si vous avez configuré une base de données de test
-        
+
         // Créer et persister un utilisateur de test
         $user = new Utilisateur();
         $user->setUsername('integration_test_user');
         $user->setPassword('hashedpassword');
-        
+
         $this->entityManager->persist($user);
         $this->entityManager->flush();
-        
+
         // Tester la recherche par nom d'utilisateur
         $foundUser = $this->repository->findOneBy(['username' => 'integration_test_user']);
-        
+
         self::assertNotNull($foundUser);
         self::assertEquals('integration_test_user', $foundUser->getUsername());
-        
+
         // Nettoyer
         $this->entityManager->remove($foundUser);
         $this->entityManager->flush();
@@ -91,9 +91,9 @@ class UtilisateurRepositoryTest extends KernelTestCase
     {
         // Exemple de test pour une méthode personnalisée (à implémenter dans le repository)
         // Cette méthode pourrait rechercher les utilisateurs actifs
-        
+
         $this->markTestSkipped('Méthode findActiveUsers() pas encore implémentée dans le repository');
-        
+
         /*
         // Si vous ajoutez cette méthode au repository :
         $activeUsers = $this->repository->findActiveUsers();
@@ -105,7 +105,7 @@ class UtilisateurRepositoryTest extends KernelTestCase
     {
         // Exemple de test pour compter le nombre total d'utilisateurs
         $this->markTestSkipped('Méthode countTotalUsers() pas encore implémentée dans le repository');
-        
+
         /*
         // Si vous ajoutez cette méthode au repository :
         $count = $this->repository->countTotalUsers();
@@ -118,12 +118,12 @@ class UtilisateurRepositoryTest extends KernelTestCase
     {
         // Exemple de test pour rechercher des utilisateurs par rôle
         $this->markTestSkipped('Méthode findUsersByRole() pas encore implémentée dans le repository');
-        
+
         /*
         // Si vous ajoutez cette méthode au repository :
         $admins = $this->repository->findUsersByRole('ROLE_ADMIN');
         self::assertIsArray($admins);
-        
+
         foreach ($admins as $admin) {
             self::assertInstanceOf(Utilisateur::class, $admin);
             self::assertContains('ROLE_ADMIN', $admin->getRoles());

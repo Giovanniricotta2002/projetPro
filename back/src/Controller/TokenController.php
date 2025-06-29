@@ -3,9 +3,7 @@
 namespace App\Controller;
 
 use App\DTO\ErrorResponseDTO;
-use App\DTO\JWTLoginResponseDTO;
 use App\DTO\JWTTokensDTO;
-use App\DTO\LoginUserDTO;
 use App\DTO\TokenInfoResponseDTO;
 use App\DTO\TokenRefreshRequestDTO;
 use App\DTO\TokenRefreshResponseDTO;
@@ -25,7 +23,7 @@ use Symfony\Component\Serializer\Serializer;
 
 #[Route('/api/token', name: 'app_token')]
 #[OA\Tag(
-    name: 'JWT Tokens', 
+    name: 'JWT Tokens',
     description: 'Gestion des tokens JWT (refresh, validation, révocation)'
 )]
 final class TokenController extends AbstractController
@@ -34,7 +32,7 @@ final class TokenController extends AbstractController
 
     public function __construct(
         private readonly JWTService $jwtService,
-        private readonly UtilisateurRepository $userRepository
+        private readonly UtilisateurRepository $userRepository,
     ) {
         $init = new InitSerializerService();
         $this->serializer = $init->serializer;
@@ -75,37 +73,40 @@ final class TokenController extends AbstractController
     public function refresh(Request $request): Response
     {
         $data = new ParameterBag($this->serializer->normalize(json_decode($request->getContent()), 'json'));
-        
+
         try {
             // Valider et créer le DTO de requête depuis le ParameterBag
             $requestDto = TokenRefreshRequestDTO::fromParameterBag($data);
-            
+
             if (!$requestDto->hasValidFormat()) {
                 $errorDto = ErrorResponseDTO::create('Invalid refresh token format');
+
                 return $this->json($errorDto->toArray(), Response::HTTP_BAD_REQUEST);
             }
-
         } catch (\InvalidArgumentException $e) {
             $errorDto = ErrorResponseDTO::create($e->getMessage());
+
             return $this->json($errorDto->toArray(), Response::HTTP_BAD_REQUEST);
         }
 
         try {
             // Valider le refresh token
             $tokenPayload = $this->jwtService->validateToken($requestDto->refreshToken);
-            
+
             // Vérifier que c'est bien un refresh token
             if (!$this->jwtService->isTokenType($tokenPayload, 'refresh')) {
                 $errorDto = ErrorResponseDTO::create('Invalid token type. Expected refresh token.');
+
                 return $this->json($errorDto->toArray(), Response::HTTP_BAD_REQUEST);
             }
 
             // Récupérer l'utilisateur
             $userId = (int) $tokenPayload['sub'];
             $user = $this->userRepository->find($userId);
-            
+
             if (!$user) {
                 $errorDto = ErrorResponseDTO::create('User not found');
+
                 return $this->json($errorDto->toArray(), Response::HTTP_UNAUTHORIZED);
             }
 
@@ -114,7 +115,7 @@ final class TokenController extends AbstractController
                 'refreshed_from' => $tokenPayload['jti'] ?? 'unknown',
                 'refresh_time' => time(),
                 'ip_address' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent')
+                'user_agent' => $request->headers->get('User-Agent'),
             ]);
 
             // Créer les DTOs de réponse
@@ -122,21 +123,21 @@ final class TokenController extends AbstractController
             $responseDto = TokenRefreshResponseDTO::success($tokensDto);
 
             return $this->json($responseDto->toArray());
-
         } catch (\InvalidArgumentException $e) {
             $errorDto = ErrorResponseDTO::withMessage(
                 'Invalid refresh token',
                 $e->getMessage()
             );
-            
-            $statusCode = $e->getCode() === 401 ? Response::HTTP_UNAUTHORIZED : Response::HTTP_BAD_REQUEST;
-            return $this->json($errorDto->toArray(), $statusCode);
 
+            $statusCode = $e->getCode() === 401 ? Response::HTTP_UNAUTHORIZED : Response::HTTP_BAD_REQUEST;
+
+            return $this->json($errorDto->toArray(), $statusCode);
         } catch (\Exception $e) {
             $errorDto = ErrorResponseDTO::withMessage(
                 'An error occurred while refreshing token',
                 $e->getMessage()
             );
+
             return $this->json($errorDto->toArray(), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
@@ -173,25 +174,27 @@ final class TokenController extends AbstractController
     public function validate(Request $request): Response
     {
         $data = new ParameterBag($this->serializer->normalize(json_decode($request->getContent()), 'json'));
-        
+
         try {
             // Valider et créer le DTO de requête depuis le ParameterBag
             $requestDto = TokenValidationRequestDTO::fromParameterBag($data);
-            
+
             if (!$requestDto->hasValidFormat()) {
                 $responseDto = TokenValidationResponseDTO::invalid('Invalid token format');
+
                 return $this->json($responseDto->toArray(), Response::HTTP_BAD_REQUEST);
             }
-
         } catch (\InvalidArgumentException $e) {
             $responseDto = TokenValidationResponseDTO::invalid($e->getMessage());
+
             return $this->json($responseDto->toArray(), Response::HTTP_BAD_REQUEST);
         }
 
         $tokenInfo = $this->jwtService->getTokenInfo($requestDto->token);
         $responseDto = TokenValidationResponseDTO::fromTokenInfo($tokenInfo);
-        
+
         $statusCode = $responseDto->valid ? Response::HTTP_OK : Response::HTTP_BAD_REQUEST;
+
         return $this->json($responseDto->toArray(), $statusCode);
     }
 
@@ -227,9 +230,10 @@ final class TokenController extends AbstractController
     {
         $authHeader = $request->headers->get('Authorization');
         $token = $this->jwtService->extractTokenFromHeader($authHeader);
-        
+
         if (!$token) {
             $errorDto = ErrorResponseDTO::create('Missing or invalid Authorization header');
+
             return $this->json($errorDto->toArray(), Response::HTTP_UNAUTHORIZED);
         }
 
@@ -237,18 +241,18 @@ final class TokenController extends AbstractController
             // Valider et obtenir le payload complet du token
             $tokenPayload = $this->jwtService->validateToken($token);
             $responseDto = TokenInfoResponseDTO::validWithDetails($tokenPayload);
-            
+
             return $this->json($responseDto->toArray(), Response::HTTP_OK);
-            
         } catch (\InvalidArgumentException $e) {
             $responseDto = TokenInfoResponseDTO::invalid($e->getMessage());
+
             return $this->json($responseDto->toArray(), Response::HTTP_UNAUTHORIZED);
-            
         } catch (\Exception $e) {
             $errorDto = ErrorResponseDTO::withMessage(
                 'An error occurred while processing token',
                 $e->getMessage()
             );
+
             return $this->json($errorDto->toArray(), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }

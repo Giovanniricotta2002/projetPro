@@ -8,8 +8,3 @@ controllers:
 api_login_check:
     path: /api/login_check
     methods: [ POST ]
-
-# JWT refresh token route
-gesdinet_jwt_refresh_token:
-    resource: "@GesdinetJWTRefreshTokenBundle/Resources/config/routing.yaml"
-    prefix: /api

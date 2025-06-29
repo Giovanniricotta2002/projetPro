@@ -22,7 +22,7 @@ class LoginStatsController extends AbstractController
     }
 
     /**
-     * Récupère les statistiques de connexion pour une période donnée
+     * Récupère les statistiques de connexion pour une période donnée.
      */
     #[Route('/statistics', name: '_statistics', methods: ['GET'])]
     public function getStatistics(Request $request): JsonResponse
@@ -36,26 +36,26 @@ class LoginStatsController extends AbstractController
 
         try {
             $statistics = $this->loginLogger->getLoginStatistics($fromDate, $toDate);
-            
+
             return $this->json([
                 'success' => true,
                 'period' => [
                     'from' => $fromDate->format('Y-m-d H:i:s'),
-                    'to' => $toDate->format('Y-m-d H:i:s')
+                    'to' => $toDate->format('Y-m-d H:i:s'),
                 ],
-                'statistics' => $statistics
+                'statistics' => $statistics,
             ]);
         } catch (\Exception $e) {
             return $this->json([
                 'success' => false,
                 'error' => 'Failed to retrieve statistics',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     /**
-     * Vérifie le statut de blocage pour une IP
+     * Vérifie le statut de blocage pour une IP.
      */
     #[Route('/check-ip-status/{ip}', name: '_check_ip', methods: ['GET'])]
     public function checkIpStatus(string $ip): JsonResponse
@@ -63,25 +63,25 @@ class LoginStatsController extends AbstractController
         try {
             $isBlocked = $this->loginLogger->isIpBlocked($ip);
             $recentFailures = $this->loginLogger->countRecentFailedAttempts($ip);
-            
+
             return $this->json([
                 'success' => true,
                 'ip' => $ip,
                 'is_blocked' => $isBlocked,
                 'recent_failed_attempts' => $recentFailures,
-                'status' => $isBlocked ? 'blocked' : 'allowed'
+                'status' => $isBlocked ? 'blocked' : 'allowed',
             ]);
         } catch (\Exception $e) {
             return $this->json([
                 'success' => false,
                 'error' => 'Failed to check IP status',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     /**
-     * Vérifie le statut de blocage pour un login
+     * Vérifie le statut de blocage pour un login.
      */
     #[Route('/check-login-status/{login}', name: '_check_login', methods: ['GET'])]
     public function checkLoginStatus(string $login): JsonResponse
@@ -89,25 +89,25 @@ class LoginStatsController extends AbstractController
         try {
             $isBlocked = $this->loginLogger->isLoginBlocked($login);
             $recentFailures = $this->loginLogger->countRecentFailedAttemptsForLogin($login);
-            
+
             return $this->json([
                 'success' => true,
                 'login' => $login,
                 'is_blocked' => $isBlocked,
                 'recent_failed_attempts' => $recentFailures,
-                'status' => $isBlocked ? 'blocked' : 'allowed'
+                'status' => $isBlocked ? 'blocked' : 'allowed',
             ]);
         } catch (\Exception $e) {
             return $this->json([
                 'success' => false,
                 'error' => 'Failed to check login status',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     /**
-     * Endpoint pour obtenir des statistiques en temps réel
+     * Endpoint pour obtenir des statistiques en temps réel.
      */
     #[Route('/real-time-stats', name: '_realtime', methods: ['GET'])]
     public function getRealTimeStats(): JsonResponse
@@ -128,47 +128,47 @@ class LoginStatsController extends AbstractController
                 'statistics' => [
                     'last_hour' => $hourlyStats,
                     'last_24_hours' => $dailyStats,
-                    'last_week' => $weeklyStats
-                ]
+                    'last_week' => $weeklyStats,
+                ],
             ]);
         } catch (\Exception $e) {
             return $this->json([
                 'success' => false,
                 'error' => 'Failed to retrieve real-time statistics',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     /**
-     * Endpoint pour réinitialiser les tentatives échouées d'une IP (déblocage manuel)
+     * Endpoint pour réinitialiser les tentatives échouées d'une IP (déblocage manuel).
      */
     #[Route('/unblock-ip/{ip}', name: '_unblock_ip', methods: ['POST'])]
     public function unblockIp(string $ip): JsonResponse
     {
         // Note: Cette fonctionnalité nécessiterait une méthode dans le service
         // pour marquer les tentatives comme "pardonnées" ou les supprimer
-        
+
         return $this->json([
             'success' => false,
             'message' => 'IP unblocking feature not yet implemented',
-            'suggestion' => 'This would require additional database logic to clear recent failed attempts'
+            'suggestion' => 'This would require additional database logic to clear recent failed attempts',
         ], Response::HTTP_NOT_IMPLEMENTED);
     }
 
     /**
-     * Endpoint pour réinitialiser les tentatives échouées d'un login
+     * Endpoint pour réinitialiser les tentatives échouées d'un login.
      */
     #[Route('/unblock-login/{login}', name: '_unblock_login', methods: ['POST'])]
     public function unblockLogin(string $login): JsonResponse
     {
         // Note: Cette fonctionnalité nécessiterait une méthode dans le service
         // pour marquer les tentatives comme "pardonnées" ou les supprimer
-        
+
         return $this->json([
             'success' => false,
             'message' => 'Login unblocking feature not yet implemented',
-            'suggestion' => 'This would require additional database logic to clear recent failed attempts'
+            'suggestion' => 'This would require additional database logic to clear recent failed attempts',
         ], Response::HTTP_NOT_IMPLEMENTED);
     }
 }

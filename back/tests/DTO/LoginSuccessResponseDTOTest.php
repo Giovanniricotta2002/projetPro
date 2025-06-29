@@ -57,7 +57,7 @@ class LoginSuccessResponseDTOTest extends TestCase
         $expected = [
             'success' => $success,
             'message' => $message,
-            'user' => $userDTO->toArray()
+            'user' => $userDTO->toArray(),
         ];
 
         $this->assertSame($expected, $dto->toArray());
@@ -91,7 +91,7 @@ class LoginSuccessResponseDTOTest extends TestCase
     {
         $userDTO = new LoginUserDTO(1, 'test', ['ROLE_USER']);
         $dto = new LoginSuccessResponseDTO(true, 'test', $userDTO);
-        
+
         // Vérifier que la classe est readonly
         $reflection = new \ReflectionClass($dto);
         $this->assertTrue($reflection->isReadOnly());
@@ -106,15 +106,13 @@ class LoginSuccessResponseDTOTest extends TestCase
     {
         $userDTO = new LoginUserDTO(1, 'test', ['ROLE_USER']);
         $dto = new LoginSuccessResponseDTO(true, $message, $userDTO);
-        
+
         $this->assertSame($message, $dto->message);
         $this->assertSame($message, $dto->toArray()['message']);
     }
 
     /**
      * Fournisseur de données pour différents messages.
-     *
-     * @return array
      */
     public static function messageProvider(): array
     {
@@ -137,15 +135,13 @@ class LoginSuccessResponseDTOTest extends TestCase
     {
         $userDTO = new LoginUserDTO(1, 'test', ['ROLE_USER']);
         $dto = new LoginSuccessResponseDTO($success, 'test message', $userDTO);
-        
+
         $this->assertSame($success, $dto->success);
         $this->assertSame($success, $dto->toArray()['success']);
     }
 
     /**
      * Fournisseur de données pour différents états de succès.
-     *
-     * @return array
      */
     public static function successProvider(): array
     {
@@ -169,11 +165,11 @@ class LoginSuccessResponseDTOTest extends TestCase
 
         foreach ($users as $testCase => $userDTO) {
             $dto = new LoginSuccessResponseDTO(true, 'Test', $userDTO);
-            
-            $this->assertSame($userDTO, $dto->user, "Échec pour le cas : $testCase");
-            
+
+            $this->assertSame($userDTO, $dto->user, "Échec pour le cas : {$testCase}");
+
             $array = $dto->toArray();
-            $this->assertSame($userDTO->toArray(), $array['user'], "Échec du toArray pour le cas : $testCase");
+            $this->assertSame($userDTO->toArray(), $array['user'], "Échec du toArray pour le cas : {$testCase}");
         }
     }
 

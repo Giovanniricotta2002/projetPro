@@ -28,8 +28,8 @@ final class CsrfTokenVerificationRequestDTO
         #[Assert\NotBlank(message: 'CSRF token is required')]
         #[Assert\Type(type: 'string', message: 'CSRF token must be a string')]
         #[Assert\Length(
-            min: 16, 
-            max: 128, 
+            min: 16,
+            max: 128,
             minMessage: 'CSRF token must be at least {{ limit }} characters long',
             maxMessage: 'CSRF token cannot be longer than {{ limit }} characters'
         )]
@@ -37,8 +37,9 @@ final class CsrfTokenVerificationRequestDTO
             pattern: '/^[a-zA-Z0-9_-]+$/',
             message: 'CSRF token contains invalid characters'
         )]
-        public readonly string $csrfToken
-    ) {}
+        public readonly string $csrfToken,
+    ) {
+    }
 
     public static function fromArray(array $data): self
     {
@@ -57,7 +58,7 @@ final class CsrfTokenVerificationRequestDTO
     public function toArray(): array
     {
         return [
-            'csrfToken' => $this->csrfToken
+            'csrfToken' => $this->csrfToken,
         ];
     }
 }

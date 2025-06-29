@@ -52,7 +52,7 @@ class CsrfTokenResponseDTOTest extends TestCase
         $dto = new CsrfTokenResponseDTO($token);
 
         $expected = [
-            'csrfToken' => $token
+            'csrfToken' => $token,
         ];
 
         $this->assertSame($expected, $dto->toArray());
@@ -79,10 +79,10 @@ class CsrfTokenResponseDTOTest extends TestCase
     public function testDTOIsReadonly(): void
     {
         $dto = new CsrfTokenResponseDTO('test-token');
-        
+
         // Vérifier que la classe est readonly en tentant d'accéder aux propriétés
         $this->assertObjectHasProperty('csrfToken', $dto);
-        
+
         // Utilisation de reflection pour vérifier que la classe est readonly
         $reflection = new \ReflectionClass($dto);
         $this->assertTrue($reflection->isReadOnly());
@@ -96,15 +96,13 @@ class CsrfTokenResponseDTOTest extends TestCase
     public function testWithVariousTokens(string $token): void
     {
         $dto = CsrfTokenResponseDTO::create($token);
-        
+
         $this->assertSame($token, $dto->csrfToken);
         $this->assertSame(['csrfToken' => $token], $dto->toArray());
     }
 
     /**
      * Fournisseur de données pour différents types de tokens.
-     *
-     * @return array
      */
     public static function tokenProvider(): array
     {

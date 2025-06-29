@@ -27,13 +27,14 @@ final class TokenRefreshRequestDTO
         #[Assert\NotBlank(message: 'Refresh token is required')]
         #[Assert\Type(type: 'string', message: 'Refresh token must be a string')]
         #[Assert\Length(
-            min: 50, 
-            max: 2048, 
+            min: 50,
+            max: 2048,
             minMessage: 'Refresh token must be at least {{ limit }} characters long',
             maxMessage: 'Refresh token cannot be longer than {{ limit }} characters'
         )]
-        public readonly string $refreshToken
-    ) {}
+        public readonly string $refreshToken,
+    ) {
+    }
 
     public static function fromArray(array $data): self
     {
@@ -45,7 +46,7 @@ final class TokenRefreshRequestDTO
     public static function fromParameterBag(ParameterBag $data): self
     {
         return new self(
-            refreshToken: $data->get('refreshToken', '')
+            refreshToken: $data->get('refreshToken') ?? ''
         );
     }
 
@@ -57,7 +58,7 @@ final class TokenRefreshRequestDTO
     public function toArray(): array
     {
         return [
-            'refreshToken' => $this->refreshToken
+            'refreshToken' => $this->refreshToken,
         ];
     }
 }

@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Tests unitaires pour le DTO ErrorResponseDTO.
- * 
+ *
  * Teste la création et les méthodes du DTO utilisé pour
  * les réponses d'erreur standardisées de l'API.
  */
@@ -117,7 +117,7 @@ class ErrorResponseDTOTest extends TestCase
 
         $expected = [
             'error' => 'Error',
-            'message' => 'Detailed message'
+            'message' => 'Detailed message',
         ];
 
         $this->assertEquals($expected, $array);
@@ -133,7 +133,7 @@ class ErrorResponseDTOTest extends TestCase
 
         $expected = [
             'error' => 'Error',
-            'code' => 5000
+            'code' => 5000,
         ];
 
         $this->assertEquals($expected, $array);
@@ -152,7 +152,7 @@ class ErrorResponseDTOTest extends TestCase
             'error' => 'Validation error',
             'message' => 'Invalid email format',
             'code' => 4004,
-            'details' => $details
+            'details' => $details,
         ];
 
         $this->assertEquals($expected, $array);
@@ -182,12 +182,12 @@ class ErrorResponseDTOTest extends TestCase
     {
         $error = 'Erreur d\'authentification avec caractères spéciaux: àéèçù';
         $message = 'Message avec émojis: 🚫❌⚠️';
-        
+
         $dto = ErrorResponseDTO::withMessage($error, $message);
-        
+
         $this->assertEquals($error, $dto->error);
         $this->assertEquals($message, $dto->message);
-        
+
         $array = $dto->toArray();
         $this->assertEquals($error, $array['error']);
         $this->assertEquals($message, $array['message']);

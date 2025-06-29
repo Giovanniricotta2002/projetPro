@@ -42,7 +42,7 @@ class Machine
     private Collection $infoMachines;
 
     #[ORM\Column(type: Types::BLOB)]
-    private $image = null;
+    private $image;
 
     public function __construct()
     {

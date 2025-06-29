@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Tests unitaires pour l'attribut LogLogin.
- * 
+ *
  * Teste la création et la configuration de l'attribut LogLogin
  * avec différentes combinaisons de paramètres.
  */
@@ -141,7 +141,7 @@ class LogLoginTest extends TestCase
 
         // Vérifier que les propriétés sont bien readonly en utilisant la réflection
         $reflection = new \ReflectionClass($attribute);
-        
+
         foreach ($reflection->getProperties() as $property) {
             $this->assertTrue($property->isReadOnly(), "Property {$property->getName()} should be readonly");
         }

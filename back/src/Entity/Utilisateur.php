@@ -49,8 +49,6 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255)]
     private ?string $status = null;
 
-    
-
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTime $createdAt = null;
 
@@ -59,8 +57,6 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTime $deletedAt = null;
-
-    
 
     /**
      * @var Collection<int, Droit>

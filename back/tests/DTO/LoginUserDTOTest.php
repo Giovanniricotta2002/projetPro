@@ -69,7 +69,7 @@ class LoginUserDTOTest extends TestCase
         $expected = [
             'id' => $id,
             'username' => $username,
-            'roles' => $roles
+            'roles' => $roles,
         ];
 
         $this->assertSame($expected, $dto->toArray());
@@ -91,7 +91,7 @@ class LoginUserDTOTest extends TestCase
             'id' => $id,
             'username' => $username,
             'roles' => $roles,
-            'last_visit' => $lastVisit
+            'last_visit' => $lastVisit,
         ];
 
         $this->assertSame($expected, $dto->toArray());
@@ -119,12 +119,12 @@ class LoginUserDTOTest extends TestCase
             'rôle simple' => ['ROLE_USER'],
             'rôles multiples' => ['ROLE_USER', 'ROLE_ADMIN', 'ROLE_MODERATOR'],
             'rôles vides' => [],
-            'rôles avec caractères spéciaux' => ['ROLE_SUPER_ADMIN', 'ROLE_API_USER']
+            'rôles avec caractères spéciaux' => ['ROLE_SUPER_ADMIN', 'ROLE_API_USER'],
         ];
 
         foreach ($rolesData as $testCase => $roles) {
             $dto = new LoginUserDTO(1, 'test', $roles);
-            $this->assertSame($roles, $dto->roles, "Échec pour le cas : $testCase");
+            $this->assertSame($roles, $dto->roles, "Échec pour le cas : {$testCase}");
         }
     }
 
@@ -134,7 +134,7 @@ class LoginUserDTOTest extends TestCase
     public function testDTOIsReadonly(): void
     {
         $dto = new LoginUserDTO(1, 'test', ['ROLE_USER']);
-        
+
         // Vérifier que la classe est readonly
         $reflection = new \ReflectionClass($dto);
         $this->assertTrue($reflection->isReadOnly());
@@ -148,9 +148,9 @@ class LoginUserDTOTest extends TestCase
     public function testWithVariousLastVisitFormats(?string $lastVisit): void
     {
         $dto = new LoginUserDTO(1, 'test', ['ROLE_USER'], $lastVisit);
-        
+
         $this->assertSame($lastVisit, $dto->lastVisit);
-        
+
         $array = $dto->toArray();
         if ($lastVisit !== null) {
             $this->assertArrayHasKey('last_visit', $array);
@@ -162,8 +162,6 @@ class LoginUserDTOTest extends TestCase
 
     /**
      * Fournisseur de données pour différents formats de lastVisit.
-     *
-     * @return array
      */
     public static function lastVisitProvider(): array
     {
@@ -184,15 +182,13 @@ class LoginUserDTOTest extends TestCase
     public function testWithVariousIds(int $id): void
     {
         $dto = new LoginUserDTO($id, 'test', ['ROLE_USER']);
-        
+
         $this->assertSame($id, $dto->id);
         $this->assertSame($id, $dto->toArray()['id']);
     }
 
     /**
      * Fournisseur de données pour différents IDs.
-     *
-     * @return array
      */
     public static function idProvider(): array
     {
@@ -212,15 +208,13 @@ class LoginUserDTOTest extends TestCase
     public function testWithVariousUsernames(string $username): void
     {
         $dto = new LoginUserDTO(1, $username, ['ROLE_USER']);
-        
+
         $this->assertSame($username, $dto->username);
         $this->assertSame($username, $dto->toArray()['username']);
     }
 
     /**
      * Fournisseur de données pour différents noms d'utilisateur.
-     *
-     * @return array
      */
     public static function usernameProvider(): array
     {

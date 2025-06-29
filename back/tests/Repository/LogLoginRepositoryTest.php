@@ -18,7 +18,7 @@ class LogLoginRepositoryTest extends KernelTestCase
         $this->entityManager = $kernel->getContainer()
             ->get('doctrine')
             ->getManager();
-        
+
         $this->repository = $this->entityManager->getRepository(LogLogin::class);
     }
 
@@ -41,21 +41,21 @@ class LogLoginRepositoryTest extends KernelTestCase
         $logLogin->setLogin('testuser');
         $logLogin->setIpPublic('192.168.1.1');
         $logLogin->setSuccess(true);
-        
+
         // Persist
         $this->entityManager->persist($logLogin);
         $this->entityManager->flush();
-        
+
         // Vérifier que l'ID a été assigné
         self::assertNotNull($logLogin->getId());
-        
+
         // Find
         $foundLog = $this->repository->find($logLogin->getId());
         self::assertNotNull($foundLog);
         self::assertEquals('testuser', $foundLog->getLogin());
         self::assertEquals('192.168.1.1', $foundLog->getIpPublic());
         self::assertTrue($foundLog->isSuccess());
-        
+
         // Clean up
         $this->entityManager->remove($foundLog);
         $this->entityManager->flush();
@@ -65,7 +65,7 @@ class LogLoginRepositoryTest extends KernelTestCase
     {
         // Exemple de méthode personnalisée
         $this->markTestSkipped('Méthode findSuccessfulLogins() pas encore implémentée dans le repository');
-        
+
         /*
         // Si vous ajoutez cette méthode au repository :
         public function findSuccessfulLogins(\DateTime $since = null): array
@@ -74,19 +74,19 @@ class LogLoginRepositoryTest extends KernelTestCase
                 ->andWhere('l.success = :success')
                 ->setParameter('success', true)
                 ->orderBy('l.date', 'DESC');
-            
+
             if ($since) {
                 $qb->andWhere('l.date >= :since')
                    ->setParameter('since', $since);
             }
-            
+
             return $qb->getQuery()->getResult();
         }
-        
+
         // Test :
         $successfulLogins = $this->repository->findSuccessfulLogins();
         self::assertIsArray($successfulLogins);
-        
+
         foreach ($successfulLogins as $log) {
             self::assertInstanceOf(LogLogin::class, $log);
             self::assertTrue($log->isSuccess());
@@ -98,7 +98,7 @@ class LogLoginRepositoryTest extends KernelTestCase
     {
         // Exemple de méthode pour détecter des tentatives suspectes
         $this->markTestSkipped('Méthode findFailedLoginsByIp() pas encore implémentée dans le repository');
-        
+
         /*
         // Si vous ajoutez cette méthode au repository :
         public function findFailedLoginsByIp(string $ipAddress, \DateTime $since = null): array
@@ -109,19 +109,19 @@ class LogLoginRepositoryTest extends KernelTestCase
                 ->setParameter('ip', $ipAddress)
                 ->setParameter('success', false)
                 ->orderBy('l.date', 'DESC');
-            
+
             if ($since) {
                 $qb->andWhere('l.date >= :since')
                    ->setParameter('since', $since);
             }
-            
+
             return $qb->getQuery()->getResult();
         }
-        
+
         // Test :
         $failedAttempts = $this->repository->findFailedLoginsByIp('192.168.1.100');
         self::assertIsArray($failedAttempts);
-        
+
         foreach ($failedAttempts as $log) {
             self::assertInstanceOf(LogLogin::class, $log);
             self::assertFalse($log->isSuccess());
@@ -134,13 +134,13 @@ class LogLoginRepositoryTest extends KernelTestCase
     {
         // Exemple de méthode pour limiter les tentatives de connexion
         $this->markTestSkipped('Méthode countLoginAttemptsLastHour() pas encore implémentée dans le repository');
-        
+
         /*
         // Si vous ajoutez cette méthode au repository :
         public function countLoginAttemptsLastHour(string $ipAddress): int
         {
             $oneHourAgo = new \DateTime('-1 hour');
-            
+
             return $this->createQueryBuilder('l')
                 ->select('COUNT(l.id)')
                 ->andWhere('l.ipPublic = :ip')
@@ -150,7 +150,7 @@ class LogLoginRepositoryTest extends KernelTestCase
                 ->getQuery()
                 ->getSingleScalarResult();
         }
-        
+
         // Test :
         $count = $this->repository->countLoginAttemptsLastHour('192.168.1.1');
         self::assertIsInt($count);
@@ -162,7 +162,7 @@ class LogLoginRepositoryTest extends KernelTestCase
     {
         // Exemple de méthode pour obtenir des statistiques
         $this->markTestSkipped('Méthode getLoginStatistics() pas encore implémentée dans le repository');
-        
+
         /*
         // Si vous ajoutez cette méthode au repository :
         public function getLoginStatistics(\DateTime $from, \DateTime $to): array
@@ -176,21 +176,21 @@ class LogLoginRepositoryTest extends KernelTestCase
                 ->setParameter('to', $to)
                 ->getQuery()
                 ->getSingleResult();
-            
+
             return [
                 'total' => (int) $result['total'],
                 'successful' => (int) $result['successful'],
                 'failed' => (int) $result['failed'],
-                'success_rate' => $result['total'] > 0 ? 
+                'success_rate' => $result['total'] > 0 ?
                     round(($result['successful'] / $result['total']) * 100, 2) : 0
             ];
         }
-        
+
         // Test :
         $from = new \DateTime('-1 week');
         $to = new \DateTime();
         $stats = $this->repository->getLoginStatistics($from, $to);
-        
+
         self::assertIsArray($stats);
         self::assertArrayHasKey('total', $stats);
         self::assertArrayHasKey('successful', $stats);

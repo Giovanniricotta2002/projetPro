@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Tests unitaires pour le DTO PendingLoginLogDTO.
- * 
+ *
  * Teste la création, l'immutabilité et les méthodes du DTO
  * utilisé pour stocker temporairement les informations de logging.
  */
@@ -45,14 +45,14 @@ class PendingLoginLogDTOTest extends TestCase
     public function testFactoryMethodCreation(): void
     {
         $beforeCreation = new \DateTime();
-        
+
         $dto = PendingLoginLogDTO::create('testuser', $this->defaultAttribute);
-        
+
         $afterCreation = new \DateTime();
 
         $this->assertEquals('testuser', $dto->username);
         $this->assertSame($this->defaultAttribute, $dto->attribute);
-        
+
         // Vérifier que le timestamp est dans la bonne plage
         $this->assertGreaterThanOrEqual($beforeCreation, $dto->requestTime);
         $this->assertLessThanOrEqual($afterCreation, $dto->requestTime);
@@ -151,7 +151,7 @@ class PendingLoginLogDTOTest extends TestCase
             'user-name',
             'user_name',
             'user123',
-            'ütf8-üser'
+            'ütf8-üser',
         ];
 
         foreach ($specialUsernames as $username) {
@@ -186,16 +186,16 @@ class PendingLoginLogDTOTest extends TestCase
     public function testPerformance(): void
     {
         $startTime = microtime(true);
-        
+
         // Créer beaucoup de DTOs pour tester la performance
-        for ($i = 0; $i < 1000; $i++) {
+        for ($i = 0; $i < 1000; ++$i) {
             $dto = PendingLoginLogDTO::create("user{$i}", $this->defaultAttribute);
             $this->assertInstanceOf(PendingLoginLogDTO::class, $dto);
         }
-        
+
         $endTime = microtime(true);
         $executionTime = $endTime - $startTime;
-        
+
         // S'assurer que la création est rapide (moins de 100ms pour 1000 DTOs)
         $this->assertLessThan(0.1, $executionTime, 'DTO creation should be fast');
     }
@@ -206,14 +206,14 @@ class PendingLoginLogDTOTest extends TestCase
     public function testWithDifferentTimezones(): void
     {
         $originalTimezone = date_default_timezone_get();
-        
+
         try {
             // Tester avec différents fuseaux horaires
             $timezones = ['UTC', 'Europe/Paris', 'America/New_York', 'Asia/Tokyo'];
-            
+
             foreach ($timezones as $timezone) {
                 date_default_timezone_set($timezone);
-                
+
                 $dto = PendingLoginLogDTO::create('testuser', $this->defaultAttribute);
                 $this->assertInstanceOf(\DateTime::class, $dto->requestTime);
                 $this->assertEquals($timezone, $dto->requestTime->getTimezone()->getName());

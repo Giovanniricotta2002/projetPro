@@ -6,7 +6,7 @@ use OpenApi\Attributes as OA;
 
 /**
  * DTO pour la réponse d'informations de token JWT.
- * Utilisé pour l'endpoint /api/token/info
+ * Utilisé pour l'endpoint /api/token/info.
  */
 #[OA\Schema(
     schema: 'TokenInfoResponse',
@@ -15,7 +15,7 @@ use OpenApi\Attributes as OA;
     type: 'object',
     required: ['valid']
 )]
-readonly class TokenInfoResponseDTO
+final readonly class TokenInfoResponseDTO
 {
     public function __construct(
         #[OA\Property(
@@ -25,7 +25,6 @@ readonly class TokenInfoResponseDTO
             example: true
         )]
         public readonly bool $valid,
-
         #[OA\Property(
             property: 'token_id',
             type: 'string',
@@ -34,7 +33,6 @@ readonly class TokenInfoResponseDTO
             example: 'jwt_64f5b2c1a8e9f'
         )]
         public readonly ?string $tokenId = null,
-
         #[OA\Property(
             property: 'user_id',
             type: 'string',
@@ -43,7 +41,6 @@ readonly class TokenInfoResponseDTO
             example: '123'
         )]
         public readonly ?string $userId = null,
-
         #[OA\Property(
             property: 'username',
             type: 'string',
@@ -52,7 +49,6 @@ readonly class TokenInfoResponseDTO
             example: 'john.doe'
         )]
         public readonly ?string $username = null,
-
         #[OA\Property(
             property: 'token_type',
             type: 'string',
@@ -62,7 +58,6 @@ readonly class TokenInfoResponseDTO
             example: 'access'
         )]
         public readonly ?string $tokenType = null,
-
         #[OA\Property(
             property: 'issued_at',
             type: 'string',
@@ -72,7 +67,6 @@ readonly class TokenInfoResponseDTO
             example: '2025-06-29 10:30:00'
         )]
         public readonly ?string $issuedAt = null,
-
         #[OA\Property(
             property: 'expires_at',
             type: 'string',
@@ -82,7 +76,6 @@ readonly class TokenInfoResponseDTO
             example: '2025-06-29 11:30:00'
         )]
         public readonly ?string $expiresAt = null,
-
         #[OA\Property(
             property: 'roles',
             type: 'array',
@@ -92,7 +85,6 @@ readonly class TokenInfoResponseDTO
             example: ['ROLE_USER', 'ROLE_ADMIN']
         )]
         public readonly ?array $roles = null,
-
         #[OA\Property(
             property: 'issuer',
             type: 'string',
@@ -101,7 +93,6 @@ readonly class TokenInfoResponseDTO
             example: 'muscuscope-api'
         )]
         public readonly ?string $issuer = null,
-
         #[OA\Property(
             property: 'audience',
             type: 'string',
@@ -110,7 +101,6 @@ readonly class TokenInfoResponseDTO
             example: 'muscuscope-users'
         )]
         public readonly ?string $audience = null,
-
         #[OA\Property(
             property: 'login_time',
             type: 'integer',
@@ -119,7 +109,6 @@ readonly class TokenInfoResponseDTO
             example: 1719656400
         )]
         public readonly ?int $loginTime = null,
-
         #[OA\Property(
             property: 'ip_address',
             type: 'string',
@@ -128,7 +117,6 @@ readonly class TokenInfoResponseDTO
             example: '192.168.1.100'
         )]
         public readonly ?string $ipAddress = null,
-
         #[OA\Property(
             property: 'user_agent',
             type: 'string',
@@ -137,7 +125,6 @@ readonly class TokenInfoResponseDTO
             example: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         )]
         public readonly ?string $userAgent = null,
-
         #[OA\Property(
             property: 'error',
             type: 'string',
@@ -145,14 +132,14 @@ readonly class TokenInfoResponseDTO
             nullable: true,
             example: 'Token signature verification failed'
         )]
-        public readonly ?string $error = null
-    ) {}
+        public readonly ?string $error = null,
+    ) {
+    }
 
     /**
      * Crée un DTO pour un token valide avec informations complètes.
      *
      * @param array $tokenPayload Payload décodé du token JWT
-     * @return self
      */
     public static function validWithDetails(array $tokenPayload): self
     {
@@ -177,7 +164,6 @@ readonly class TokenInfoResponseDTO
      * Crée un DTO pour un token invalide.
      *
      * @param string $error Message d'erreur
-     * @return self
      */
     public static function invalid(string $error): self
     {
@@ -191,7 +177,6 @@ readonly class TokenInfoResponseDTO
      * Crée un DTO depuis les informations du JWTService.
      *
      * @param array $tokenInfo Informations du token
-     * @return self
      */
     public static function fromTokenInfo(array $tokenInfo): self
     {
@@ -214,8 +199,6 @@ readonly class TokenInfoResponseDTO
 
     /**
      * Convertit le DTO en tableau associatif.
-     *
-     * @return array
      */
     public function toArray(): array
     {
@@ -255,8 +238,6 @@ readonly class TokenInfoResponseDTO
 
     /**
      * Vérifie si le token est encore valide (non expiré).
-     *
-     * @return bool
      */
     public function isStillValid(): bool
     {
@@ -265,6 +246,7 @@ readonly class TokenInfoResponseDTO
         }
 
         $expirationTime = strtotime($this->expiresAt);
+
         return $expirationTime > time();
     }
 

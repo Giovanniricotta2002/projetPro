@@ -27,13 +27,14 @@ final class TokenValidationRequestDTO
         #[Assert\NotBlank(message: 'Token is required')]
         #[Assert\Type(type: 'string', message: 'Token must be a string')]
         #[Assert\Length(
-            min: 50, 
-            max: 2048, 
+            min: 50,
+            max: 2048,
             minMessage: 'Token must be at least {{ limit }} characters long',
             maxMessage: 'Token cannot be longer than {{ limit }} characters'
         )]
-        public readonly string $token
-    ) {}
+        public readonly string $token,
+    ) {
+    }
 
     public static function fromArray(array $data): self
     {
@@ -57,7 +58,7 @@ final class TokenValidationRequestDTO
     public function toArray(): array
     {
         return [
-            'token' => $this->token
+            'token' => $this->token,
         ];
     }
 }

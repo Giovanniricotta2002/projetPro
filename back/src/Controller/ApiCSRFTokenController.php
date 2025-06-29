@@ -2,12 +2,12 @@
 
 namespace App\Controller;
 
-use App\DTO\ErrorResponseDTO;
 use App\DTO\CsrfTokenResponseDTO;
 use App\DTO\CsrfTokenVerificationRequestDTO;
 use App\DTO\CsrfTokenVerificationResponseDTO;
+use App\DTO\ErrorResponseDTO;
 use App\Services\InitSerializerService;
-use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
@@ -26,7 +26,7 @@ final class ApiCSRFTokenController extends AbstractController
     private Serializer $serializer;
 
     public function __construct(
-        private readonly ValidatorInterface $validator
+        private readonly ValidatorInterface $validator,
     ) {
         $init = new InitSerializerService();
         $this->serializer = $init->serializer;
@@ -53,8 +53,9 @@ final class ApiCSRFTokenController extends AbstractController
     public function generateToken(CsrfTokenManagerInterface $csrfTokenManager): Response
     {
         $token = $csrfTokenManager->getToken('authenticate')->getValue();
-        
+
         $responseDto = CsrfTokenResponseDTO::create($token);
+
         return $this->json($responseDto->toArray(), Response::HTTP_OK);
     }
 
@@ -97,6 +98,7 @@ final class ApiCSRFTokenController extends AbstractController
 
         if ($data->all() === null) {
             $errorDto = ErrorResponseDTO::create('Invalid JSON format');
+
             return $this->json($errorDto->toArray(), Response::HTTP_BAD_REQUEST);
         }
 
@@ -115,32 +117,35 @@ final class ApiCSRFTokenController extends AbstractController
                     'Validation failed',
                     implode('; ', $errors)
                 );
+
                 return $this->json($errorDto->toArray(), Response::HTTP_UNPROCESSABLE_ENTITY);
             }
-
         } catch (\InvalidArgumentException $e) {
             $errorDto = ErrorResponseDTO::create($e->getMessage());
+
             return $this->json($errorDto->toArray(), Response::HTTP_BAD_REQUEST);
         }
 
         try {
             // Vérifier la validité du token CSRF
             $csrfToken = new CsrfToken('authenticate', $requestDto->csrfToken);
-            
+
             if (!$csrfTokenManager->isTokenValid($csrfToken)) {
                 $errorDto = ErrorResponseDTO::create('Invalid CSRF token');
+
                 return $this->json($errorDto->toArray(), Response::HTTP_FORBIDDEN);
             }
 
             // Token valide - retourner une réponse de succès
             $responseDto = CsrfTokenVerificationResponseDTO::createValid();
-            return $this->json($responseDto->toArray(), Response::HTTP_OK);
 
+            return $this->json($responseDto->toArray(), Response::HTTP_OK);
         } catch (\Exception $e) {
             $errorDto = ErrorResponseDTO::withMessage(
                 'Error occurred while verifying CSRF token',
                 $e->getMessage()
             );
+
             return $this->json($errorDto->toArray(), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }

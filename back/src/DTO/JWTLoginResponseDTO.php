@@ -14,15 +14,15 @@ use OpenApi\Attributes as OA;
     type: 'object',
     required: ['success', 'message', 'user', 'tokens']
 )]
-readonly class JWTLoginResponseDTO
+final readonly class JWTLoginResponseDTO
 {
     /**
      * Constructeur du DTO de succès de connexion JWT.
      *
-     * @param bool $success Indicateur de succès
-     * @param string $message Message de succès
-     * @param LoginUserDTO $user Informations utilisateur
-     * @param array $tokens Tokens JWT (access + refresh)
+     * @param bool         $success Indicateur de succès
+     * @param string       $message Message de succès
+     * @param LoginUserDTO $user    Informations utilisateur
+     * @param array        $tokens  Tokens JWT (access + refresh)
      */
     public function __construct(
         #[OA\Property(
@@ -32,7 +32,6 @@ readonly class JWTLoginResponseDTO
             example: true
         )]
         public readonly bool $success,
-        
         #[OA\Property(
             property: 'message',
             description: 'Message de confirmation',
@@ -40,20 +39,18 @@ readonly class JWTLoginResponseDTO
             example: 'Login successful'
         )]
         public readonly string $message,
-        
         #[OA\Property(
             property: 'user',
             description: 'Informations de l\'utilisateur connecté',
             ref: '#/components/schemas/LoginUser'
         )]
         public readonly LoginUserDTO $user,
-        
         #[OA\Property(
             property: 'tokens',
             description: 'Tokens JWT d\'authentification',
             ref: '#/components/schemas/JWTTokens'
         )]
-        public readonly JWTTokensDTO $tokens
+        public readonly JWTTokensDTO $tokens,
     ) {
     }
 
@@ -68,22 +65,21 @@ readonly class JWTLoginResponseDTO
             'success' => $this->success,
             'message' => $this->message,
             'user' => $this->user->toArray(),
-            'tokens' => $this->tokens->toArray(),
+            'tokens' => $this->tokens, // Return as object, not array
         ];
     }
 
     /**
      * Crée un DTO de succès avec tokens JWT.
      *
-     * @param LoginUserDTO $user Informations utilisateur
-     * @param JWTTokensDTO $tokens Tokens JWT
-     * @param string $message Message personnalisé
-     * @return self
+     * @param LoginUserDTO $user    Informations utilisateur
+     * @param JWTTokensDTO $tokens  Tokens JWT
+     * @param string       $message Message personnalisé
      */
     public static function success(
-        LoginUserDTO $user, 
-        JWTTokensDTO $tokens, 
-        string $message = 'Login successful'
+        LoginUserDTO $user,
+        JWTTokensDTO $tokens,
+        string $message = 'Login successful',
     ): self {
         return new self(
             success: true,
@@ -97,6 +93,7 @@ readonly class JWTLoginResponseDTO
      * Valide la structure des tokens.
      *
      * @param JWTTokensDTO $tokens Les tokens à valider
+     *
      * @return bool True si la structure est valide
      */
     public static function validateTokensStructure(JWTTokensDTO $tokens): bool

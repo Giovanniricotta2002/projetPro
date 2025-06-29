@@ -12,6 +12,7 @@ final class LoginControllerTest extends WebTestCase
         $client = static::createClient();
         $client->request('GET', '/api/csrfToken');
         $tokenResponse = json_decode($client->getResponse()->getContent(), true);
+
         return $tokenResponse['csrfToken'];
     }
 
@@ -27,11 +28,11 @@ final class LoginControllerTest extends WebTestCase
             [],
             [
                 'CONTENT_TYPE' => 'application/json',
-                'HTTP_X-CSRF-TOKEN' => $csrfToken
+                'HTTP_X-CSRF-TOKEN' => $csrfToken,
             ],
             json_encode([
                 'login' => 'testuser',
-                'password' => 'testpassword'
+                'password' => 'testpassword',
             ])
         );
 
@@ -52,15 +53,15 @@ final class LoginControllerTest extends WebTestCase
             [],
             [
                 'CONTENT_TYPE' => 'application/json',
-                'HTTP_X-CSRF-TOKEN' => $csrfToken
+                'HTTP_X-CSRF-TOKEN' => $csrfToken,
             ],
             json_encode([
-                'password' => 'testpassword'
+                'password' => 'testpassword',
             ])
         );
 
         self::assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
-        
+
         $responseData = json_decode($client->getResponse()->getContent(), true);
         self::assertArrayHasKey('error', $responseData);
         self::assertEquals('Missing parameter: login', $responseData['error']);
@@ -78,15 +79,15 @@ final class LoginControllerTest extends WebTestCase
             [],
             [
                 'CONTENT_TYPE' => 'application/json',
-                'HTTP_X-CSRF-TOKEN' => $csrfToken
+                'HTTP_X-CSRF-TOKEN' => $csrfToken,
             ],
             json_encode([
-                'login' => 'testuser'
+                'login' => 'testuser',
             ])
         );
 
         self::assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
-        
+
         $responseData = json_decode($client->getResponse()->getContent(), true);
         self::assertArrayHasKey('error', $responseData);
         self::assertEquals('Missing parameter: password', $responseData['error']);
@@ -104,13 +105,13 @@ final class LoginControllerTest extends WebTestCase
             [],
             [
                 'CONTENT_TYPE' => 'application/json',
-                'HTTP_X-CSRF-TOKEN' => $csrfToken
+                'HTTP_X-CSRF-TOKEN' => $csrfToken,
             ],
             json_encode([])
         );
 
         self::assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
-        
+
         $responseData = json_decode($client->getResponse()->getContent(), true);
         self::assertArrayHasKey('error', $responseData);
         self::assertEquals('Missing parameter: login', $responseData['error']);
@@ -127,11 +128,11 @@ final class LoginControllerTest extends WebTestCase
             [],
             [
                 'CONTENT_TYPE' => 'application/json',
-                'HTTP_X-CSRF-TOKEN' => 'invalid-token'
+                'HTTP_X-CSRF-TOKEN' => 'invalid-token',
             ],
             json_encode([
                 'login' => 'testuser',
-                'password' => 'testpassword'
+                'password' => 'testpassword',
             ])
         );
 
@@ -150,7 +151,7 @@ final class LoginControllerTest extends WebTestCase
             ['CONTENT_TYPE' => 'application/json'],
             json_encode([
                 'login' => 'testuser',
-                'password' => 'testpassword'
+                'password' => 'testpassword',
             ])
         );
 
@@ -179,11 +180,11 @@ final class LoginControllerTest extends WebTestCase
             [],
             [
                 'CONTENT_TYPE' => 'application/json',
-                'HTTP_X-CSRF-TOKEN' => $csrfToken
+                'HTTP_X-CSRF-TOKEN' => $csrfToken,
             ],
             json_encode([
                 'login' => '',
-                'password' => ''
+                'password' => '',
             ])
         );
 
@@ -204,11 +205,11 @@ final class LoginControllerTest extends WebTestCase
             [],
             [
                 'CONTENT_TYPE' => 'application/json',
-                'HTTP_X-CSRF-TOKEN' => $csrfToken
+                'HTTP_X-CSRF-TOKEN' => $csrfToken,
             ],
             json_encode([
                 'login' => null,
-                'password' => null
+                'password' => null,
             ])
         );
 
@@ -228,7 +229,7 @@ final class LoginControllerTest extends WebTestCase
             [],
             [
                 'CONTENT_TYPE' => 'application/json',
-                'HTTP_X-CSRF-TOKEN' => $csrfToken
+                'HTTP_X-CSRF-TOKEN' => $csrfToken,
             ],
             '{"login": invalid-json, "password": "test"}'
         );
@@ -250,7 +251,7 @@ final class LoginControllerTest extends WebTestCase
             [],
             [
                 'CONTENT_TYPE' => 'text/plain',
-                'HTTP_X-CSRF-TOKEN' => $csrfToken
+                'HTTP_X-CSRF-TOKEN' => $csrfToken,
             ],
             'login=testuser&password=testpassword'
         );
@@ -271,13 +272,13 @@ final class LoginControllerTest extends WebTestCase
             [],
             [
                 'CONTENT_TYPE' => 'application/json',
-                'HTTP_X-CSRF-TOKEN' => $csrfToken
+                'HTTP_X-CSRF-TOKEN' => $csrfToken,
             ],
             json_encode([
                 'login' => 'testuser',
                 'password' => 'testpassword',
                 'extraParam' => 'extraValue',
-                'remember' => true
+                'remember' => true,
             ])
         );
 
@@ -299,11 +300,11 @@ final class LoginControllerTest extends WebTestCase
             [],
             [
                 'CONTENT_TYPE' => 'application/json',
-                'HTTP_X-CSRF-TOKEN' => $csrfToken
+                'HTTP_X-CSRF-TOKEN' => $csrfToken,
             ],
             json_encode([
                 'login' => '<script>alert("xss")</script>',
-                'password' => '"; DROP TABLE users; --'
+                'password' => '"; DROP TABLE users; --',
             ])
         );
 

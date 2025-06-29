@@ -14,7 +14,7 @@ use OpenApi\Attributes as OA;
     type: 'object',
     required: ['csrfToken']
 )]
-readonly class CsrfTokenResponseDTO
+final readonly class CsrfTokenResponseDTO
 {
     /**
      * Constructeur du DTO de token CSRF.
@@ -28,7 +28,7 @@ readonly class CsrfTokenResponseDTO
             type: 'string',
             example: 'abc123def456ghi789'
         )]
-        public readonly string $csrfToken
+        public readonly string $csrfToken,
     ) {
     }
 
@@ -36,7 +36,6 @@ readonly class CsrfTokenResponseDTO
      * Factory method pour créer une réponse de token CSRF.
      *
      * @param string $token Le token CSRF
-     * @return self
      */
     public static function create(string $token): self
     {
@@ -45,13 +44,11 @@ readonly class CsrfTokenResponseDTO
 
     /**
      * Convertit le DTO en tableau pour la sérialisation JSON.
-     *
-     * @return array
      */
     public function toArray(): array
     {
         return [
-            'csrfToken' => $this->csrfToken
+            'csrfToken' => $this->csrfToken,
         ];
     }
 }

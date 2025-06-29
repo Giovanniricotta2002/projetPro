@@ -2,8 +2,8 @@
 
 namespace App\Tests\Repository;
 
-use App\Entity\Post;
 use App\Entity\Forum;
+use App\Entity\Post;
 use App\Repository\PostRepository;
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityManagerInterface;
@@ -21,10 +21,10 @@ class PostRepositoryUnitTest extends TestCase
     {
         $this->entityManager = $this->createMock(EntityManagerInterface::class);
         $this->registry = $this->createMock(ManagerRegistry::class);
-        
+
         $this->registry->method('getManagerForClass')
             ->willReturn($this->entityManager);
-        
+
         $this->repository = new PostRepository($this->registry);
     }
 
@@ -38,7 +38,7 @@ class PostRepositoryUnitTest extends TestCase
     {
         // Exemple de test unitaire pour une méthode personnalisée
         $this->markTestSkipped('Méthode findPopularPosts() pas encore implémentée dans le repository');
-        
+
         /*
         // Si vous ajoutez cette méthode au repository :
         public function findPopularPosts(int $minViews = 100): array
@@ -50,20 +50,20 @@ class PostRepositoryUnitTest extends TestCase
                 ->getQuery()
                 ->getResult();
         }
-        
+
         // Setup mocks
         $queryBuilder = $this->createMock(QueryBuilder::class);
         $query = $this->createMock(AbstractQuery::class);
-        
+
         $posts = [
             $this->createMockPost(1, 'Post populaire 1', 150),
             $this->createMockPost(2, 'Post populaire 2', 200),
         ];
-        
+
         // Configuration de la chaîne de mocks
         $this->entityManager->method('createQueryBuilder')
             ->willReturn($queryBuilder);
-        
+
         $queryBuilder->method('andWhere')
             ->willReturnSelf();
         $queryBuilder->method('setParameter')
@@ -72,13 +72,13 @@ class PostRepositoryUnitTest extends TestCase
             ->willReturnSelf();
         $queryBuilder->method('getQuery')
             ->willReturn($query);
-        
+
         $query->method('getResult')
             ->willReturn($posts);
-        
+
         // Test
         $result = $this->repository->findPopularPosts(100);
-        
+
         self::assertIsArray($result);
         self::assertCount(2, $result);
         self::assertContainsOnlyInstancesOf(Post::class, $result);
@@ -89,7 +89,7 @@ class PostRepositoryUnitTest extends TestCase
     {
         // Exemple de test pour rechercher des posts par forum
         $this->markTestSkipped('Méthode findPostsByForum() pas encore implémentée dans le repository');
-        
+
         /*
         // Si vous ajoutez cette méthode au repository :
         public function findPostsByForum(Forum $forum, int $limit = 10): array
@@ -102,22 +102,22 @@ class PostRepositoryUnitTest extends TestCase
                 ->getQuery()
                 ->getResult();
         }
-        
+
         // Setup mocks
         $forum = $this->createMock(Forum::class);
         $forum->method('getId')->willReturn(1);
-        
+
         $queryBuilder = $this->createMock(QueryBuilder::class);
         $query = $this->createMock(AbstractQuery::class);
-        
+
         $posts = [
             $this->createMockPost(1, 'Post 1', 10),
             $this->createMockPost(2, 'Post 2', 5),
         ];
-        
+
         $this->entityManager->method('createQueryBuilder')
             ->willReturn($queryBuilder);
-        
+
         $queryBuilder->method('andWhere')
             ->willReturnSelf();
         $queryBuilder->method('setParameter')
@@ -128,13 +128,13 @@ class PostRepositoryUnitTest extends TestCase
             ->willReturnSelf();
         $queryBuilder->method('getQuery')
             ->willReturn($query);
-        
+
         $query->method('getResult')
             ->willReturn($posts);
-        
+
         // Test
         $result = $this->repository->findPostsByForum($forum, 10);
-        
+
         self::assertIsArray($result);
         self::assertCount(2, $result);
         */
@@ -144,7 +144,7 @@ class PostRepositoryUnitTest extends TestCase
     {
         // Exemple de test pour compter les posts dans un forum
         $this->markTestSkipped('Méthode countPostsInForum() pas encore implémentée dans le repository');
-        
+
         /*
         // Si vous ajoutez cette méthode au repository :
         public function countPostsInForum(Forum $forum): int
@@ -156,15 +156,15 @@ class PostRepositoryUnitTest extends TestCase
                 ->getQuery()
                 ->getSingleScalarResult();
         }
-        
+
         // Setup mocks
         $forum = $this->createMock(Forum::class);
         $queryBuilder = $this->createMock(QueryBuilder::class);
         $query = $this->createMock(AbstractQuery::class);
-        
+
         $this->entityManager->method('createQueryBuilder')
             ->willReturn($queryBuilder);
-        
+
         $queryBuilder->method('select')
             ->willReturnSelf();
         $queryBuilder->method('andWhere')
@@ -173,19 +173,19 @@ class PostRepositoryUnitTest extends TestCase
             ->willReturnSelf();
         $queryBuilder->method('getQuery')
             ->willReturn($query);
-        
+
         $query->method('getSingleScalarResult')
             ->willReturn(42);
-        
+
         // Test
         $count = $this->repository->countPostsInForum($forum);
-        
+
         self::assertEquals(42, $count);
         */
     }
 
     /**
-     * Méthode helper pour créer des mocks de Post
+     * Méthode helper pour créer des mocks de Post.
      */
     private function createMockPost(int $id, string $titre, int $vues): Post
     {
@@ -194,7 +194,7 @@ class PostRepositoryUnitTest extends TestCase
         $post->method('getTitre')->willReturn($titre);
         $post->method('getVues')->willReturn($vues);
         $post->method('getDateCreation')->willReturn(new \DateTime());
-        
+
         return $post;
     }
 }

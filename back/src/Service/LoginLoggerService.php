@@ -13,14 +13,14 @@ class LoginLoggerService
 
     public function __construct(
         EntityManagerInterface $entityManager,
-        RequestStack $requestStack
+        RequestStack $requestStack,
     ) {
         $this->entityManager = $entityManager;
         $this->requestStack = $requestStack;
     }
 
     /**
-     * Log une tentative de connexion
+     * Log une tentative de connexion.
      */
     public function logLoginAttempt(string $login, bool $success, ?\DateTime $date = null): LogLogin
     {
@@ -31,7 +31,7 @@ class LoginLoggerService
         $logLogin->setLogin($login);
         $logLogin->setSuccess($success);
         $logLogin->setIpPublic($ipAddress);
-        
+
         if ($date !== null) {
             $logLogin->setDate($date);
         }
@@ -43,7 +43,7 @@ class LoginLoggerService
     }
 
     /**
-     * Log une tentative de connexion réussie
+     * Log une tentative de connexion réussie.
      */
     public function logSuccessfulLogin(string $login): LogLogin
     {
@@ -51,7 +51,7 @@ class LoginLoggerService
     }
 
     /**
-     * Log une tentative de connexion échouée
+     * Log une tentative de connexion échouée.
      */
     public function logFailedLogin(string $login): LogLogin
     {
@@ -59,7 +59,7 @@ class LoginLoggerService
     }
 
     /**
-     * Récupère l'adresse IP du client en tenant compte des proxies
+     * Récupère l'adresse IP du client en tenant compte des proxies.
      */
     private function getClientIpAddress($request): string
     {
@@ -75,14 +75,14 @@ class LoginLoggerService
             'HTTP_X_FORWARDED',
             'HTTP_FORWARDED_FOR',
             'HTTP_FORWARDED',
-            'REMOTE_ADDR'
+            'REMOTE_ADDR',
         ];
 
         foreach ($ipKeys as $key) {
             if (!empty($_SERVER[$key])) {
                 $ips = explode(',', $_SERVER[$key]);
                 $ip = trim($ips[0]);
-                
+
                 if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
                     return $ip;
                 }
@@ -94,7 +94,7 @@ class LoginLoggerService
     }
 
     /**
-     * Compte les tentatives de connexion échouées récentes pour une IP
+     * Compte les tentatives de connexion échouées récentes pour une IP.
      */
     public function countRecentFailedAttempts(string $ipAddress, int $minutes = 60): int
     {
@@ -115,7 +115,7 @@ class LoginLoggerService
     }
 
     /**
-     * Compte les tentatives de connexion échouées récentes pour un login
+     * Compte les tentatives de connexion échouées récentes pour un login.
      */
     public function countRecentFailedAttemptsForLogin(string $login, int $minutes = 60): int
     {
@@ -136,25 +136,27 @@ class LoginLoggerService
     }
 
     /**
-     * Vérifie si une IP est temporairement bloquée (trop de tentatives échouées)
+     * Vérifie si une IP est temporairement bloquée (trop de tentatives échouées).
      */
     public function isIpBlocked(string $ipAddress, int $maxAttempts = 5, int $blockDurationMinutes = 60): bool
     {
         $failedAttempts = $this->countRecentFailedAttempts($ipAddress, $blockDurationMinutes);
+
         return $failedAttempts >= $maxAttempts;
     }
 
     /**
-     * Vérifie si un login est temporairement bloqué
+     * Vérifie si un login est temporairement bloqué.
      */
     public function isLoginBlocked(string $login, int $maxAttempts = 3, int $blockDurationMinutes = 30): bool
     {
         $failedAttempts = $this->countRecentFailedAttemptsForLogin($login, $blockDurationMinutes);
+
         return $failedAttempts >= $maxAttempts;
     }
 
     /**
-     * Obtient des statistiques de connexion pour une période donnée
+     * Obtient des statistiques de connexion pour une période donnée.
      */
     public function getLoginStatistics(\DateTime $from, \DateTime $to): array
     {
@@ -178,7 +180,7 @@ class LoginLoggerService
             'total' => $total,
             'successful' => $successful,
             'failed' => $failed,
-            'success_rate' => $total > 0 ? round(($successful / $total) * 100, 2) : 0
+            'success_rate' => $total > 0 ? round(($successful / $total) * 100, 2) : 0,
         ];
     }
 }

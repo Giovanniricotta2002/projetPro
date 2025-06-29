@@ -2,10 +2,10 @@
 
 namespace App\Tests\Entity;
 
-use App\Entity\Utilisateur;
 use App\Entity\Droit;
 use App\Entity\Forum;
 use App\Entity\Message;
+use App\Entity\Utilisateur;
 use PHPUnit\Framework\TestCase;
 
 class UtilisateurTest extends TestCase
@@ -30,9 +30,9 @@ class UtilisateurTest extends TestCase
     public function testUsernameGetterAndSetter(): void
     {
         $username = 'testuser';
-        
+
         self::assertNull($this->utilisateur->getUsername());
-        
+
         $this->utilisateur->setUsername($username);
         self::assertEquals($username, $this->utilisateur->getUsername());
     }
@@ -40,9 +40,9 @@ class UtilisateurTest extends TestCase
     public function testPasswordGetterAndSetter(): void
     {
         $password = 'hashedpassword123';
-        
+
         self::assertNull($this->utilisateur->getPassword());
-        
+
         $this->utilisateur->setPassword($password);
         self::assertEquals($password, $this->utilisateur->getPassword());
     }
@@ -50,10 +50,10 @@ class UtilisateurTest extends TestCase
     public function testRolesGetterAndSetter(): void
     {
         $roles = ['ROLE_USER', 'ROLE_ADMIN'];
-        
+
         // Par défaut, devrait retourner un tableau vide
         self::assertEquals([], $this->utilisateur->getRoles());
-        
+
         $this->utilisateur->setRoles($roles);
         self::assertEquals($roles, $this->utilisateur->getRoles());
     }
@@ -63,7 +63,7 @@ class UtilisateurTest extends TestCase
         // Même sans définir de rôles, ROLE_USER devrait être présent
         $this->utilisateur->setRoles([]);
         $roles = $this->utilisateur->getRoles();
-        
+
         // Note: Vérifiez si votre implémentation ajoute automatiquement ROLE_USER
         // Si c'est le cas, décommentez la ligne suivante :
         // self::assertContains('ROLE_USER', $roles);
@@ -72,9 +72,9 @@ class UtilisateurTest extends TestCase
     public function testMailGetterAndSetter(): void
     {
         $mail = 'test@example.com';
-        
+
         self::assertNull($this->utilisateur->getMail());
-        
+
         $this->utilisateur->setMail($mail);
         self::assertEquals($mail, $this->utilisateur->getMail());
     }
@@ -82,9 +82,9 @@ class UtilisateurTest extends TestCase
     public function testStatusGetterAndSetter(): void
     {
         $status = 'active';
-        
+
         self::assertNull($this->utilisateur->getStatus());
-        
+
         $this->utilisateur->setStatus($status);
         self::assertEquals($status, $this->utilisateur->getStatus());
     }
@@ -94,10 +94,10 @@ class UtilisateurTest extends TestCase
         // Note: Il y a une faute de frappe dans l'entité (aninimus au lieu d'anonimus)
         // Par défaut devrait être false
         self::assertFalse($this->utilisateur->isAninimus());
-        
+
         $this->utilisateur->setAninimus(true);
         self::assertTrue($this->utilisateur->isAninimus());
-        
+
         $this->utilisateur->setAninimus(false);
         self::assertFalse($this->utilisateur->isAninimus());
     }
@@ -105,9 +105,9 @@ class UtilisateurTest extends TestCase
     public function testLastVisitGetterAndSetter(): void
     {
         $lastVisit = new \DateTime('2024-01-01 12:00:00');
-        
+
         self::assertNull($this->utilisateur->getLastVisit());
-        
+
         $this->utilisateur->setLastVisit($lastVisit);
         self::assertEquals($lastVisit, $this->utilisateur->getLastVisit());
     }
@@ -115,10 +115,10 @@ class UtilisateurTest extends TestCase
     public function testDateCreationGetterAndSetter(): void
     {
         $dateCreation = new \DateTime('2024-01-01 10:00:00');
-        
+
         // La date de création est définie dans le constructeur
         self::assertInstanceOf(\DateTime::class, $this->utilisateur->getDateCreation());
-        
+
         $this->utilisateur->setDateCreation($dateCreation);
         self::assertEquals($dateCreation, $this->utilisateur->getDateCreation());
     }
@@ -127,7 +127,7 @@ class UtilisateurTest extends TestCase
     {
         $username = 'testuser';
         $this->utilisateur->setUsername($username);
-        
+
         self::assertEquals($username, $this->utilisateur->getUserIdentifier());
     }
 
@@ -136,7 +136,7 @@ class UtilisateurTest extends TestCase
         // Cette méthode devrait être vide dans la plupart des cas
         // Mais elle ne devrait pas lever d'exception
         $this->utilisateur->eraseCredentials();
-        
+
         // Test qu'aucune exception n'est levée
         self::assertTrue(true);
     }
@@ -145,14 +145,14 @@ class UtilisateurTest extends TestCase
     {
         // Créer un mock de Droit (ou utiliser une vraie instance si possible)
         $droit = $this->createMock(Droit::class);
-        
+
         // Tester l'ajout d'un droit
         self::assertEmpty($this->utilisateur->getDroits());
-        
+
         $this->utilisateur->addDroit($droit);
         self::assertCount(1, $this->utilisateur->getDroits());
         self::assertTrue($this->utilisateur->getDroits()->contains($droit));
-        
+
         // Tester la suppression d'un droit
         $this->utilisateur->removeDroit($droit);
         self::assertEmpty($this->utilisateur->getDroits());
@@ -163,14 +163,14 @@ class UtilisateurTest extends TestCase
     {
         // Créer un mock de Forum
         $forum = $this->createMock(Forum::class);
-        
+
         // Tester l'ajout d'un forum
         self::assertEmpty($this->utilisateur->getForums());
-        
+
         $this->utilisateur->addForum($forum);
         self::assertCount(1, $this->utilisateur->getForums());
         self::assertTrue($this->utilisateur->getForums()->contains($forum));
-        
+
         // Tester la suppression d'un forum
         $this->utilisateur->removeForum($forum);
         self::assertEmpty($this->utilisateur->getForums());
@@ -180,12 +180,12 @@ class UtilisateurTest extends TestCase
     public function testMessageRelation(): void
     {
         $message = $this->createMock(Message::class);
-        
+
         self::assertNull($this->utilisateur->getMessage());
-        
+
         $this->utilisateur->setMessage($message);
         self::assertEquals($message, $this->utilisateur->getMessage());
-        
+
         $this->utilisateur->setMessage(null);
         self::assertNull($this->utilisateur->getMessage());
     }
@@ -194,9 +194,9 @@ class UtilisateurTest extends TestCase
     {
         $validEmail = 'user@example.com';
         $this->utilisateur->setMail($validEmail);
-        
+
         self::assertEquals($validEmail, $this->utilisateur->getMail());
-        
+
         // Vérifier que c'est un email valide
         self::assertMatchesRegularExpression(
             '/^[^\s@]+@[^\s@]+\.[^\s@]+$/',
@@ -208,7 +208,7 @@ class UtilisateurTest extends TestCase
     {
         $longUsername = str_repeat('a', 200); // Plus long que la limite de 180 caractères
         $this->utilisateur->setUsername($longUsername);
-        
+
         // En réalité, la base de données devrait lever une erreur
         // Mais au niveau de l'entité, on peut juste vérifier que la valeur est définie
         self::assertEquals($longUsername, $this->utilisateur->getUsername());
@@ -218,9 +218,9 @@ class UtilisateurTest extends TestCase
     {
         $plainPassword = 'plainpassword';
         $hashedPassword = password_hash($plainPassword, PASSWORD_DEFAULT);
-        
+
         $this->utilisateur->setPassword($hashedPassword);
-        
+
         // Vérifier que le mot de passe n'est pas stocké en clair
         self::assertNotEquals($plainPassword, $this->utilisateur->getPassword());
         self::assertTrue(password_verify($plainPassword, $this->utilisateur->getPassword()));
@@ -229,7 +229,7 @@ class UtilisateurTest extends TestCase
     public function testDateConsistency(): void
     {
         $now = new \DateTime();
-        
+
         // La date de création doit être antérieure ou égale à maintenant
         self::assertLessThanOrEqual($now, $this->utilisateur->getDateCreation());
         self::assertLessThanOrEqual($now, $this->utilisateur->getCreatedAt());
@@ -239,12 +239,12 @@ class UtilisateurTest extends TestCase
     {
         // Tester la suppression logique
         self::assertNull($this->utilisateur->getDeletedAt());
-        
+
         $deletedAt = new \DateTime();
         $this->utilisateur->setDeletedAt($deletedAt);
-        
+
         self::assertEquals($deletedAt, $this->utilisateur->getDeletedAt());
-        
+
         // Une entité avec deletedAt défini pourrait être considérée comme supprimée
         self::assertNotNull($this->utilisateur->getDeletedAt());
     }
@@ -253,7 +253,7 @@ class UtilisateurTest extends TestCase
     {
         $username = 'testuser';
         $this->utilisateur->setUsername($username);
-        
+
         // Si l'entité a une méthode __toString(), la tester
         // Sinon, ignorer ce test
         if (method_exists($this->utilisateur, '__toString')) {

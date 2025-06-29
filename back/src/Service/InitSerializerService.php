@@ -12,6 +12,7 @@ use Symfony\Component\Serializer\Serializer;
 class InitSerializerService
 {
     public Serializer $serializer;
+
     public function __construct()
     {
         $normalizers = [new ObjectNormalizer()];

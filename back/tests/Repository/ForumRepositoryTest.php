@@ -19,7 +19,7 @@ class ForumRepositoryTest extends KernelTestCase
         $this->entityManager = $kernel->getContainer()
             ->get('doctrine')
             ->getManager();
-        
+
         $this->repository = $this->entityManager->getRepository(Forum::class);
     }
 
@@ -43,30 +43,30 @@ class ForumRepositoryTest extends KernelTestCase
         $forum->setDateCreation(new \DateTime());
         $forum->setOrdreAffichage(1);
         $forum->setVisible(true);
-        
+
         // Persist
         $this->entityManager->persist($forum);
         $this->entityManager->flush();
-        
+
         // Vérifier que l'ID a été assigné
         self::assertNotNull($forum->getId());
-        
+
         // Find
         $foundForum = $this->repository->find($forum->getId());
         self::assertNotNull($foundForum);
         self::assertEquals('Forum Test', $foundForum->getTitre());
-        
+
         // Update
         $foundForum->setTitre('Forum Test Modifié');
         $this->entityManager->flush();
-        
+
         $updatedForum = $this->repository->find($forum->getId());
         self::assertEquals('Forum Test Modifié', $updatedForum->getTitre());
-        
+
         // Delete
         $this->entityManager->remove($updatedForum);
         $this->entityManager->flush();
-        
+
         $deletedForum = $this->repository->find($forum->getId());
         self::assertNull($deletedForum);
     }
@@ -75,7 +75,7 @@ class ForumRepositoryTest extends KernelTestCase
     {
         // Exemple de méthode personnalisée à implémenter
         $this->markTestSkipped('Méthode findVisibleForums() pas encore implémentée dans le repository');
-        
+
         /*
         // Si vous ajoutez cette méthode au repository :
         public function findVisibleForums(): array
@@ -87,11 +87,11 @@ class ForumRepositoryTest extends KernelTestCase
                 ->getQuery()
                 ->getResult();
         }
-        
+
         // Test :
         $visibleForums = $this->repository->findVisibleForums();
         self::assertIsArray($visibleForums);
-        
+
         foreach ($visibleForums as $forum) {
             self::assertInstanceOf(Forum::class, $forum);
             self::assertTrue($forum->isVisible());
@@ -103,7 +103,7 @@ class ForumRepositoryTest extends KernelTestCase
     {
         // Exemple de méthode pour trouver les forums d'un utilisateur
         $this->markTestSkipped('Méthode findForumsByUser() pas encore implémentée dans le repository');
-        
+
         /*
         // Si vous ajoutez cette méthode au repository :
         public function findForumsByUser(Utilisateur $user): array
@@ -115,7 +115,7 @@ class ForumRepositoryTest extends KernelTestCase
                 ->getQuery()
                 ->getResult();
         }
-        
+
         // Test :
         $user = new Utilisateur();
         $userForums = $this->repository->findForumsByUser($user);
@@ -127,7 +127,7 @@ class ForumRepositoryTest extends KernelTestCase
     {
         // Exemple pour trouver les forums actifs (non clos)
         $this->markTestSkipped('Méthode findActiveForums() pas encore implémentée dans le repository');
-        
+
         /*
         // Si vous ajoutez cette méthode au repository :
         public function findActiveForums(): array
@@ -141,15 +141,15 @@ class ForumRepositoryTest extends KernelTestCase
                 ->getQuery()
                 ->getResult();
         }
-        
+
         // Test :
         $activeForums = $this->repository->findActiveForums();
         self::assertIsArray($activeForums);
-        
+
         foreach ($activeForums as $forum) {
             self::assertInstanceOf(Forum::class, $forum);
             self::assertTrue($forum->isVisible());
-            
+
             $dateCloture = $forum->getDateCloture();
             if ($dateCloture !== null) {
                 self::assertGreaterThan(new \DateTime(), $dateCloture);
@@ -162,7 +162,7 @@ class ForumRepositoryTest extends KernelTestCase
     {
         // Exemple pour compter les forums
         $this->markTestSkipped('Méthode countForums() pas encore implémentée dans le repository');
-        
+
         /*
         // Si vous ajoutez cette méthode au repository :
         public function countForums(): int
@@ -172,7 +172,7 @@ class ForumRepositoryTest extends KernelTestCase
                 ->getQuery()
                 ->getSingleScalarResult();
         }
-        
+
         // Test :
         $count = $this->repository->countForums();
         self::assertIsInt($count);
@@ -184,7 +184,7 @@ class ForumRepositoryTest extends KernelTestCase
     {
         // Exemple de recherche de forums par titre
         $this->markTestSkipped('Méthode searchForumsByTitle() pas encore implémentée dans le repository');
-        
+
         /*
         // Si vous ajoutez cette méthode au repository :
         public function searchForumsByTitle(string $searchTerm): array
@@ -196,11 +196,11 @@ class ForumRepositoryTest extends KernelTestCase
                 ->getQuery()
                 ->getResult();
         }
-        
+
         // Test :
         $results = $this->repository->searchForumsByTitle('test');
         self::assertIsArray($results);
-        
+
         foreach ($results as $forum) {
             self::assertInstanceOf(Forum::class, $forum);
             self::assertStringContainsStringIgnoringCase('test', $forum->getTitre());

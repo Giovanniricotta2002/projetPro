@@ -14,7 +14,7 @@ use OpenApi\Attributes as OA;
     type: 'object',
     required: ['valid']
 )]
-readonly class TokenValidationResponseDTO
+final readonly class TokenValidationResponseDTO
 {
     public function __construct(
         #[OA\Property(
@@ -24,7 +24,6 @@ readonly class TokenValidationResponseDTO
             example: true
         )]
         public readonly bool $valid,
-
         #[OA\Property(
             property: 'token_id',
             type: 'string',
@@ -33,7 +32,6 @@ readonly class TokenValidationResponseDTO
             example: 'jwt_64f5b2c1a8e9f'
         )]
         public readonly ?string $tokenId = null,
-
         #[OA\Property(
             property: 'user_id',
             type: 'string',
@@ -42,7 +40,6 @@ readonly class TokenValidationResponseDTO
             example: '123'
         )]
         public readonly ?string $userId = null,
-
         #[OA\Property(
             property: 'username',
             type: 'string',
@@ -51,7 +48,6 @@ readonly class TokenValidationResponseDTO
             example: 'john.doe'
         )]
         public readonly ?string $username = null,
-
         #[OA\Property(
             property: 'token_type',
             type: 'string',
@@ -61,7 +57,6 @@ readonly class TokenValidationResponseDTO
             example: 'access'
         )]
         public readonly ?string $tokenType = null,
-
         #[OA\Property(
             property: 'issued_at',
             type: 'string',
@@ -71,7 +66,6 @@ readonly class TokenValidationResponseDTO
             example: '2025-06-29 10:30:00'
         )]
         public readonly ?string $issuedAt = null,
-
         #[OA\Property(
             property: 'expires_at',
             type: 'string',
@@ -81,7 +75,6 @@ readonly class TokenValidationResponseDTO
             example: '2025-06-29 11:30:00'
         )]
         public readonly ?string $expiresAt = null,
-
         #[OA\Property(
             property: 'roles',
             type: 'array',
@@ -91,7 +84,6 @@ readonly class TokenValidationResponseDTO
             example: ['ROLE_USER', 'ROLE_ADMIN']
         )]
         public readonly ?array $roles = null,
-
         #[OA\Property(
             property: 'error',
             type: 'string',
@@ -99,14 +91,14 @@ readonly class TokenValidationResponseDTO
             nullable: true,
             example: 'Token expired'
         )]
-        public readonly ?string $error = null
-    ) {}
+        public readonly ?string $error = null,
+    ) {
+    }
 
     /**
      * Crée un DTO pour un token valide.
      *
      * @param array $tokenInfo Informations du token depuis JWTService::getTokenInfo()
-     * @return self
      */
     public static function valid(array $tokenInfo): self
     {
@@ -126,7 +118,6 @@ readonly class TokenValidationResponseDTO
      * Crée un DTO pour un token invalide.
      *
      * @param string $error Message d'erreur
-     * @return self
      */
     public static function invalid(string $error): self
     {
@@ -140,7 +131,6 @@ readonly class TokenValidationResponseDTO
      * Crée un DTO depuis les informations du JWTService.
      *
      * @param array $tokenInfo Informations du token
-     * @return self
      */
     public static function fromTokenInfo(array $tokenInfo): self
     {
@@ -153,8 +143,6 @@ readonly class TokenValidationResponseDTO
 
     /**
      * Convertit le DTO en tableau associatif.
-     *
-     * @return array
      */
     public function toArray(): array
     {

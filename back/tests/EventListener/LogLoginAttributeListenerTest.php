@@ -3,11 +3,10 @@
 namespace App\Tests\EventListener;
 
 use App\Attribute\LogLogin;
-use App\DTO\PendingLoginLogDTO;
 use App\EventListener\LogLoginAttributeListener;
 use App\Service\LoginLoggerService;
-use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,7 +16,7 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 /**
  * Tests unitaires pour LogLoginAttributeListener.
- * 
+ *
  * Teste le comportement de l'event listener qui gère automatiquement
  * le logging des connexions basé sur l'attribut LogLogin.
  */
@@ -39,17 +38,17 @@ class LogLoginAttributeListenerTest extends TestCase
     {
         $request = new Request();
         $kernel = $this->createMock(HttpKernelInterface::class);
-        
+
         $event = new ControllerEvent(
             $kernel,
-            function() { return new Response(); }, // Callable au lieu d'array
+            function () { return new Response(); }, // Callable au lieu d'array
             $request,
             HttpKernelInterface::MAIN_REQUEST
         );
 
         // Ne devrait pas lever d'exception
         $this->listener->onController($event);
-        
+
         // Le contrôleur ne devrait pas avoir changé
         $this->assertIsCallable($event->getController());
     }
@@ -60,12 +59,15 @@ class LogLoginAttributeListenerTest extends TestCase
     public function testIgnoresControllersWithoutLogLoginAttribute(): void
     {
         $controller = new class {
-            public function action() { return new Response(); }
+            public function action()
+            {
+                return new Response();
+            }
         };
 
         $request = new Request();
         $kernel = $this->createMock(HttpKernelInterface::class);
-        
+
         $event = new ControllerEvent(
             $kernel,
             [$controller, 'action'],
@@ -74,7 +76,7 @@ class LogLoginAttributeListenerTest extends TestCase
         );
 
         $this->listener->onController($event);
-        
+
         // Le contrôleur ne devrait pas avoir changé
         $this->assertEquals([$controller, 'action'], $event->getController());
     }
@@ -86,12 +88,15 @@ class LogLoginAttributeListenerTest extends TestCase
     {
         $controller = new class {
             #[LogLogin(enabled: false)]
-            public function action() { return new Response(); }
+            public function action()
+            {
+                return new Response();
+            }
         };
 
         $request = Request::create('/api/login', 'POST', [], [], [], [], '{"login":"test","password":"test"}');
         $kernel = $this->createMock(HttpKernelInterface::class);
-        
+
         $event = new ControllerEvent(
             $kernel,
             [$controller, 'action'],
@@ -100,7 +105,7 @@ class LogLoginAttributeListenerTest extends TestCase
         );
 
         $this->listener->onController($event);
-        
+
         // Le contrôleur ne devrait pas avoir changé
         $this->assertEquals([$controller, 'action'], $event->getController());
     }
@@ -112,12 +117,15 @@ class LogLoginAttributeListenerTest extends TestCase
     {
         $controller = new class {
             #[LogLogin]
-            public function action() { return new Response(); }
+            public function action()
+            {
+                return new Response();
+            }
         };
 
         $request = Request::create('/api/login', 'GET');
         $kernel = $this->createMock(HttpKernelInterface::class);
-        
+
         $event = new ControllerEvent(
             $kernel,
             [$controller, 'action'],
@@ -126,7 +134,7 @@ class LogLoginAttributeListenerTest extends TestCase
         );
 
         $this->listener->onController($event);
-        
+
         // Le contrôleur ne devrait pas avoir changé
         $this->assertEquals([$controller, 'action'], $event->getController());
     }
@@ -138,12 +146,15 @@ class LogLoginAttributeListenerTest extends TestCase
     {
         $controller = new class {
             #[LogLogin]
-            public function action() { return new Response(); }
+            public function action()
+            {
+                return new Response();
+            }
         };
 
         $request = Request::create('/api/login', 'POST');
         $kernel = $this->createMock(HttpKernelInterface::class);
-        
+
         $event = new ControllerEvent(
             $kernel,
             [$controller, 'action'],
@@ -152,7 +163,7 @@ class LogLoginAttributeListenerTest extends TestCase
         );
 
         $this->listener->onController($event);
-        
+
         // Le contrôleur ne devrait pas avoir changé
         $this->assertEquals([$controller, 'action'], $event->getController());
     }
@@ -164,11 +175,14 @@ class LogLoginAttributeListenerTest extends TestCase
     {
         $controller = new class {
             #[LogLogin(maxIpAttempts: 3, ipBlockDuration: 60)]
-            public function action() { return new Response(); }
+            public function action()
+            {
+                return new Response();
+            }
         };
 
-        $request = Request::create('/api/login', 'POST', [], [], [], 
-            ['REMOTE_ADDR' => '192.168.1.1'], 
+        $request = Request::create('/api/login', 'POST', [], [], [],
+            ['REMOTE_ADDR' => '192.168.1.1'],
             '{"login":"test","password":"test"}'
         );
         $kernel = $this->createMock(HttpKernelInterface::class);
@@ -196,7 +210,7 @@ class LogLoginAttributeListenerTest extends TestCase
 
         // Le contrôleur devrait avoir été remplacé par une réponse d'erreur
         $this->assertIsCallable($event->getController());
-        
+
         $response = call_user_func($event->getController());
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertEquals(Response::HTTP_TOO_MANY_REQUESTS, $response->getStatusCode());
@@ -209,11 +223,14 @@ class LogLoginAttributeListenerTest extends TestCase
     {
         $controller = new class {
             #[LogLogin(maxLoginAttempts: 2, loginBlockDuration: 30)]
-            public function action() { return new Response(); }
+            public function action()
+            {
+                return new Response();
+            }
         };
 
-        $request = Request::create('/api/login', 'POST', [], [], [], 
-            ['REMOTE_ADDR' => '192.168.1.1'], 
+        $request = Request::create('/api/login', 'POST', [], [], [],
+            ['REMOTE_ADDR' => '192.168.1.1'],
             '{"login":"blockeduser","password":"test"}'
         );
         $kernel = $this->createMock(HttpKernelInterface::class);
@@ -247,7 +264,7 @@ class LogLoginAttributeListenerTest extends TestCase
         $response = call_user_func($event->getController());
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertEquals(Response::HTTP_TOO_MANY_REQUESTS, $response->getStatusCode());
-        
+
         $data = json_decode($response->getContent(), true);
         $this->assertArrayHasKey('retry_after', $data);
         $this->assertEquals(1800, $data['retry_after']); // 30 minutes * 60
@@ -260,11 +277,14 @@ class LogLoginAttributeListenerTest extends TestCase
     {
         $controller = new class {
             #[LogLogin]
-            public function action() { return new Response(); }
+            public function action()
+            {
+                return new Response();
+            }
         };
 
-        $request = Request::create('/api/login', 'POST', [], [], [], 
-            ['REMOTE_ADDR' => '192.168.1.1'], 
+        $request = Request::create('/api/login', 'POST', [], [], [],
+            ['REMOTE_ADDR' => '192.168.1.1'],
             '{"login":"validuser","password":"validpass"}'
         );
         $kernel = $this->createMock(HttpKernelInterface::class);
@@ -301,11 +321,14 @@ class LogLoginAttributeListenerTest extends TestCase
         // D'abord, simuler l'événement controller
         $controller = new class {
             #[LogLogin]
-            public function action() { return new Response(); }
+            public function action()
+            {
+                return new Response();
+            }
         };
 
-        $request = Request::create('/api/login', 'POST', [], [], [], 
-            ['REMOTE_ADDR' => '192.168.1.1'], 
+        $request = Request::create('/api/login', 'POST', [], [], [],
+            ['REMOTE_ADDR' => '192.168.1.1'],
             '{"login":"user","password":"pass"}'
         );
         $kernel = $this->createMock(HttpKernelInterface::class);
@@ -353,11 +376,14 @@ class LogLoginAttributeListenerTest extends TestCase
         // Simuler l'événement controller
         $controller = new class {
             #[LogLogin]
-            public function action() { return new Response(); }
+            public function action()
+            {
+                return new Response();
+            }
         };
 
-        $request = Request::create('/api/login', 'POST', [], [], [], 
-            ['REMOTE_ADDR' => '192.168.1.1'], 
+        $request = Request::create('/api/login', 'POST', [], [], [],
+            ['REMOTE_ADDR' => '192.168.1.1'],
             '{"login":"user","password":"wrongpass"}'
         );
         $kernel = $this->createMock(HttpKernelInterface::class);
@@ -402,10 +428,13 @@ class LogLoginAttributeListenerTest extends TestCase
     {
         $controller = new class {
             #[LogLogin]
-            public function action() { return new Response(); }
+            public function action()
+            {
+                return new Response();
+            }
         };
 
-        $request = Request::create('/api/login', 'POST', [], [], [], [], 
+        $request = Request::create('/api/login', 'POST', [], [], [], [],
             '{"login":"test"password":"invalid json}'
         );
         $kernel = $this->createMock(HttpKernelInterface::class);
@@ -419,7 +448,7 @@ class LogLoginAttributeListenerTest extends TestCase
 
         // Ne devrait pas lever d'exception
         $this->listener->onController($event);
-        
+
         // Le contrôleur ne devrait pas avoir changé
         $this->assertEquals([$controller, 'action'], $event->getController());
     }
