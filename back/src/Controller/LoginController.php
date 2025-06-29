@@ -7,10 +7,13 @@ use App\DTO\ErrorResponseDTO;
 use App\DTO\JWTLoginResponseDTO;
 use App\DTO\JWTTokensDTO;
 use App\DTO\LoginUserDTO;
+use App\Entity\Utilisateur;
+use App\Enum\UserStatus;
 use App\Repository\UtilisateurRepository;
 use App\Service\InitSerializerService;
 use App\Service\JWTService;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Exception\ORMException;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -22,7 +25,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsCsrfTokenValid;
 use Symfony\Component\Serializer\Serializer;
 
-#[Route('/api/login', name: 'app_login')]
+#[Route('/api', name: 'app_login')]
 final class LoginController extends AbstractController
 {
     private Serializer $serializer;
@@ -37,7 +40,7 @@ final class LoginController extends AbstractController
         $this->serializer = $init->serializer;
     }
 
-    #[Route('', name: '_log', methods: ['POST'])]
+    #[Route('/login', name: '_log', methods: ['POST'])]
     #[IsCsrfTokenValid('authenticate', tokenKey: 'X-CSRF-Token', methods: ['POST'])]
     #[LogLogin(
         enabled: true,
@@ -154,8 +157,8 @@ final class LoginController extends AbstractController
 
             // Ajouter les headers de debugging JWT
             $tokenInfo = $this->jwtService->getTokenInfo($tokens['access_token']);
-            if ($tokenInfo['valid']) {
-                $response->headers->set('X-JWT-Token-ID', $tokenInfo['token_id'] ?? 'unknown');
+            if ($tokenInfo->valid) {
+                $response->headers->set('X-JWT-Token-ID', $tokenInfo->tokenId ?? 'unknown');
             }
 
             return $response;
@@ -170,7 +173,7 @@ final class LoginController extends AbstractController
         }
     }
 
-    #[Route('', name: '_log_options', methods: ['OPTIONS'])]
+    #[Route('/login', name: '_log_options', methods: ['OPTIONS'])]
     public function loginOptions(Request $request): Response
     {
         return new Response('', Response::HTTP_OK, [
@@ -179,4 +182,72 @@ final class LoginController extends AbstractController
             'Access-Control-Allow-Headers' => 'Content-Type, X-CSRF-Token',
         ]);
     }
+
+    #[Route('/register', name: '_register', methods: ['POST'])]
+    #[IsCsrfTokenValid('authenticate', tokenKey: 'X-CSRF-Token', methods: ['POST'])]
+    public function register(Request $request): Response
+    {
+        $data = new ParameterBag($this->serializer->normalize(json_decode($request->getContent()), 'json'));
+
+        // Validation des paramètres requis
+        foreach (['username', 'password'] as $key) {
+            if (!$data->has($key)) {
+                $errorDto = ErrorResponseDTO::create("Missing parameter: {$key}");
+
+                return $this->json($errorDto->toArray(), Response::HTTP_BAD_REQUEST);
+            }
+        }
+
+        $username = $data->get('username');
+        $password = $data->get('password');
+
+        // Sécurité supplémentaire sur le login
+        if (strlen($username) < 3) {
+            $errorDto = ErrorResponseDTO::create('Login must be at least 3 characters long');
+            return $this->json($errorDto->toArray(), Response::HTTP_BAD_REQUEST);
+        }
+        if (strlen($username) > 180) {
+            $errorDto = ErrorResponseDTO::create('Login must be less than 180 characters');
+            return $this->json($errorDto->toArray(), Response::HTTP_BAD_REQUEST);
+        }
+
+        // Sécurité supplémentaire sur le mot de passe
+        if (strlen($password) < 6) {
+            $errorDto = ErrorResponseDTO::create('Password must be at least 6 characters long');
+            return $this->json($errorDto->toArray(), Response::HTTP_BAD_REQUEST);
+        }
+
+        try {
+            // Vérifier si l'utilisateur existe déjà
+            if ($this->userRepository->findOneBy(['username' => $username])) {
+                $errorDto = ErrorResponseDTO::create('Username already exists');
+
+                return $this->json($errorDto->toArray(), Response::HTTP_CONFLICT);
+            }
+
+            // Créer un nouvel utilisateur
+            $user = new Utilisateur();
+            $user->setUsername($username);
+            $user->setPassword($this->passwordHasher->hashPassword($user, $password));
+            $user->setRoles(['ROLE_USER']);
+            $user->setStatus(UserStatus::ACTIVE);
+            $user->setLastVisit(new \DateTime());
+
+            // Persister l'utilisateur
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
+
+            // Connexion réussie - le logging sera automatique via l'attribut
+            return $this->json(['message' => 'User registered successfully'], Response::HTTP_CREATED);
+        } catch (ORMException $orm) {
+            // Log l'erreur - le logging sera automatique via l'attribut
+            $errorDto = ErrorResponseDTO::withMessage(
+                'An error occurred during registration',
+                $orm->getMessage()
+            );
+
+            return $this->json($errorDto->toArray(), Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
 }

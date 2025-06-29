@@ -24,5 +24,11 @@ export const useRuleInput = defineStore('rule_input', {
       const urlPattern = /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/[^\s]*)?$/
       return !v || !urlPattern.test(v) ? 'Invalid URL format' : true
     },
+
+    confirmPasswordRule: () => (v: string, password: string) => {
+      if (!v) return 'Confirmation du mot de passe requise'
+      if (v !== password) return 'Les mots de passe ne correspondent pas'
+      return true
+    },
   },
 })

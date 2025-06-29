@@ -2,7 +2,7 @@
     <v-app>
         <v-app-bar dense flat max-height="3em">
             <p class="version">{{ version }}</p>
-            <v-toolbar-title>{{ tilte }}</v-toolbar-title>
+            <v-toolbar-title>{{ title }}</v-toolbar-title>
         </v-app-bar>
         <div class="login">
             <div class="form">
@@ -10,29 +10,64 @@
                     <v-container>
                         <v-row>
                             <v-col>
-                                <v-text-field label="Username" required></v-text-field>
-                            </v-col>
-                        </v-row>
-                        <v-row>
-                            <v-col cols="6">
-                                <v-text-field label="Password" required></v-text-field>
-                            </v-col>
-                            <v-col cols="6">
-                                <v-text-field label="Confirmer le password" required></v-text-field>
-                            </v-col>
-                        </v-row>
-                        <v-row>
-                            <v-col cols="12">
-                                <v-btn variant="text">Crée</v-btn>
+                                <v-text-field 
+                                    label="Username" 
+                                    v-model="username"
+                                    required
+                                    :rules="[ruleInput.loginRule]">
+                                </v-text-field>
                             </v-col>
                         </v-row>
                         <v-row>
                             <v-col>
-                                <v-alert v-if="error" type="error" class="mt-2">{{ error }}</v-alert>
+                                <v-text-field 
+                                    label="Email" 
+                                    v-model="email"
+                                    type="email"
+                                    required
+                                    :rules="[ruleInput.emailRule]">
+                                </v-text-field>
+                            </v-col>
+                        </v-row>
+                        <v-row>
+                            <v-col cols="6">
+                                <v-text-field 
+                                    label="Password" 
+                                    v-model="password"
+                                    type="password"
+                                    required
+                                    :rules="[ruleInput.passwordRule]">
+                                </v-text-field>
+                            </v-col>
+                            <v-col cols="6">
+                                <v-text-field 
+                                    label="Confirmer le password" 
+                                    v-model="confirmPassword"
+                                    type="password"
+                                    required
+                                    :rules="confirmPasswordRules">
+                                </v-text-field>
+                            </v-col>
+                        </v-row>
+                        <v-row>
+                            <v-col cols="12">
+                                <v-btn 
+                                    type="submit" 
+                                    variant="elevated" 
+                                    color="primary"
+                                    :disabled="!valid || auth.isLoading.value"
+                                    block>
+                                    {{ auth.isLoading ? 'Création...' : 'Créer le compte' }}
+                                </v-btn>
+                            </v-col>
+                        </v-row>
+                        <v-row>
+                            <v-col>
+                                <v-alert v-if="auth.error" type="error" class="mt-2">{{ auth.error }}</v-alert>
                             </v-col>
                         </v-row>
                     </v-container>
-                    <input type="hidden" name="_csrf_token" v-model="csrf_token">
+                    <input type="hidden" name="_csrf_token" v-model="csrfToken.token">
                 </v-form>
             </div>
         </div>
@@ -41,47 +76,44 @@
 
 <script setup lang="ts">
 import { useCSRFToken } from '@/stores/useCSRFToken'
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRuleInput } from '@/stores/ruleInput'
+import { useAuth } from '@/composables/useAuth'
+import { ref, onMounted, computed } from 'vue'
 
 const version = ref('0.0.1')
-const tilte = ref('Crée un compte')
-const csrf_token = ref('')
+const title = ref('Créer un compte')
 const valid = ref(false)
-const error = ref('')
-const router = useRouter()
-
-async function newUser() {
-    const body = {
-        username: '',
-        mail: '',
-        password: '',
-    }
-
-    try {
-        const response = await fetch('/exemple.com/api/register', {
-            method: 'POST',
-            credentials: 'include',
-            body: JSON.stringify(body)
-        });
-
-        if (!response.ok) {
-            error.value = await response.json()
-            
-            throw new Error(error.value || 'Erreur de connection');
-        }
-
-        router.push('/login')
-    } catch (err: any) {
-        console.error(err.message)
-    }
-}
-
+const username = ref('')
+const email = ref('')
+const password = ref('')
+const confirmPassword = ref('')
+const ruleInput = useRuleInput()
+const auth = useAuth()
 const csrfToken = useCSRFToken()
 
-onMounted(() => {
-    csrfToken.fetchCSRFToken()
-    csrf_token.value = csrfToken.token
+// Règles de validation personnalisées pour la confirmation de mot de passe
+const confirmPasswordRules = computed(() => [
+    (v: string) => ruleInput.confirmPasswordRule(v, password.value)
+])
+
+async function newUser() {
+    if (!valid.value) {
+        return
+    }
+
+    await auth.registerAndRedirect({
+        username: username.value,
+        email: email.value,
+        password: password.value,
+        csrfToken: csrfToken.token,
+    })
+}
+
+onMounted(async () => {
+    // Rediriger si déjà connecté
+    auth.requireGuest()
+    
+    await csrfToken.fetchCSRFToken()
 })
 </script>
 

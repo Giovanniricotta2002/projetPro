@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\UserStatus;
 use App\Repository\UtilisateurRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -46,16 +47,13 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $mail = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $status = null;
+    #[ORM\Column(type: 'string', enumType: UserStatus::class)]
+    private UserStatus $status = UserStatus::PENDING;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private ?\DateTime $createdAt = null;
-
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTime $updatedAt = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTime $deletedAt = null;
 
     /**
@@ -79,11 +77,15 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToOne(mappedBy: 'cible', cascade: ['persist', 'remove'])]
     private ?Moderations $cible = null;
 
+    #[ORM\Column]
+    private ?\DateTimeImmutable $createdAt = null;
+
     public function __construct()
     {
         $this->dateCreation = new \DateTime();
+        $this->createdAt = new \DateTimeImmutable();
         $this->anonimus = false;
-        $this->createdAt = new \DateTime();
+        $this->status = UserStatus::PENDING;
 
         $this->droits = new ArrayCollection();
         $this->forums = new ArrayCollection();
@@ -191,27 +193,85 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getStatus(): ?string
+    public function getStatus(): UserStatus
     {
         return $this->status;
     }
 
-    public function setStatus(string $status): static
+    public function setStatus(UserStatus $status): static
     {
         $this->status = $status;
 
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTime
+    /**
+     * Vérifie si l'utilisateur peut se connecter selon son statut.
+     */
+    public function canLogin(): bool
     {
-        return $this->createdAt;
+        return $this->status->canLogin();
     }
 
-    public function setCreatedAt(\DateTime $createdAt): static
+    /**
+     * Vérifie si l'utilisateur a accès à l'application.
+     */
+    public function isAccessible(): bool
     {
-        $this->createdAt = $createdAt;
+        return $this->status->isAccessible();
+    }
 
+    /**
+     * Vérifie si le compte nécessite une action de l'utilisateur.
+     */
+    public function requiresUserAction(): bool
+    {
+        return $this->status->requiresUserAction();
+    }
+
+    /**
+     * Active le compte utilisateur.
+     */
+    public function activate(): static
+    {
+        $this->status = UserStatus::ACTIVE;
+        return $this;
+    }
+
+    /**
+     * Désactive le compte utilisateur.
+     */
+    public function deactivate(): static
+    {
+        $this->status = UserStatus::INACTIVE;
+        return $this;
+    }
+
+    /**
+     * Suspend le compte utilisateur.
+     */
+    public function suspend(): static
+    {
+        $this->status = UserStatus::SUSPENDED;
+        return $this;
+    }
+
+    /**
+     * Bannit le compte utilisateur.
+     */
+    public function ban(): static
+    {
+        $this->status = UserStatus::BANNED;
+        return $this;
+    }
+
+    /**
+     * Marque le compte comme supprimé (soft delete).
+     */
+    public function markAsDeleted(): static
+    {
+        $this->status = UserStatus::DELETED;
+        $this->deletedAt = new \DateTime();
         return $this;
     }
 
@@ -358,6 +418,18 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         $this->cible = $cible;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    {
+        $this->createdAt = $createdAt;
 
         return $this;
     }

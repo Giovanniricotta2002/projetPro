@@ -9,10 +9,12 @@
                 <v-form ref="form" v-model="valid" @submit.prevent="fLogin">
                     <v-text-field label="Login" v-model="login" @keydown.enter="fLogin" required name="login" :rules="[rules.loginRule]"></v-text-field>
                     <v-text-field label="Password" v-model="password" required @keydown.enter="fLogin" :type="show1 ? 'text' : 'password'" name="password" :rules="[rules.passwordRule]"></v-text-field>
-                    <v-btn class="mt-2" type="submit" block :disabled="!valid" @click="fLogin">Se connecter</v-btn>
-                    <v-btn class="mt-2" type="submit" block @click="redirect">Cree un compte</v-btn>
-                    <input type="text" name="_csrf_token" v-model="csrfToken.token">
-                    <v-alert v-if="error" type="error" class="mt-2">{{ error }}</v-alert>
+                    <v-btn class="mt-2" type="submit" block :disabled="!valid">
+                        {{ auth.isLoading ? 'Connexion...' : 'Se connecter' }}
+                    </v-btn>
+                    <v-btn class="mt-2" type="button" block @click="redirect">Créer un compte</v-btn>
+                    <input type="hidden" name="_csrf_token" v-model="csrfToken.token">
+                    <v-alert v-if="auth.error" type="error" class="mt-2">{{ auth.error }}</v-alert>
                 </v-form>
             </div>
         </div>
@@ -22,95 +24,68 @@
 <script setup lang="ts">
 import { useRuleInput } from '@/stores/ruleInput'
 import { useCSRFToken } from '@/stores/useCSRFToken'
+import { useAuth } from '@/composables/useAuth'
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { apiEndpoint, corsRequestHeaders } from '../config'
 
 const login = ref('')
 const password = ref('')
-const error = ref('')
 const version = ref('0.0.1')
 const title = ref('Se connecter')
 const csrf_token = ref('')
 const valid = ref(false)
 const show1 = ref(false)
-const router = useRouter()
 
 const rules = useRuleInput()
-
+const auth = useAuth()
 const csrfToken = useCSRFToken()
 
-onMounted(() => {
-    csrfToken.fetchCSRFToken()
+onMounted(async () => {
+    // Rediriger si déjà connecté
+    auth.requireGuest()
+    
+    await csrfToken.fetchCSRFToken()
     csrf_token.value = csrfToken.token
 })
 
 async function fLogin() {
-    const body = {
+    await auth.loginAndRedirect({
         login: login.value,
         password: password.value,
-        'X-CSRF-Token': csrfToken.token,
-    }
-
-    // localStorage.setItem('token', 'true')
-    // router.push('/')
-    
-    console.log(csrf_token.value);
-    
-    try {
-        const url = new URL('/api/login', `${apiEndpoint}`)
-        const response = await fetch(url, {
-            method: 'POST',
-            credentials: 'include',
-            headers: {
-              ...corsRequestHeaders,
-              'X-CSRF-Token': csrfToken.token,
-            },
-            body: JSON.stringify(body)
-        });
-            
-        if (!response.ok) {
-            const error = await response.json()
-            throw new Error(error.message || 'Erreur de connection');
-        }
-                
-        localStorage.setItem('token', csrf_token.value)
-        router.push('/')
-    } catch (err: any) {
-        error.value = err.message
-    }
+        csrfToken: csrfToken.token,
+    })
 }
 
-
 const redirect = () => {
-    router.push('/register')
+    auth.requireGuest('/register')
 }
 
 
 
 const formRef = ref()
 
+// ⬇️ Exposé dans la console navigateur (dev uniquement)
 declare global {
   interface Window {
     login: typeof formRef
   }
 }
-// ⬇️ Exposé dans la console navigateur
-window.login = {
+if (import.meta.env.DEV) {
+
+  window.login = {
     login,
     password,
-    error,
     version,
     title,
     csrf_token,
     valid,
     show1,
-    router,
     rules,
     fLogin,
     redirect,
-    useCSRFToken,
-} as any
+    auth,
+    csrfToken,
+  } as any
+}
 
 </script>
 

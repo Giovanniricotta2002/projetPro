@@ -1,16 +1,37 @@
 // router/index.ts
 
 import { setupLayouts } from 'virtual:generated-layouts'
-// import { routes } from 'vue-router/auto-routes'
 import { createRouter, createWebHistory } from 'vue-router/auto'
+import { authGuard, roleGuard } from './router/guards'
 import HelloWorld from './components/HelloWorld.vue'
 import Login from './views/Login.vue'
 import Register from './views/Register.vue'
 
 const routes = [
-  { path: '/', component: HelloWorld },
-  { path: '/login', name: 'Login', component: Login, meta: { requiresAuth: false} },
-  { path: '/register', name: 'Crée un compte', component: Register, meta: { requiresAuth: false} },
+  { 
+    path: '/', 
+    component: HelloWorld, 
+    meta: { requiresAuth: true } 
+  },
+  { 
+    path: '/login', 
+    name: 'login', 
+    component: Login, 
+    meta: { requiresGuest: true } 
+  },
+  { 
+    path: '/register', 
+    name: 'register', 
+    component: Register, 
+    meta: { requiresGuest: true } 
+  },
+  // Exemple d'utilisation du roleGuard pour une route admin
+  // { 
+  //   path: '/admin', 
+  //   component: AdminDashboard, 
+  //   meta: { requiresAuth: true },
+  //   beforeEnter: roleGuard('admin')
+  // },
 ]
 
 const router = createRouter({
@@ -18,19 +39,8 @@ const router = createRouter({
   routes: setupLayouts(routes),
 })
 
-router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('token')
-  console.log(token, to.meta)
-
-  const requiresAuth = to.meta.requiresAuth !== false // true si undefined ou true, false uniquement si false
-
-  if (requiresAuth && !token) {
-    // Redirect to login if the route requires authentication and no token is present
-    next('/login')
-  } else {
-    next()
-  }
-})
+// Utilisation du guard d'authentification amélioré
+router.beforeEach(authGuard)
 
 // Workaround for https://github.com/vitejs/vite/issues/11804
 router.onError((err, to) => {
