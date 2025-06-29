@@ -11,6 +11,8 @@ use App\Repository\UtilisateurRepository;
 use App\Service\InitSerializerService;
 use App\Service\JWTService;
 use Doctrine\ORM\EntityManagerInterface;
+use Nelmio\ApiDocBundle\Attribute\Model;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
@@ -46,6 +48,41 @@ final class LoginController extends AbstractController
         maxLoginAttempts: 3,
         ipBlockDuration: 60,
         loginBlockDuration: 30
+    )]
+    #[OA\Post(
+        path: '/api/login',
+        operationId: 'authenticateUser',
+        summary: 'Authentifier un utilisateur',
+        description: 'Authentifie un utilisateur avec son login et mot de passe. Inclut une protection contre les attaques par force brute.',
+        security: [['csrfToken' => []]],
+        tags: ['Authentication']
+    )]
+    #[OA\RequestBody(
+        required: true,
+        description: 'Identifiants de connexion utilisateur',
+        content: new OA\JsonContent(
+            type: 'object',
+            required: ['login', 'password'],
+            properties: [
+                new OA\Property(property: 'login', type: 'string', description: 'Nom d\'utilisateur ou adresse email', example: 'john.doe'),
+                new OA\Property(property: 'password', type: 'string', description: 'Mot de passe de l\'utilisateur', format: 'password', example: 'motDePasseSecret123')
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Connexion réussie avec tokens JWT',
+        content: new OA\JsonContent(ref: new Model(type: JWTLoginResponseDTO::class))
+    )]
+    #[OA\Response(
+        response: 401,
+        description: 'Identifiants incorrects',
+        content: new OA\JsonContent(ref: new Model(type: ErrorResponseDTO::class))
+    )]
+    #[OA\Response(
+        response: 429,
+        description: 'Trop de tentatives - Protection anti-brute force',
+        content: new OA\JsonContent(ref: new Model(type: ErrorResponseDTO::class))
     )]
     public function login(Request $request): Response
     {

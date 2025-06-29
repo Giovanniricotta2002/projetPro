@@ -1,15 +1,39 @@
 openapi: 3.0.0
 info:
   title: 'API ProjetPro'
-  description: "API REST pour l'application ProjetPro avec système d'authentification sécurisé.\n\n## Fonctionnalités principales:\n- Authentification avec protection anti-force brute\n- Gestion des tokens CSRF\n- Logging automatique des tentatives de connexion\n- Système de blocage par IP et par login\n\n## Sécurité:\n- Protection CSRF obligatoire\n- Tokens d'authentification\n- Blocage automatique après échecs répétés\n\n## Headers requis:\n- `X-CSRF-Token`: Token CSRF pour les requêtes POST\n- `Content-Type: application/json`\n"
+  description: "API REST pour l'application ProjetPro avec système d'authentification sécurisé.\n\n## Fonctionnalités principales:\n- Authentification avec protection anti-force brute\n- Gestion des tokens CSRF\n- Upload d'images vers Azure Blob Storage\n- Logging automatique des tentatives de connexion\n- Système de blocage par IP et par login\n\n## Sécurité:\n- Protection CSRF obligatoire\n- Tokens d'authentification JWT\n- Blocage automatique après échecs répétés\n\n## Headers requis:\n- `X-CSRF-Token`: Token CSRF pour les requêtes POST\n- `Authorization: Bearer <token>`: Token JWT pour l'authentification\n- `Content-Type: application/json`\n"
+  contact:
+    name: 'Support API'
+    email: support@projetpro.com
   version: 1.0.0
+servers:
+  -
+    url: 'http://localhost:8000'
+    description: 'Serveur de développement'
+  -
+    url: /api
+    description: 'API Production'
 paths:
   /api/csrfToken:
     get:
-      operationId: get__generate
+      tags:
+        - 'CSRF Token'
+      summary: 'Générer un token CSRF'
+      description: "Génère un nouveau token CSRF pour sécuriser les formulaires de l'application"
+      operationId: generateCsrfToken
       responses:
-        default:
-          description: ''
+        '200':
+          description: 'Token CSRF généré avec succès'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CsrfTokenResponseDTO'
+        '500':
+          description: 'Erreur serveur lors de la génération du token'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDTO'
     options:
       operationId: options__generate
       responses:
@@ -17,17 +41,77 @@ paths:
           description: ''
   /api/csrfToken/verify:
     post:
-      operationId: post__verify
+      tags:
+        - 'CSRF Token'
+      summary: 'Vérifier un token CSRF'
+      description: "Vérifie la validité d'un token CSRF fourni par le client"
+      operationId: verifyCsrfToken
+      requestBody:
+        description: 'Token CSRF à vérifier'
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CsrfTokenVerificationRequestDTO'
       responses:
-        default:
-          description: ''
+        '200':
+          description: 'Token CSRF valide'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CsrfTokenVerificationResponseDTO'
+        '400':
+          description: 'Token CSRF manquant ou format invalide'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDTO'
+        '403':
+          description: 'Token CSRF invalide'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDTO'
+        '422':
+          description: 'Erreurs de validation des données'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDTO'
   /api/images/upload-url:
     post:
-      summary: 'Génère une URL présignée pour que le front puisse uploader directement vers Azure.'
-      operationId: post_api_images_upload_url
+      tags:
+        - Images
+      summary: "Générer une URL d'upload Azure"
+      description: 'Génère une URL présignée pour uploader directement une image vers Azure Blob Storage'
+      operationId: generateImageUploadUrl
+      requestBody:
+        description: 'Informations de fichier à uploader'
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - filename
+              properties:
+                filename:
+                  description: 'Nom du fichier avec extension'
+                  type: string
+                  example: photo.jpg
+                expiry:
+                  description: 'Durée de validité en secondes'
+                  type: integer
+                  example: 3600
+              type: object
       responses:
-        default:
-          description: ''
+        '200':
+          description: "URL d'upload générée avec succès"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AzureUploadResponseDTO'
+        '400':
+          description: 'Paramètres invalides ou extension non autorisée'
   /api/images/verify:
     post:
       summary: "Vérifie qu'un upload a bien eu lieu et retourne l'URL publique."
@@ -79,10 +163,53 @@ paths:
           description: ''
   /api/login:
     post:
-      operationId: post_app_login_log
+      tags:
+        - Authentication
+      summary: 'Authentifier un utilisateur'
+      description: 'Authentifie un utilisateur avec son login et mot de passe. Inclut une protection contre les attaques par force brute.'
+      operationId: authenticateUser
+      requestBody:
+        description: 'Identifiants de connexion utilisateur'
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - login
+                - password
+              properties:
+                login:
+                  description: "Nom d'utilisateur ou adresse email"
+                  type: string
+                  example: john.doe
+                password:
+                  description: "Mot de passe de l'utilisateur"
+                  type: string
+                  format: password
+                  example: motDePasseSecret123
+              type: object
       responses:
-        default:
-          description: ''
+        '200':
+          description: 'Connexion réussie avec tokens JWT'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JWTLoginResponseDTO'
+        '401':
+          description: 'Identifiants incorrects'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDTO'
+        '429':
+          description: 'Trop de tentatives - Protection anti-brute force'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDTO'
+      security:
+        -
+          csrfToken: []
     options:
       operationId: options_app_login_log_options
       responses:
@@ -160,10 +287,31 @@ paths:
           description: ''
   /api/tokens/refresh:
     post:
-      operationId: post_app_tokens_refresh
+      tags:
+        - 'JWT Tokens'
+      summary: 'Rafraîchir un token JWT'
+      description: "Génère un nouveau token d'accès à partir d'un refresh token valide"
+      operationId: refreshToken
+      requestBody:
+        description: 'Refresh token à utiliser'
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequestDTO'
       responses:
-        default:
-          description: ''
+        '200':
+          description: 'Token rafraîchi avec succès'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefreshResponseDTO'
+        '400':
+          description: 'Refresh token invalide ou expiré'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDTO'
   /api/tokens/validate:
     post:
       operationId: post_app_tokens_validate
@@ -177,7 +325,204 @@ paths:
         default:
           description: ''
 components:
+  schemas:
+    CsrfTokenResponseDTO:
+      title: 'Réponse de génération de token CSRF'
+      description: "Structure de la réponse lors de la génération d'un token CSRF"
+      required:
+        - csrfToken
+      properties:
+        csrfToken:
+          description: 'Le token CSRF généré'
+          type: string
+          example: abc123def456ghi789
+      type: object
+    ErrorResponseDTO:
+      required:
+        - error
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+          default: null
+          nullable: true
+        code:
+          type: integer
+          default: null
+          nullable: true
+        details:
+          type: array
+          items: {  }
+          default: null
+          nullable: true
+      type: object
+    CsrfTokenVerificationRequestDTO:
+      required:
+        - csrfToken
+      properties:
+        csrfToken:
+          type: string
+          maxLength: 128
+          minLength: 16
+          pattern: '[a-zA-Z0-9_-]+'
+      type: object
+    CsrfTokenVerificationResponseDTO:
+      required:
+        - valid
+        - message
+      properties:
+        valid:
+          type: boolean
+        message:
+          type: string
+      type: object
+    AzureUploadResponseDTO:
+      title: "Réponse d'upload Azure"
+      description: 'Informations pour uploader directement vers Azure Blob Storage'
+      required:
+        - upload_url
+        - blob_name
+        - expires_at
+        - headers
+        - expired
+        - timeUntilExpiry
+      properties:
+        upload_url:
+          description: "URL présignée pour l'upload"
+          type: string
+          example: 'https://storage.blob.core.windows.net/container/blob?sig=...'
+        blob_name:
+          description: 'Nom du blob dans Azure'
+          type: string
+          example: images/uuid-photo.jpg
+        expires_at:
+          description: "Date d'expiration de l'URL"
+          type: string
+          format: date-time
+          example: '2025-06-29T15:30:00Z'
+        headers:
+          description: "Headers requis pour l'upload"
+          type: object
+          example:
+            x-ms-blob-type: BlockBlob
+            Content-Type: image/jpeg
+        expired:
+          title: "Vérifie si l'URL d'upload est encore valide."
+          type: boolean
+        timeUntilExpiry:
+          title: 'Retourne le temps restant avant expiration en secondes.'
+          type: integer
+      type: object
+    JWTLoginResponseDTO:
+      required:
+        - success
+        - message
+        - user
+        - tokens
+      properties:
+        success:
+          title: 'Crée un DTO de succès avec tokens JWT.'
+          type: boolean
+        message:
+          type: string
+        user:
+          $ref: '#/components/schemas/LoginUserDTO'
+        tokens:
+          type: array
+          items: {  }
+      type: object
+    TokenRefreshRequestDTO:
+      required:
+        - refreshToken
+        - validFormat
+      properties:
+        refreshToken:
+          type: string
+          maxLength: 2048
+          minLength: 50
+        validFormat:
+          type: boolean
+      type: object
+    TokenRefreshResponseDTO:
+      required:
+        - success
+        - message
+        - tokens
+      properties:
+        success:
+          title: 'Crée une réponse de succès pour le refresh.'
+          type: boolean
+        message:
+          type: string
+        tokens:
+          $ref: '#/components/schemas/JWTTokensDTO'
+      type: object
+    LoginUserDTO:
+      title: 'Informations utilisateur'
+      description: "Données utilisateur dans les réponses d'authentification"
+      required:
+        - id
+        - username
+        - roles
+      properties:
+        id:
+          description: "Identifiant unique de l'utilisateur"
+          type: integer
+          example: 1
+        username:
+          description: "Nom d'utilisateur"
+          type: string
+          example: john.doe
+        roles:
+          description: "Liste des rôles de l'utilisateur"
+          type: array
+          items:
+            type: string
+          example:
+            - ROLE_USER
+        last_visit:
+          description: 'Date et heure de la dernière visite'
+          type: string
+          format: date-time
+          default: null
+          example: '2025-06-29 14:30:00'
+          nullable: true
+      type: object
+    JWTTokensDTO:
+      required:
+        - accessToken
+        - refreshToken
+        - tokenType
+        - expiresIn
+        - valid
+        - authorizationHeader
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        tokenType:
+          type: string
+        expiresIn:
+          type: integer
+        refreshExpiresIn:
+          type: integer
+          default: null
+          nullable: true
+        valid:
+          title: 'Valide la structure des tokens.'
+          type: boolean
+        authorizationHeader:
+          title: "Obtient uniquement le token d'accès pour les headers Authorization."
+          type: string
+      type: object
   securitySchemes:
+    bearerAuth:
+      type: http
+      description: "Token JWT d'authentification"
+      bearerFormat: JWT
+      scheme: bearer
     csrfToken:
       type: apiKey
       description: 'Token CSRF pour la protection contre les attaques CSRF'
@@ -185,5 +530,20 @@ components:
       in: header
 security:
   -
+    bearerAuth: []
+  -
     csrfToken: []
+tags:
+  -
+    name: Authentication
+    description: "Gestion de l'authentification utilisateur"
+  -
+    name: 'CSRF Token'
+    description: 'Gestion des tokens CSRF'
+  -
+    name: 'JWT Tokens'
+    description: 'Gestion des tokens JWT (refresh, validation, révocation)'
+  -
+    name: Images
+    description: 'Gestion des images via Azure Blob Storage'
 

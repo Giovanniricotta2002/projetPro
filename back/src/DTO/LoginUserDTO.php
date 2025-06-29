@@ -2,9 +2,17 @@
 
 namespace App\DTO;
 
+use OpenApi\Attributes as OA;
+
 /**
  * DTO pour les informations utilisateur dans la réponse de connexion.
  */
+#[OA\Schema(
+    title: 'Informations utilisateur',
+    description: 'Données utilisateur dans les réponses d\'authentification',
+    type: 'object',
+    required: ['id', 'username', 'roles']
+)]
 final readonly class LoginUserDTO
 {
     /**
@@ -16,9 +24,29 @@ final readonly class LoginUserDTO
      * @param string|null $lastVisit Dernière visite formatée
      */
     public function __construct(
+        #[OA\Property(property: 'id', type: 'integer', description: 'Identifiant unique de l\'utilisateur', example: 1)]
         public int $id,
+        
+        #[OA\Property(property: 'username', type: 'string', description: 'Nom d\'utilisateur', example: 'john.doe')]
         public string $username,
+        
+        #[OA\Property(
+            property: 'roles',
+            type: 'array',
+            items: new OA\Items(type: 'string'),
+            description: 'Liste des rôles de l\'utilisateur',
+            example: ['ROLE_USER']
+        )]
         public array $roles,
+        
+        #[OA\Property(
+            property: 'last_visit',
+            type: 'string',
+            format: 'date-time',
+            nullable: true,
+            description: 'Date et heure de la dernière visite',
+            example: '2025-06-29 14:30:00'
+        )]
         public ?string $lastVisit = null,
     ) {
     }

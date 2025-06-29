@@ -2,7 +2,10 @@
 
 namespace App\Controller;
 
+use App\DTO\AzureUploadResponseDTO;
 use App\Service\AzureBlobImageService;
+use Nelmio\ApiDocBundle\Attribute\Model;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,6 +28,34 @@ class ImageController extends AbstractController
      * Génère une URL présignée pour que le front puisse uploader directement vers Azure.
      */
     #[Route('/upload-url', name: 'upload_url', methods: ['POST'])]
+    #[OA\Post(
+        path: '/api/images/upload-url',
+        operationId: 'generateImageUploadUrl',
+        summary: 'Générer une URL d\'upload Azure',
+        description: 'Génère une URL présignée pour uploader directement une image vers Azure Blob Storage',
+        tags: ['Images']
+    )]
+    #[OA\RequestBody(
+        required: true,
+        description: 'Informations de fichier à uploader',
+        content: new OA\JsonContent(
+            type: 'object',
+            required: ['filename'],
+            properties: [
+                new OA\Property(property: 'filename', type: 'string', description: 'Nom du fichier avec extension', example: 'photo.jpg'),
+                new OA\Property(property: 'expiry', type: 'integer', description: 'Durée de validité en secondes', example: 3600)
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'URL d\'upload générée avec succès',
+        content: new OA\JsonContent(ref: new Model(type: AzureUploadResponseDTO::class))
+    )]
+    #[OA\Response(
+        response: 400,
+        description: 'Paramètres invalides ou extension non autorisée'
+    )]
     public function generateUploadUrl(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);

@@ -12,6 +12,8 @@ use App\DTO\TokenValidationResponseDTO;
 use App\Repository\UtilisateurRepository;
 use App\Service\InitSerializerService;
 use App\Service\JWTService;
+use Nelmio\ApiDocBundle\Attribute\Model;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
@@ -33,6 +35,28 @@ final class TokenController extends AbstractController
     }
 
     #[Route('/refresh', name: '_refresh', methods: ['POST'])]
+    #[OA\Post(
+        path: '/api/tokens/refresh',
+        operationId: 'refreshToken',
+        summary: 'Rafraîchir un token JWT',
+        description: 'Génère un nouveau token d\'accès à partir d\'un refresh token valide',
+        tags: ['JWT Tokens']
+    )]
+    #[OA\RequestBody(
+        required: true,
+        description: 'Refresh token à utiliser',
+        content: new OA\JsonContent(ref: new Model(type: TokenRefreshRequestDTO::class))
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Token rafraîchi avec succès',
+        content: new OA\JsonContent(ref: new Model(type: TokenRefreshResponseDTO::class))
+    )]
+    #[OA\Response(
+        response: 400,
+        description: 'Refresh token invalide ou expiré',
+        content: new OA\JsonContent(ref: new Model(type: ErrorResponseDTO::class))
+    )]
     public function refresh(Request $request): Response
     {
         $data = new ParameterBag($this->serializer->normalize(json_decode($request->getContent()), 'json'));
