@@ -10,12 +10,15 @@ use App\DTO\TokenRefreshResponseDTO;
 use App\DTO\TokenValidationRequestDTO;
 use App\DTO\TokenValidationResponseDTO;
 use App\Repository\UtilisateurRepository;
+use App\Service\HttpOnlyCookieService;
 use App\Service\InitSerializerService;
+use App\Service\JWTSecurityService;
 use App\Service\JWTService;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
+use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -29,6 +32,7 @@ final class TokenController extends AbstractController
     public function __construct(
         private readonly JWTService $jwtService,
         private readonly UtilisateurRepository $userRepository,
+        private readonly HttpOnlyCookieService $cookieService,
     ) {
         $init = new InitSerializerService();
         $this->serializer = $init->serializer;
@@ -59,26 +63,17 @@ final class TokenController extends AbstractController
     )]
     public function refresh(Request $request): Response
     {
-        $data = new ParameterBag($this->serializer->normalize(json_decode($request->getContent()), 'json'));
-
-        try {
-            // Valider et créer le DTO de requête depuis le ParameterBag
-            $requestDto = TokenRefreshRequestDTO::fromParameterBag($data);
-
-            if (!$requestDto->hasValidFormat()) {
-                $errorDto = ErrorResponseDTO::create('Invalid refresh token format');
-
-                return $this->json($errorDto->toArray(), Response::HTTP_BAD_REQUEST);
-            }
-        } catch (\InvalidArgumentException $e) {
-            $errorDto = ErrorResponseDTO::create($e->getMessage());
-
+        // Extraire le refresh token depuis les cookies ou le body
+        $refreshToken = $this->cookieService->extractRefreshToken($request);
+        
+        if (!$refreshToken) {
+            $errorDto = ErrorResponseDTO::create('Missing refresh token');
             return $this->json($errorDto->toArray(), Response::HTTP_BAD_REQUEST);
         }
 
         try {
             // Valider le refresh token
-            $tokenPayload = $this->jwtService->validateToken($requestDto->refreshToken);
+            $tokenPayload = $this->jwtService->validateToken($refreshToken);
 
             // Vérifier que c'est bien un refresh token
             if (!$this->jwtService->isTokenType($tokenPayload, 'refresh')) {
@@ -109,7 +104,12 @@ final class TokenController extends AbstractController
             $tokensDto = JWTTokensDTO::forRefreshResponse($newTokens);
             $responseDto = TokenRefreshResponseDTO::success($tokensDto);
 
-            return $this->json($responseDto->toArray());
+            $response = $this->json($responseDto->toArray());
+
+            // Mettre à jour les cookies httpOnly avec les nouveaux tokens
+            $this->cookieService->setJwtCookies($response, $request, $newTokens);
+
+            return $response;
         } catch (\InvalidArgumentException $e) {
             $errorDto = ErrorResponseDTO::withMessage(
                 'Invalid refresh token',
@@ -166,11 +166,11 @@ final class TokenController extends AbstractController
     #[Route('/info', name: '_info', methods: ['GET'])]
     public function info(Request $request): Response
     {
-        $authHeader = $request->headers->get('Authorization');
-        $token = $this->jwtService->extractTokenFromHeader($authHeader);
+        // Extraire le token depuis les cookies ou les headers
+        $token = $this->cookieService->extractAccessToken($request);
 
         if (!$token) {
-            $errorDto = ErrorResponseDTO::create('Missing or invalid Authorization header');
+            $errorDto = ErrorResponseDTO::create('Missing access token');
 
             return $this->json($errorDto->toArray(), Response::HTTP_UNAUTHORIZED);
         }
@@ -194,4 +194,33 @@ final class TokenController extends AbstractController
             return $this->json($errorDto->toArray(), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+    #[Route('/logout', name: '_logout', methods: ['POST'])]
+    #[OA\Post(
+        path: '/api/tokens/logout',
+        operationId: 'logoutUser',
+        summary: 'Déconnecter un utilisateur',
+        description: 'Supprime les cookies de session et invalide les tokens',
+        tags: ['JWT Tokens']
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Déconnexion réussie',
+        content: new OA\JsonContent(
+            type: 'object',
+            properties: [
+                new OA\Property(property: 'message', type: 'string', example: 'Logout successful')
+            ]
+        )
+    )]
+    public function logout(Request $request): Response
+    {
+        $response = $this->json(['message' => 'Logout successful']);
+
+        // Supprimer les cookies httpOnly
+        $this->cookieService->clearJwtCookies($response, $request);
+
+        return $response;
+    }
+
 }

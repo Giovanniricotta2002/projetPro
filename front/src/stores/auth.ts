@@ -24,15 +24,16 @@ export const useAuthStore = defineStore('auth', () => {
     }
   })
 
-  // Utilitaire pour les requêtes API
+  // Utilitaire pour les requêtes API avec refresh automatique
   async function apiRequest<T>(
     endpoint: string, 
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
     try {
       const url = new URL(endpoint, apiEndpoint)
-      const response = await fetch(url, {
-        credentials: 'include',
+      
+      let response = await fetch(url, {
+        credentials: 'include', // Important pour les cookies HTTPOnly
         headers: {
           ...corsRequestHeaders,
           'Content-Type': 'application/json',
@@ -40,6 +41,28 @@ export const useAuthStore = defineStore('auth', () => {
         },
         ...options,
       })
+
+      // Si 401 et ce n'est pas déjà une requête de refresh, essayer le refresh
+      if (response.status === 401 && !endpoint.includes('/refresh') && !endpoint.includes('/login')) {
+        const refreshResult = await refreshToken()
+        
+        if (refreshResult.success) {
+          // Retry la requête originale après refresh
+          response = await fetch(url, {
+            credentials: 'include',
+            headers: {
+              ...corsRequestHeaders,
+              'Content-Type': 'application/json',
+              ...options.headers,
+            },
+            ...options,
+          })
+        } else {
+          // Refresh failed, déconnecter
+          await forceLogout()
+          throw new Error('Session expirée')
+        }
+      }
 
       const data = await response.json()
 
@@ -57,6 +80,66 @@ export const useAuthStore = defineStore('auth', () => {
         success: false,
         message: err.message || 'Une erreur est survenue',
       }
+    }
+  }
+
+  // Variables pour la gestion du refresh automatique
+  let authCheckInterval: ReturnType<typeof setInterval> | null = null
+
+  // Fonction pour refresh automatique du token
+  async function refreshToken(): Promise<ApiResponse<User>> {
+    try {
+      const response = await fetch(new URL('/api/refresh', apiEndpoint), {
+        method: 'POST',
+        credentials: 'include', // Les cookies HTTPOnly seront envoyés automatiquement
+        headers: {
+          ...corsRequestHeaders,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.user) {
+        user.value = data.user
+        isInitialized.value = true
+        return { success: true, data: data.user }
+      } else {
+        return { success: false, message: data.message || 'Erreur de refresh' }
+      }
+    } catch (err: any) {
+      return { success: false, message: err.message || 'Erreur de refresh' }
+    }
+  }
+
+  // Déconnexion forcée (sans appel API)
+  function forceLogout() {
+    user.value = null
+    error.value = ''
+    isInitialized.value = true
+    isLoading.value = false
+    stopAuthCheck()
+  }
+
+  // Vérification périodique de l'authentification
+  function startAuthCheck() {
+    if (authCheckInterval) return
+
+    // Vérifier toutes les 5 minutes
+    authCheckInterval = setInterval(async () => {
+      if (isAuthenticated.value && isInitialized.value) {
+        const result = await refreshToken()
+        if (!result.success) {
+          forceLogout()
+        }
+      }
+    }, 5 * 60 * 1000) // 5 minutes
+  }
+
+  function stopAuthCheck() {
+    if (authCheckInterval) {
+      clearInterval(authCheckInterval)
+      authCheckInterval = null
     }
   }
 
@@ -82,6 +165,7 @@ export const useAuthStore = defineStore('auth', () => {
     if (result.success && result.data) {
       user.value = result.data
       isInitialized.value = true
+      startAuthCheck() // Démarrer la vérification périodique
     } else {
       error.value = result.message || 'Erreur de connexion'
     }
@@ -94,6 +178,7 @@ export const useAuthStore = defineStore('auth', () => {
     if (isLoading.value) return
 
     isLoading.value = true
+    stopAuthCheck() // Arrêter la vérification périodique
     
     // Appel API de déconnexion (optionnel selon votre backend)
     await apiRequest('/api/logout', {
@@ -112,15 +197,27 @@ export const useAuthStore = defineStore('auth', () => {
 
     isLoading.value = true
     
-    const result = await apiRequest<User>('/api/me')
+    // Essayer d'abord /api/me
+    let result = await apiRequest<User>('/api/me')
+    
+    if (!result.success) {
+      // Si échec, essayer le refresh
+      const refreshResult = await refreshToken()
+      if (refreshResult.success) {
+        result = refreshResult
+      }
+    }
 
     if (result.success && result.data) {
       user.value = result.data
+      isInitialized.value = true
+      startAuthCheck() // Démarrer la vérification périodique
     } else {
       user.value = null
+      isInitialized.value = true
+      stopAuthCheck()
     }
 
-    isInitialized.value = true
     isLoading.value = false
     
     return isAuthenticated.value
@@ -211,6 +308,7 @@ export const useAuthStore = defineStore('auth', () => {
     isLoading.value = false
     error.value = ''
     isInitialized.value = false
+    stopAuthCheck() // Arrêter la vérification périodique
   }
 
   return {
@@ -235,5 +333,11 @@ export const useAuthStore = defineStore('auth', () => {
     changePassword,
     clearError,
     $reset,
+    
+    // Nouvelles fonctions pour cookies HTTPOnly et refresh
+    refreshToken,
+    startAuthCheck,
+    stopAuthCheck,
+    forceLogout,
   }
 })

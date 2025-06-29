@@ -90,5 +90,11 @@ export function useAuth() {
     // Guards
     requireAuth,
     requireGuest,
+    
+    // Nouvelles fonctions pour cookies HTTPOnly et refresh
+    refreshToken: authStore.refreshToken,
+    startAuthCheck: authStore.startAuthCheck,
+    stopAuthCheck: authStore.stopAuthCheck,
+    forceLogout: authStore.forceLogout,
   }
 }

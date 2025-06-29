@@ -10,6 +10,7 @@ use App\DTO\LoginUserDTO;
 use App\Entity\Utilisateur;
 use App\Enum\UserStatus;
 use App\Repository\UtilisateurRepository;
+use App\Service\HttpOnlyCookieService;
 use App\Service\InitSerializerService;
 use App\Service\JWTService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -18,6 +19,7 @@ use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
+use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -35,6 +37,7 @@ final class LoginController extends AbstractController
         private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly EntityManagerInterface $entityManager,
         private readonly JWTService $jwtService,
+        private readonly HttpOnlyCookieService $cookieService,
     ) {
         $init = new InitSerializerService();
         $this->serializer = $init->serializer;
@@ -154,6 +157,9 @@ final class LoginController extends AbstractController
             );
 
             $response = $this->json($jwtResponse->toArray(), Response::HTTP_OK);
+
+            // Définir les cookies httpOnly pour les tokens JWT
+            $this->cookieService->setJwtCookies($response, $request, $tokens);
 
             // Ajouter les headers de debugging JWT
             $tokenInfo = $this->jwtService->getTokenInfo($tokens['access_token']);
