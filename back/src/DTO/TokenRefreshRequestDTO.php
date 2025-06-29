@@ -2,28 +2,12 @@
 
 namespace App\DTO;
 
-use OpenApi\Attributes as OA;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 use Symfony\Component\Validator\Constraints as Assert;
 
-#[OA\Schema(
-    schema: 'TokenRefreshRequestDTO',
-    title: 'Requête de rafraîchissement de token JWT',
-    description: 'DTO pour rafraîchir un token JWT avec un refresh token',
-    type: 'object',
-    required: ['refreshToken']
-)]
 final class TokenRefreshRequestDTO
 {
     public function __construct(
-        #[OA\Property(
-            property: 'refreshToken',
-            description: 'Le refresh token JWT à utiliser pour générer un nouveau token d\'accès',
-            type: 'string',
-            minLength: 50,
-            maxLength: 2048,
-            example: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJtdXNjdXNjb3BlLWFwaS...'
-        )]
         #[Assert\NotBlank(message: 'Refresh token is required')]
         #[Assert\Type(type: 'string', message: 'Refresh token must be a string')]
         #[Assert\Length(

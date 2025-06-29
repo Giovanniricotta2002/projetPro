@@ -2,18 +2,9 @@
 
 namespace App\DTO;
 
-use OpenApi\Attributes as OA;
-
 /**
  * DTO pour la réponse JWT d'authentification réussie.
  */
-#[OA\Schema(
-    schema: 'JWTLoginResponse',
-    title: 'Réponse de connexion JWT',
-    description: 'Structure de la réponse lors d\'une authentification JWT réussie',
-    type: 'object',
-    required: ['success', 'message', 'user', 'tokens']
-)]
 final readonly class JWTLoginResponseDTO
 {
     /**
@@ -25,31 +16,9 @@ final readonly class JWTLoginResponseDTO
      * @param array        $tokens  Tokens JWT (access + refresh)
      */
     public function __construct(
-        #[OA\Property(
-            property: 'success',
-            description: 'Indicateur de succès de la connexion',
-            type: 'boolean',
-            example: true
-        )]
         public readonly bool $success,
-        #[OA\Property(
-            property: 'message',
-            description: 'Message de confirmation',
-            type: 'string',
-            example: 'Login successful'
-        )]
         public readonly string $message,
-        #[OA\Property(
-            property: 'user',
-            description: 'Informations de l\'utilisateur connecté',
-            ref: '#/components/schemas/LoginUser'
-        )]
         public readonly LoginUserDTO $user,
-        #[OA\Property(
-            property: 'tokens',
-            description: 'Tokens JWT d\'authentification',
-            ref: '#/components/schemas/JWTTokens'
-        )]
         public readonly JWTTokensDTO $tokens,
     ) {
     }

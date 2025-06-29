@@ -7,90 +7,17 @@ use OpenApi\Attributes as OA;
 /**
  * DTO pour la réponse de validation de token JWT.
  */
-#[OA\Schema(
-    schema: 'TokenValidationResponse',
-    title: 'Réponse de validation de token',
-    description: 'Structure de la réponse lors de la validation d\'un token JWT',
-    type: 'object',
-    required: ['valid']
-)]
 final readonly class TokenValidationResponseDTO
 {
     public function __construct(
-        #[OA\Property(
-            property: 'valid',
-            type: 'boolean',
-            description: 'Indique si le token est valide',
-            example: true
-        )]
         public readonly bool $valid,
-        #[OA\Property(
-            property: 'token_id',
-            type: 'string',
-            description: 'Identifiant unique du token JWT',
-            nullable: true,
-            example: 'jwt_64f5b2c1a8e9f'
-        )]
         public readonly ?string $tokenId = null,
-        #[OA\Property(
-            property: 'user_id',
-            type: 'string',
-            description: 'Identifiant de l\'utilisateur',
-            nullable: true,
-            example: '123'
-        )]
         public readonly ?string $userId = null,
-        #[OA\Property(
-            property: 'username',
-            type: 'string',
-            description: 'Nom d\'utilisateur',
-            nullable: true,
-            example: 'john.doe'
-        )]
         public readonly ?string $username = null,
-        #[OA\Property(
-            property: 'token_type',
-            type: 'string',
-            description: 'Type de token (access ou refresh)',
-            nullable: true,
-            enum: ['access', 'refresh'],
-            example: 'access'
-        )]
         public readonly ?string $tokenType = null,
-        #[OA\Property(
-            property: 'issued_at',
-            type: 'string',
-            description: 'Date et heure d\'émission du token',
-            nullable: true,
-            format: 'date-time',
-            example: '2025-06-29 10:30:00'
-        )]
         public readonly ?string $issuedAt = null,
-        #[OA\Property(
-            property: 'expires_at',
-            type: 'string',
-            description: 'Date et heure d\'expiration du token',
-            nullable: true,
-            format: 'date-time',
-            example: '2025-06-29 11:30:00'
-        )]
         public readonly ?string $expiresAt = null,
-        #[OA\Property(
-            property: 'roles',
-            type: 'array',
-            description: 'Rôles de l\'utilisateur',
-            items: new OA\Items(type: 'string'),
-            nullable: true,
-            example: ['ROLE_USER', 'ROLE_ADMIN']
-        )]
         public readonly ?array $roles = null,
-        #[OA\Property(
-            property: 'error',
-            type: 'string',
-            description: 'Message d\'erreur si le token est invalide',
-            nullable: true,
-            example: 'Token expired'
-        )]
         public readonly ?string $error = null,
     ) {
     }

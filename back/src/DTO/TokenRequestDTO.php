@@ -2,30 +2,14 @@
 
 namespace App\DTO;
 
-use OpenApi\Attributes as OA;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * DTO pour les requêtes de token.
  */
-#[OA\Schema(
-    schema: 'TokenRequest',
-    title: 'Requête de token',
-    description: 'Structure de la requête pour obtenir un token JWT',
-    type: 'object',
-    required: ['refresh_token']
-)]
 final readonly class TokenRequestDTO
 {
     public function __construct(
-        #[OA\Property(
-            property: 'refresh_token',
-            type: 'string',
-            description: 'Le refresh token JWT valide à utiliser pour générer de nouveaux tokens',
-            minLength: 50,
-            maxLength: 2048,
-            example: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJtdXNjdXNjb3BlLWFwaSJ9.signature'
-        )]
         #[Assert\NotBlank(message: 'Refresh token is required')]
         #[Assert\Length(
             min: 50,

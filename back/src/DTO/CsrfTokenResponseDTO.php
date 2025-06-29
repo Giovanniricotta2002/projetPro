@@ -2,18 +2,9 @@
 
 namespace App\DTO;
 
-use OpenApi\Attributes as OA;
-
 /**
  * DTO pour la réponse de génération de token CSRF.
  */
-#[OA\Schema(
-    schema: 'CsrfTokenResponse',
-    title: 'Réponse de génération de token CSRF',
-    description: 'Structure de la réponse lors de la génération d\'un token CSRF',
-    type: 'object',
-    required: ['csrfToken']
-)]
 final readonly class CsrfTokenResponseDTO
 {
     /**
@@ -22,12 +13,6 @@ final readonly class CsrfTokenResponseDTO
      * @param string $csrfToken Le token CSRF généré
      */
     public function __construct(
-        #[OA\Property(
-            property: 'csrfToken',
-            description: 'Le token CSRF généré',
-            type: 'string',
-            example: 'abc123def456ghi789'
-        )]
         public readonly string $csrfToken,
     ) {
     }

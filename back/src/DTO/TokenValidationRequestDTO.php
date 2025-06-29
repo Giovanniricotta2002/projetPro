@@ -2,28 +2,12 @@
 
 namespace App\DTO;
 
-use OpenApi\Attributes as OA;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 use Symfony\Component\Validator\Constraints as Assert;
 
-#[OA\Schema(
-    schema: 'TokenValidationRequestDTO',
-    title: 'Requête de validation de token JWT',
-    description: 'DTO pour valider un token JWT',
-    type: 'object',
-    required: ['token']
-)]
 final class TokenValidationRequestDTO
 {
     public function __construct(
-        #[OA\Property(
-            property: 'token',
-            description: 'Le token JWT à valider',
-            type: 'string',
-            minLength: 50,
-            maxLength: 2048,
-            example: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJtdXNjdXNjb3BlLWFwaS...'
-        )]
         #[Assert\NotBlank(message: 'Token is required')]
         #[Assert\Type(type: 'string', message: 'Token must be a string')]
         #[Assert\Length(
@@ -46,7 +30,7 @@ final class TokenValidationRequestDTO
     public static function fromParameterBag(ParameterBag $data): self
     {
         return new self(
-            token: $data->get('token', '')
+            token: $data->get('token')
         );
     }
 

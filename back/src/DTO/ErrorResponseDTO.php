@@ -2,21 +2,12 @@
 
 namespace App\DTO;
 
-use OpenApi\Attributes as OA;
-
 /**
  * DTO pour les réponses d'erreur standardisées de l'API.
  *
  * Utilisé pour documenter et structurer les réponses d'erreur
  * de façon cohérente à travers toute l'application.
  */
-#[OA\Schema(
-    schema: 'ErrorResponse',
-    title: 'Réponse d\'erreur',
-    description: 'Structure standardisée pour les réponses d\'erreur de l\'API',
-    type: 'object',
-    required: ['error']
-)]
 final readonly class ErrorResponseDTO
 {
     /**
@@ -28,35 +19,9 @@ final readonly class ErrorResponseDTO
      * @param array|null  $details Détails supplémentaires sur l'erreur (optionnel)
      */
     public function __construct(
-        #[OA\Property(
-            property: 'error',
-            description: 'Message d\'erreur principal',
-            type: 'string',
-            example: 'Invalid credentials'
-        )]
         public readonly string $error,
-        #[OA\Property(
-            property: 'message',
-            description: 'Message d\'erreur détaillé',
-            type: 'string',
-            nullable: true,
-            example: 'The provided username or password is incorrect'
-        )]
         public readonly ?string $message = null,
-        #[OA\Property(
-            property: 'code',
-            description: 'Code d\'erreur spécifique à l\'application',
-            type: 'integer',
-            nullable: true,
-            example: 4001
-        )]
         public readonly ?int $code = null,
-        #[OA\Property(
-            property: 'details',
-            description: 'Détails supplémentaires sur l\'erreur',
-            type: 'object',
-            nullable: true
-        )]
         public readonly ?array $details = null,
     ) {
     }

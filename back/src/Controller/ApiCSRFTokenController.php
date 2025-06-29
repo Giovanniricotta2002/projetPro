@@ -6,9 +6,7 @@ use App\DTO\CsrfTokenResponseDTO;
 use App\DTO\CsrfTokenVerificationRequestDTO;
 use App\DTO\CsrfTokenVerificationResponseDTO;
 use App\DTO\ErrorResponseDTO;
-use App\Services\InitSerializerService;
-use Nelmio\ApiDocBundle\Attribute\Model;
-use OpenApi\Attributes as OA;
+use App\Service\InitSerializerService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,7 +18,6 @@ use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/api/csrfToken')]
-#[OA\Tag(name: 'CSRF Token', description: 'Gestion des tokens CSRF pour la sécurité des formulaires')]
 final class ApiCSRFTokenController extends AbstractController
 {
     private Serializer $serializer;
@@ -33,23 +30,6 @@ final class ApiCSRFTokenController extends AbstractController
     }
 
     #[Route('', name: '_generate', methods: ['GET', 'OPTIONS'])]
-    #[OA\Get(
-        path: '/api/csrfToken',
-        operationId: 'generateCsrfToken',
-        summary: 'Générer un token CSRF',
-        description: 'Génère un nouveau token CSRF pour sécuriser les formulaires de l\'application',
-        tags: ['CSRF Token']
-    )]
-    #[OA\Response(
-        response: 200,
-        description: 'Token CSRF généré avec succès',
-        content: new OA\JsonContent(ref: new Model(type: CsrfTokenResponseDTO::class))
-    )]
-    #[OA\Response(
-        response: 500,
-        description: 'Erreur serveur lors de la génération du token',
-        content: new OA\JsonContent(ref: new Model(type: ErrorResponseDTO::class))
-    )]
     public function generateToken(CsrfTokenManagerInterface $csrfTokenManager): Response
     {
         $token = $csrfTokenManager->getToken('authenticate')->getValue();
@@ -60,38 +40,6 @@ final class ApiCSRFTokenController extends AbstractController
     }
 
     #[Route('/verify', name: '_verify', methods: ['POST'])]
-    #[OA\Post(
-        path: '/api/csrfToken/verify',
-        operationId: 'verifyCsrfToken',
-        summary: 'Vérifier un token CSRF',
-        description: 'Vérifie la validité d\'un token CSRF fourni par le client',
-        tags: ['CSRF Token']
-    )]
-    #[OA\RequestBody(
-        required: true,
-        description: 'Token CSRF à vérifier',
-        content: new OA\JsonContent(ref: new Model(type: CsrfTokenVerificationRequestDTO::class))
-    )]
-    #[OA\Response(
-        response: 200,
-        description: 'Token CSRF valide',
-        content: new OA\JsonContent(ref: new Model(type: CsrfTokenVerificationResponseDTO::class))
-    )]
-    #[OA\Response(
-        response: 400,
-        description: 'Token CSRF manquant ou format invalide',
-        content: new OA\JsonContent(ref: new Model(type: ErrorResponseDTO::class))
-    )]
-    #[OA\Response(
-        response: 403,
-        description: 'Token CSRF invalide',
-        content: new OA\JsonContent(ref: new Model(type: ErrorResponseDTO::class))
-    )]
-    #[OA\Response(
-        response: 422,
-        description: 'Erreurs de validation des données',
-        content: new OA\JsonContent(ref: new Model(type: ErrorResponseDTO::class))
-    )]
     public function verifyToken(Request $request, CsrfTokenManagerInterface $csrfTokenManager): Response
     {
         $data = new ParameterBag($this->serializer->normalize(json_decode($request->getContent()), 'json'));

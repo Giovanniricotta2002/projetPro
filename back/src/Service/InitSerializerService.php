@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Service;
 
 use Symfony\Component\Serializer\Encoder\CsvEncoder;
 use Symfony\Component\Serializer\Encoder\JsonEncode;

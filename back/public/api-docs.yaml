@@ -1,0 +1,189 @@
+openapi: 3.0.0
+info:
+  title: 'API ProjetPro'
+  description: "API REST pour l'application ProjetPro avec système d'authentification sécurisé.\n\n## Fonctionnalités principales:\n- Authentification avec protection anti-force brute\n- Gestion des tokens CSRF\n- Logging automatique des tentatives de connexion\n- Système de blocage par IP et par login\n\n## Sécurité:\n- Protection CSRF obligatoire\n- Tokens d'authentification\n- Blocage automatique après échecs répétés\n\n## Headers requis:\n- `X-CSRF-Token`: Token CSRF pour les requêtes POST\n- `Content-Type: application/json`\n"
+  version: 1.0.0
+paths:
+  /api/csrfToken:
+    get:
+      operationId: get__generate
+      responses:
+        default:
+          description: ''
+    options:
+      operationId: options__generate
+      responses:
+        default:
+          description: ''
+  /api/csrfToken/verify:
+    post:
+      operationId: post__verify
+      responses:
+        default:
+          description: ''
+  /api/images/upload-url:
+    post:
+      summary: 'Génère une URL présignée pour que le front puisse uploader directement vers Azure.'
+      operationId: post_api_images_upload_url
+      responses:
+        default:
+          description: ''
+  /api/images/verify:
+    post:
+      summary: "Vérifie qu'un upload a bien eu lieu et retourne l'URL publique."
+      operationId: post_api_images_verify
+      responses:
+        default:
+          description: ''
+  '/api/images/signed-url/{blobName}':
+    get:
+      summary: 'Génère une URL présignée pour accéder à une image privée.'
+      operationId: get_api_images_signed_url
+      parameters:
+        -
+          name: blobName
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        default:
+          description: ''
+  '/api/images/{blobName}':
+    delete:
+      summary: "Supprime une image d'Azure Blob Storage."
+      operationId: delete_api_images_delete
+      parameters:
+        -
+          name: blobName
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        default:
+          description: ''
+  '/api/images/url/{blobName}':
+    get:
+      summary: "Retourne l'URL publique d'une image."
+      operationId: get_api_images_public_url
+      parameters:
+        -
+          name: blobName
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        default:
+          description: ''
+  /api/login:
+    post:
+      operationId: post_app_login_log
+      responses:
+        default:
+          description: ''
+    options:
+      operationId: options_app_login_log_options
+      responses:
+        default:
+          description: ''
+  /api/admin/login-logs/statistics:
+    get:
+      summary: 'Récupère les statistiques de connexion pour une période donnée.'
+      operationId: get_app_admin_login_logs_statistics
+      responses:
+        default:
+          description: ''
+  '/api/admin/login-logs/check-ip-status/{ip}':
+    get:
+      summary: 'Vérifie le statut de blocage pour une IP.'
+      operationId: get_app_admin_login_logs_check_ip
+      parameters:
+        -
+          name: ip
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        default:
+          description: ''
+  '/api/admin/login-logs/check-login-status/{login}':
+    get:
+      summary: 'Vérifie le statut de blocage pour un login.'
+      operationId: get_app_admin_login_logs_check_login
+      parameters:
+        -
+          name: login
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        default:
+          description: ''
+  /api/admin/login-logs/real-time-stats:
+    get:
+      summary: 'Endpoint pour obtenir des statistiques en temps réel.'
+      operationId: get_app_admin_login_logs_realtime
+      responses:
+        default:
+          description: ''
+  '/api/admin/login-logs/unblock-ip/{ip}':
+    post:
+      summary: "Endpoint pour réinitialiser les tentatives échouées d'une IP (déblocage manuel)."
+      operationId: post_app_admin_login_logs_unblock_ip
+      parameters:
+        -
+          name: ip
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        default:
+          description: ''
+  '/api/admin/login-logs/unblock-login/{login}':
+    post:
+      summary: "Endpoint pour réinitialiser les tentatives échouées d'un login."
+      operationId: post_app_admin_login_logs_unblock_login
+      parameters:
+        -
+          name: login
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        default:
+          description: ''
+  /api/tokens/refresh:
+    post:
+      operationId: post_app_tokens_refresh
+      responses:
+        default:
+          description: ''
+  /api/tokens/validate:
+    post:
+      operationId: post_app_tokens_validate
+      responses:
+        default:
+          description: ''
+  /api/tokens/info:
+    get:
+      operationId: get_app_tokens_info
+      responses:
+        default:
+          description: ''
+components:
+  securitySchemes:
+    csrfToken:
+      type: apiKey
+      description: 'Token CSRF pour la protection contre les attaques CSRF'
+      name: X-CSRF-Token
+      in: header
+security:
+  -
+    csrfToken: []
+
