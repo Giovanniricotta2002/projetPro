@@ -16,10 +16,10 @@ final readonly class LoginUserDTO
      * @param string|null $lastVisit Dernière visite formatée
      */
     public function __construct(
-        public readonly int $id,
-        public readonly string $username,
-        public readonly array $roles,
-        public readonly ?string $lastVisit = null,
+        public int $id,
+        public string $username,
+        public array $roles,
+        public ?string $lastVisit = null,
     ) {
     }
 
