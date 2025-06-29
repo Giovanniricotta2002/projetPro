@@ -2,8 +2,6 @@
 
 namespace App\DTO;
 
-use OpenApi\Attributes as OA;
-
 /**
  * DTO pour la réponse de validation de token JWT.
  */
