@@ -2,8 +2,8 @@
 
 namespace App\Tests\Service;
 
-use App\Tests\IntegrationTestCase;
 use App\Service\JWTService;
+use App\Tests\IntegrationTestCase;
 
 /**
  * Test d'intégration pour JWTService.

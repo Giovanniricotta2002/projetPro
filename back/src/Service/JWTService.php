@@ -2,14 +2,14 @@
 
 namespace App\Service;
 
-use App\Entity\Utilisateur;
 use App\DTO\TokenInfoResponseDTO;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use App\Entity\Utilisateur;
+use Firebase\JWT\ExpiredException;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
-use Firebase\JWT\ExpiredException;
 use Firebase\JWT\SignatureInvalidException;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
  * Service de gestion des tokens JWT pour l'authentification.
@@ -258,6 +258,7 @@ class JWTService
     {
         try {
             $payload = $this->validateToken($token);
+
             return TokenInfoResponseDTO::validWithDetails($payload);
         } catch (\Exception $e) {
             return TokenInfoResponseDTO::invalid($e->getMessage());
