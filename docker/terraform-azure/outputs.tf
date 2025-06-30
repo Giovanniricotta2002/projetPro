@@ -35,12 +35,18 @@ output "frontend_url" {
   value       = "https://${azurerm_container_app.front-end.latest_revision_fqdn}"
 }
 
+output "grafana_url" {
+  description = "URL de Grafana (Container App)"
+  value       = "https://${azurerm_container_app.grafana.latest_revision_fqdn}"
+}
+
 output "blob_containers" {
   description = "Liste des containers blob créés"
   value = {
     machine_images = azurerm_storage_container.machine_images.name
     temp_uploads   = azurerm_storage_container.temp_uploads.name
     public_assets  = azurerm_storage_container.public_assets.name
+    grafana_dashboards = azurerm_storage_container.grafana_dashboards.name
   }
 }
 
@@ -50,9 +56,9 @@ output "estimated_monthly_cost_info" {
   value = {
     storage_account = "~5-15€/mois (selon utilisation)"
     postgresql_server = "~30-50€/mois (B_Standard_B4ms)"
-    container_apps = "~20-40€/mois (selon trafic)"
+    container_apps = "~25-50€/mois (backend + frontend + grafana selon trafic)"
     network_costs = "~2-5€/mois"
-    total_estimated = "~57-110€/mois"
-    note = "Coûts réels dépendent de l'utilisation réelle"
+    total_estimated = "~62-120€/mois"
+    note = "Coûts réels dépendent de l'utilisation réelle. Grafana ajoute ~5-10€/mois"
   }
 }

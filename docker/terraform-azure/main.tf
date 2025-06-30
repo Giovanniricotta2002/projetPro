@@ -265,3 +265,160 @@ resource "azurerm_storage_container" "public_assets" {
   storage_account_id    = azurerm_storage_account.projet_pro.id
   container_access_type = "blob"  # Accès public en lecture seule
 }
+
+# Container pour les dashboards Grafana (sauvegarde)
+resource "azurerm_storage_container" "grafana_dashboards" {
+  name                  = "grafana-dashboards"
+  storage_account_id    = azurerm_storage_account.projet_pro.id
+  container_access_type = "private"
+}
+
+# Container App pour Grafana
+resource "azurerm_container_app" "grafana" {
+  name = "grafana"
+  resource_group_name = azurerm_resource_group.rg.name
+  container_app_environment_id = azurerm_container_app_environment.projetc_pro_env.id
+  revision_mode = "Single"
+  max_inactive_revisions = 0
+
+  template {
+    min_replicas = 1
+    max_replicas = 2  # Limite pour réduire les coûts
+
+    container {
+      name = "grafana"
+      image = "grafana/grafana-oss:12.0.2-ubuntu"  # Version open source gratuite
+      cpu = "0.25"    # CPU minimal pour réduire les coûts
+      memory = "0.5Gi" # Mémoire minimale
+
+      # Configuration Grafana via variables d'environnement
+      env {
+        name = "GF_SERVER_HTTP_PORT"
+        value = "3000"
+      }
+
+      env {
+        name = "GF_SERVER_DOMAIN"
+        value = "grafana.${azurerm_container_app_environment.projetc_pro_env.default_domain}"
+      }
+
+      env {
+        name = "GF_SERVER_ROOT_URL"
+        value = "https://grafana.${azurerm_container_app_environment.projetc_pro_env.default_domain}"
+      }
+
+      env {
+        name = "GF_SECURITY_ADMIN_USER"
+        value = "admin"
+      }
+
+      env {
+        name = "GF_SECURITY_ADMIN_PASSWORD"
+        value = var.grafana_admin_password
+      }
+
+      env {
+        name = "GF_AUTH_ANONYMOUS_ENABLED"
+        value = "false"
+      }
+
+      env {
+        name = "GF_SECURITY_ALLOW_EMBEDDING"
+        value = "true"
+      }
+
+      # Configuration de la base de données PostgreSQL pour Grafana
+      env {
+        name = "GF_DATABASE_TYPE"
+        value = "postgres"
+      }
+
+      env {
+        name = "GF_DATABASE_HOST"
+        value = "${azurerm_postgresql_flexible_server.projet_pro.fqdn}:5432"
+      }
+
+      env {
+        name = "GF_DATABASE_NAME"
+        value = "grafana"
+      }
+
+      env {
+        name = "GF_DATABASE_USER"
+        value = "psqladmin"
+      }
+
+      env {
+        name = "GF_DATABASE_PASSWORD"
+        value = var.postgres_password
+      }
+
+      env {
+        name = "GF_DATABASE_SSL_MODE"
+        value = "require"
+      }
+
+      # Désactiver les télémétries pour économiser la bande passante
+      env {
+        name = "GF_ANALYTICS_REPORTING_ENABLED"
+        value = "false"
+      }
+
+      env {
+        name = "GF_ANALYTICS_CHECK_FOR_UPDATES"
+        value = "false"
+      }
+
+      # Configuration pour économiser les ressources
+      env {
+        name = "GF_ALERTING_ENABLED"
+        value = "false"  # Désactiver les alertes pour économiser les ressources
+      }
+
+      env {
+        name = "GF_EXPLORE_ENABLED"
+        value = "true"
+      }
+
+      # Configuration du stockage Azure pour les snapshots (optionnel)
+      env {
+        name = "GF_SNAPSHOTS_EXTERNAL_ENABLED"
+        value = "true"
+      }
+
+      env {
+        name = "GF_EXTERNAL_IMAGE_STORAGE_PROVIDER"
+        value = "azure_blob"
+      }
+
+      env {
+        name = "GF_EXTERNAL_IMAGE_STORAGE_AZURE_BLOB_ACCOUNT_NAME"
+        value = azurerm_storage_account.projet_pro.name
+      }
+
+      env {
+        name = "GF_EXTERNAL_IMAGE_STORAGE_AZURE_BLOB_ACCOUNT_KEY"
+        value = azurerm_storage_account.projet_pro.primary_access_key
+      }
+
+      env {
+        name = "GF_EXTERNAL_IMAGE_STORAGE_AZURE_BLOB_CONTAINER_NAME"
+        value = azurerm_storage_container.grafana_dashboards.name
+      }
+    }
+  }
+
+  depends_on = [ 
+    azurerm_container_app_environment.projetc_pro_env,
+    azurerm_postgresql_flexible_server.projet_pro
+  ]
+
+  ingress {
+    external_enabled = true
+    target_port = 3000
+    traffic_weight {
+      latest_revision = true
+      percentage = 100
+    }
+  }
+}
