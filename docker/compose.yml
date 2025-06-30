@@ -36,22 +36,6 @@ services:
     depends_on:
       - backend
 
-  # frontend:
-  #   image: node:20
-  #   container_name: vite-frontend
-  #   working_dir: /app
-  #   volumes:
-  #     - $APP_DIR_FRONTEND:/app
-  #     - /app/node_modules    # pour ne pas écraser les node_modules du conteneur
-  #   ports:
-  #     - $APP_FRONTEND_PORT:5173          # port HTTP de Vite
-  #     - "24678:24678"        # port HMR (WebSocket)
-  #   command: npm run dev
-  #   environment:
-  #     - NODE_ENV=development
-  #   networks:
-  #     - projetProNetcwork
-
   bdd:
     image: postgres:15.8-bookworm
     environment:

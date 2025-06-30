@@ -1,0 +1,122 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana-deployment
+  namespace: local
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+      - name: grafana
+        image: grafana/grafana-oss:12.0.2-ubuntu
+        ports:
+        - containerPort: 3000
+        env:
+        - name: GF_SERVER_HTTP_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: grafana-config
+              key: GF_SERVER_HTTP_PORT
+        - name: GF_SERVER_DOMAIN
+          valueFrom:
+            configMapKeyRef:
+              name: grafana-config
+              key: GF_SERVER_DOMAIN
+        - name: GF_SERVER_ROOT_URL
+          valueFrom:
+            configMapKeyRef:
+              name: grafana-config
+              key: GF_SERVER_ROOT_URL
+        - name: GF_SECURITY_ALLOW_EMBEDDING
+          valueFrom:
+            configMapKeyRef:
+              name: grafana-config
+              key: GF_SECURITY_ALLOW_EMBEDDING
+        - name: GF_AUTH_ANONYMOUS_ENABLED
+          valueFrom:
+            configMapKeyRef:
+              name: grafana-config
+              key: GF_AUTH_ANONYMOUS_ENABLED
+        - name: GF_INSTALL_PLUGINS
+          valueFrom:
+            configMapKeyRef:
+              name: grafana-config
+              key: GF_INSTALL_PLUGINS
+        - name: GF_DATABASE_TYPE
+          valueFrom:
+            configMapKeyRef:
+              name: grafana-config
+              key: GF_DATABASE_TYPE
+        - name: GF_DATABASE_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: grafana-config
+              key: GF_DATABASE_HOST
+        - name: GF_DATABASE_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: grafana-config
+              key: GF_DATABASE_NAME
+        - name: GF_DATABASE_SSL_MODE
+          valueFrom:
+            configMapKeyRef:
+              name: grafana-config
+              key: GF_DATABASE_SSL_MODE
+        - name: GF_SECURITY_ADMIN_USER
+          valueFrom:
+            secretKeyRef:
+              name: grafana-secret
+              key: GF_SECURITY_ADMIN_USER
+        - name: GF_SECURITY_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: grafana-secret
+              key: GF_SECURITY_ADMIN_PASSWORD
+        - name: GF_DATABASE_USER
+          valueFrom:
+            secretKeyRef:
+              name: grafana-secret
+              key: GF_DATABASE_USER
+        - name: GF_DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: grafana-secret
+              key: GF_DATABASE_PASSWORD
+        - name: GF_SECURITY_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: grafana-secret
+              key: GF_SECURITY_SECRET_KEY
+        volumeMounts:
+        - name: grafana-storage
+          mountPath: /var/lib/grafana
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "300m"
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 60
+          periodSeconds: 30
+      volumes:
+      - name: grafana-storage
+        persistentVolumeClaim:
+          claimName: grafana-pvc
