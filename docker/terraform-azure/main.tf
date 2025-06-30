@@ -93,7 +93,7 @@ resource "azurerm_container_app" "backend-api" {
 
     container {
       name = "backend-api"
-      image = "docker.io/${var.dockerhub_user}/muscuscope-backend:latest"
+      image = "docker.io/${var.dockerhub_user}/muscuscope:backend"
       cpu = "0.5"
       memory = "1.0Gi"
 
@@ -168,7 +168,7 @@ resource "azurerm_container_app" "front-end" {
 
     container {
       name = "front-end"
-      image = "docker.io/${var.dockerhub_user}/muscuscope-frontend:latest"
+      image = "docker.io/${var.dockerhub_user}/muscuscope:frontend"
       cpu = "0.5"
       memory = "1.0Gi"
 

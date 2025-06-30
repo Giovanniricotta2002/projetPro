@@ -21,26 +21,44 @@ WORKDIR /app
 # Copier les fichiers de dépendances Composer
 COPY composer.json composer.lock ./
 
-# Installation des dépendances Composer (optimisé pour production)
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress --prefer-dist
+# Installation des dépendances Composer (optimisé pour production, sans scripts)
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress --prefer-dist --no-scripts
 
 # Copier le code source
 COPY . .
 
-# Optimisations Symfony pour la production
-RUN composer dump-autoload --optimize --no-dev && \
-    php bin/console cache:clear --env=prod --no-debug && \
-    php bin/console cache:warmup --env=prod --no-debug
+# Créer le fichier .env.local pour forcer l'environnement de production
+RUN echo "APP_ENV=prod" > .env.local && \
+    echo "APP_DEBUG=0" >> .env.local
+
+# Ignorer les scripts post-install et faire directement les optimisations
+
+# Optimisations Symfony pour la production (avec environnement explicite)
+RUN APP_ENV=prod APP_DEBUG=0 composer dump-autoload --optimize --no-dev && \
+    APP_ENV=prod APP_DEBUG=0 php bin/console cache:clear --env=prod --no-debug && \
+    APP_ENV=prod APP_DEBUG=0 php bin/console cache:warmup --env=prod --no-debug
 
 # Stage 2: Image de production finale
 FROM php:8.3-apache-bookworm AS production
 
-# Copier la configuration Apache
-COPY --chown=root:root symfony.conf /etc/apache2/sites-available/symfony.conf
+# Créer la configuration Apache directement
+COPY <<EOF /etc/apache2/sites-available/symfony.conf
+<VirtualHost *:80>
+    DocumentRoot /var/www/app/public
+    <Directory /var/www/app/public>
+        Require all granted
+        AllowOverride All
+        FallbackResource /index.php
+    </Directory>
+
+    ErrorLog /var/log/app/error.log
+    CustomLog /var/log/app/access.log combined
+</VirtualHost>
+EOF
 
 # Installation des packages système et configuration
 RUN apt-get -qq update && \
-    apt-get -qq install -y libpq-dev libicu-dev locales libzip-dev libgd-dev libxml2-dev && \
+    apt-get -qq install -y libpq-dev libicu-dev locales libzip-dev libgd-dev libxml2-dev curl && \
     echo -e "en_US.UTF-8 UTF-8\nfr_FR.UTF-8 UTF-8" >> /etc/locale.gen && \
     locale-gen && \
     rm -rf /var/lib/apt/lists/*
@@ -73,9 +91,13 @@ RUN ln -sf /usr/share/zoneinfo/Europe/Paris /etc/localtime && \
 # Copier l'application buildée depuis le stage builder
 COPY --from=builder --chown=1000:1000 /app /var/www/app
 
+# Arguments de build pour les variables d'environnement dynamiques
+ARG CORS_ALLOW_ORIGIN="*"
+
 # Variables d'environnement pour la production
 ENV APP_ENV=prod
 ENV APP_DEBUG=0
+ENV CORS_ALLOW_ORIGIN=${CORS_ALLOW_ORIGIN}
 ENV LANG=fr_FR.UTF-8
 ENV LANGUAGE=fr_FR.UTF-8
 ENV LC_ALL=fr_FR.UTF-8

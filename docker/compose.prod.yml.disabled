@@ -1,0 +1,63 @@
+services:
+  backend:
+    image: backend:latest
+    build:
+      context: ../back
+      dockerfile: Dockerfile
+    environment:
+      - APP_ENV=prod
+      - APP_DEBUG=0
+      - DATABASE_URL=postgresql://projetPro:projetPro@bdd:5432/projetPro
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-your-secret-key}
+      - AZURE_STORAGE_CONNECTION_STRING=${AZURE_STORAGE_CONNECTION_STRING:-}
+    ports:
+      - ${APP_PORT:-8080}:80
+      - 8000:8000
+    networks:
+      - projetProNetcwork
+    depends_on:
+      - bdd
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+
+  frontend:
+    image: frontend:latest
+    build:
+      context: ../front
+      dockerfile: Dockerfile
+    ports:
+      - ${APP_FRONTEND_PORT:-3000}:80
+    environment:
+      - VITE_API_URL=${BACKEND_URL:-http://localhost:8000}
+      - VITE_APP_NAME=MuscuScope
+      - VITE_ENVIRONMENT=production
+    networks:
+      - projetProNetcwork
+    depends_on:
+      - backend
+
+  bdd:
+    image: postgres:15.8-bookworm
+    environment:
+      POSTGRES_DB: projetPro
+      POSTGRES_USER: projetPro
+      POSTGRES_PASSWORD: projetPro
+    ports:
+      - $BDD_PORT:5432
+    volumes:
+      - $BDD_DIR:/var/lib/postgresql/data
+      - "/etc/localtime:/etc/localtime:ro"
+    networks:
+      - projetProNetcwork
+
+  grafana:
+    image: grafana/grafana-oss:12.0.2-ubuntu
+    ports:
+      - 3000:3000
+    networks:
+      - projetProNetcwork
+
+networks:
+  projetProNetcwork:
+    name: projetProNetcwork
+    external: true

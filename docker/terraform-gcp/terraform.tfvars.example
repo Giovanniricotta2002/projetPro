@@ -1,0 +1,22 @@
+# Fichier de variables pour GCP
+# Copier ce fichier vers terraform.tfvars et remplir les valeurs
+
+# OBLIGATOIRE: ID de votre projet Google Cloud
+project_id = "your-gcp-project-id"
+
+# Optionnel: région (par défaut europe-west1)
+# region = "europe-west1"
+
+# Optionnel: zone (par défaut europe-west1-b)
+# zone = "europe-west1-b"
+
+# Nom d'utilisateur Docker Hub
+dockerhub_user = "gio"
+
+# Secrets (OBLIGATOIRES)
+jwt_secret = "your-jwt-secret-key-here"
+postgres_password = "your-secure-postgres-password"
+grafana_admin_password = "your-grafana-admin-password"
+
+# Environnement
+environment = "prod"

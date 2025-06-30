@@ -7,7 +7,7 @@ variable "location" {
 }
 
 variable "dockerhub_user" {
-  default = "gio"
+  default = "giovanni2002ynov"
 }
 
 variable "jwt_secret" {

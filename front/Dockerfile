@@ -10,19 +10,23 @@ WORKDIR /app
 # Copier les fichiers de dépendances
 COPY package*.json ./
 
-# Installer les dépendances (optimisé pour le cache Docker)
-RUN npm ci --only=production --silent
+# Installer les dépendances (incluant devDependencies pour le build)
+RUN npm ci --silent
 
 # Copier le code source
 COPY . .
 
+# Arguments de build (passés depuis Terraform/docker build)
+ARG VITE_API_URL=http://localhost:80
+ARG VITE_APP_NAME=MuscuScope
+
 # Variables d'environnement pour le build
 ENV NODE_ENV=production
-ENV VITE_API_URL=https://api.muscuscope.local
-ENV VITE_APP_NAME=MuscuScope
+ENV VITE_API_URL=${VITE_API_URL}
+ENV VITE_APP_NAME=${VITE_APP_NAME}
 
-# Build de l'application pour la production
-RUN npm run build
+# Build de l'application pour la production (séquentiel pour éviter run-p)
+RUN npm run type-check && npm run build-only
 
 # Stage 2: Production avec Nginx
 FROM nginx:1.25-alpine AS production
@@ -70,28 +74,63 @@ server {
 }
 EOF
 
+# Configuration Nginx principale pour utilisateur non-root
+COPY <<EOF /etc/nginx/nginx.conf
+worker_processes auto;
+error_log /var/log/nginx/error.log notice;
+pid /tmp/nginx.pid;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+    
+    log_format main '\$remote_addr - \$remote_user [\$time_local] "\$request" '
+                    '\$status \$body_bytes_sent "\$http_referer" '
+                    '"\$http_user_agent" "\$http_x_forwarded_for"';
+    
+    access_log /var/log/nginx/access.log main;
+    
+    sendfile on;
+    tcp_nopush on;
+    keepalive_timeout 65;
+    
+    include /etc/nginx/conf.d/*.conf;
+}
+EOF
+
 # Copier les fichiers buildés depuis le stage builder
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Créer un utilisateur non-root pour la sécurité
-RUN addgroup -g 1001 -S nginx && \
-    adduser -S -D -H -u 1001 -h /var/cache/nginx -s /sbin/nologin -G nginx -g nginx nginx
+# Installer curl pour le health check
+RUN apk add --no-cache curl
 
-# Changer les permissions
+# Ajuster les permissions pour l'utilisateur nginx et forcer le PID location
 RUN chown -R nginx:nginx /usr/share/nginx/html && \
     chown -R nginx:nginx /var/cache/nginx && \
     chown -R nginx:nginx /var/log/nginx && \
-    chown -R nginx:nginx /etc/nginx/conf.d
+    chown -R nginx:nginx /etc/nginx && \
+    # Créer les répertoires nécessaires avec les bonnes permissions
+    mkdir -p /var/cache/nginx /var/log/nginx /tmp && \
+    # Permissions complètes pour nginx sur ses répertoires
+    chmod -R 755 /var/cache/nginx /var/log/nginx /tmp && \
+    # Donner les permissions sur /tmp pour le PID file
+    chown nginx:nginx /tmp && \
+    # Remplacer le nginx.conf par défaut pour éviter les conflits
+    rm -f /etc/nginx/nginx.conf.default
 
-# Changer vers l'utilisateur non-root
+# Changer vers l'utilisateur non-root (standard sécurisé)
 USER nginx
 
 # Exposer le port 80
 EXPOSE 80
 
-# Health check
+# Health check avec curl
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD curl -f http://localhost/health || exit 1
 
-# Commande de démarrage
-CMD ["nginx", "-g", "daemon off;"]
+# Commande de démarrage avec configuration explicite
+CMD ["nginx", "-g", "daemon off;", "-c", "/etc/nginx/nginx.conf"]

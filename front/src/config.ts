@@ -1,4 +1,4 @@
-const apiEndpoint = import.meta.env.VITE_BACKEND_URL || 'http://localhost:80';
+const apiEndpoint = import.meta.env.VITE_API_URL || 'http://localhost:80';
 
 const corsRequestHeaders = {
     'Accept': 'application/json',
