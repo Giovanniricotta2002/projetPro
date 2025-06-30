@@ -1,23 +1,23 @@
 # Activer les APIs nécessaires
-# resource "google_project_service" "required_apis" {
-#   for_each = toset([
-#     "cloudresourcemanager.googleapis.com",
-#     "compute.googleapis.com",
-#     "run.googleapis.com",
-#     "sql-component.googleapis.com",
-#     "sqladmin.googleapis.com",
-#     "storage.googleapis.com",
-#     "secretmanager.googleapis.com",
-#     "artifactregistry.googleapis.com",
-#     "vpcaccess.googleapis.com",  # Pour VPC Access Connector
-#     "servicenetworking.googleapis.com"  # Pour Cloud SQL private network
-#   ])
+resource "google_project_service" "required_apis" {
+  for_each = toset([
+    "cloudresourcemanager.googleapis.com",
+    "compute.googleapis.com",
+    "run.googleapis.com",
+    "sql-component.googleapis.com",
+    "sqladmin.googleapis.com",
+    "storage.googleapis.com",
+    "secretmanager.googleapis.com",
+    "artifactregistry.googleapis.com",
+    "vpcaccess.googleapis.com",  # Pour VPC Access Connector
+    "servicenetworking.googleapis.com"  # Pour Cloud SQL private network
+  ])
   
-#   project = var.project_id
-#   service = each.value
+  project = var.project_id
+  service = each.value
   
-#   disable_on_destroy = true
-# }
+  disable_on_destroy = true
+}
 
 # Génération d'un suffixe aléatoire pour l'unicité des noms
 resource "random_string" "suffix" {
@@ -194,7 +194,7 @@ resource "google_secret_manager_secret" "jwt_secret" {
     }
   }
   
-  # depends_on = [google_project_service.required_apis]
+  depends_on = [google_project_service.required_apis]
 }
 
 resource "google_secret_manager_secret_version" "jwt_secret_version" {
@@ -213,7 +213,7 @@ resource "google_secret_manager_secret" "postgres_password" {
     }
   }
   
-  # depends_on = [google_project_service.required_apis]
+  depends_on = [google_project_service.required_apis]
 }
 
 resource "google_secret_manager_secret_version" "postgres_password_version" {
@@ -232,7 +232,7 @@ resource "google_secret_manager_secret" "grafana_password" {
     }
   }
   
-  # depends_on = [google_project_service.required_apis]
+  depends_on = [google_project_service.required_apis]
 }
 
 resource "google_secret_manager_secret_version" "grafana_password_version" {
@@ -547,7 +547,7 @@ resource "google_vpc_access_connector" "connector" {
   min_instances = 2
   max_instances = 3  # Limite pour contrôler les coûts
   
-  # depends_on = [google_project_service.required_apis]
+  depends_on = [google_project_service.required_apis]
 }
 
 # IAM bindings pour Cloud Run invoker (public access)
