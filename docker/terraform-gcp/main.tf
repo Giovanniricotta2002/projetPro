@@ -402,7 +402,7 @@ resource "google_cloud_run_service" "frontend" {
 
         env {
           name  = "VITE_API_URL"
-          value = "https://backend-api-470976636166.europe-west1.run.app"
+          value = google_cloud_run_service.backend.traffic[0].url
         }
       }
     }

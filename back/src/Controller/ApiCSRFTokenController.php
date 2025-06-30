@@ -55,7 +55,7 @@ final class ApiCSRFTokenController extends AbstractController
 
         $responseDto = CsrfTokenResponseDTO::create($token);
 
-        return $this->json($responseDto->toArray(), Response::HTTP_OK);
+        return $this->json([...$responseDto->toArray(), 'env' => $_ENV['CORS_ALLOW_ORIGIN']], Response::HTTP_OK);
     }
 
     #[Route('/verify', name: '_verify', methods: ['POST'])]
