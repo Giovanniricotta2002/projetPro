@@ -1,10 +1,5 @@
 # Schémas des Composants Applicatifs et leurs Interactions - MuscuScope
 
-## 🎯 Réponse à l'exigence
-> Le schéma doit inclure les composants applicatifs et leurs interactions (frontend, API, base, stockage...)
-
----
-
 ## 📐 Architecture Générale - Vue d'ensemble
 
 ```mermaid
@@ -70,34 +65,6 @@ C4Context
     Rel(webapp, database, "Lit/Écrit", "SQL/Doctrine ORM")
     Rel(user, browser, "Interagit via")
     Rel(webapp, api_docs, "Génère", "NelmioApiDocBundle")
-```
-
----
-
-## 📦 Architecture C4 - Niveau 2 : Conteneurs
-
-```mermaid
-C4Container
-    title Conteneurs - Architecture Applicative
-
-    Person(user, "Utilisateur")
-
-    Container_Boundary(webapp, "Application Web") {
-        Container(frontend, "Frontend SPA", "Vue.js, TypeScript, Vite", "Interface utilisateur reactive")
-        Container(backend, "Backend API", "PHP 8.3, Symfony 7.3", "API REST avec auth et logging")
-        Container(webserver, "Serveur Web", "Nginx/Apache", "Reverse proxy et assets statiques")
-    }
-
-    ContainerDb(database, "Base de Données", "MySQL/PostgreSQL", "Persistance des données")
-    
-    Container_Ext(docs, "Documentation", "OpenAPI/Swagger UI", "Documentation API auto-générée")
-
-    Rel(user, frontend, "Utilise", "HTTPS")
-    Rel(frontend, backend, "Appelle", "JSON/HTTPS, CSRF protected")
-    Rel(backend, database, "Persiste", "Doctrine ORM")
-    RelIndex(backend, docs, "Génère", "4")
-    Rel(webserver, frontend, "Sert", "Assets statiques")
-    Rel(webserver, backend, "Proxy vers", "FastCGI/FPM")
 ```
 
 ---
@@ -338,35 +305,3 @@ flowchart TD
     Deploy --> URLs
     URLs --> Test
 ```
-
----
-
-## 📊 Synthèse des Composants et Interactions
-
-### ✅ Composants Applicatifs Identifiés
-
-| Composant | Technologie | Rôle | Interactions |
-|-----------|-------------|------|--------------|
-| **Frontend SPA** | Vue.js 3 + TypeScript + Vite | Interface utilisateur | ↔ Backend API (HTTP/JSON) |
-| **Backend API** | PHP 8.3 + Symfony 7.3 | Logique métier + Auth | ↔ Database (SQL/ORM) |
-| **Base de données** | PostgreSQL + Doctrine | Persistance | ↔ Backend (SQL) |
-| **Stockage** | Cloud Storage | Fichiers/Images | ↔ Backend (REST API) |
-| **Monitoring** | Grafana + PostgreSQL | Observabilité | ↔ Database (SQL) |
-| **Sécurité** | Secret Manager + VPC | Credentials | ↔ Services (Secrets) |
-
-### 🔗 Interactions Détaillées
-
-1. **Utilisateur ↔ Frontend** : Navigation web (HTTPS)
-2. **Frontend ↔ Backend** : API REST (JSON, CSRF protected)
-3. **Backend ↔ Database** : Doctrine ORM (SQL transactions)
-4. **Backend ↔ Stockage** : Upload/Download fichiers
-5. **Services ↔ Monitoring** : Logs et métriques
-6. **Composants ↔ Sécurité** : Authentification et secrets
-
-### 🎯 Conformité aux Exigences
-
-**✅ 100% Conforme** : Tous les composants applicatifs et leurs interactions sont représentés dans les schémas avec un niveau de détail technique professionnel.
-
----
-
-**📋 Note** : Ces schémas utilisent la notation Mermaid et peuvent être visualisés dans tout environnement compatible (GitHub, GitLab, VS Code, etc.).
