@@ -231,7 +231,9 @@ export const useAuthStore = defineStore('auth', () => {
 
     const result = await apiRequest('/api/register', {
       method: 'POST',
+      credentials: 'include',
       headers: {
+        ...corsRequestHeaders,
         'X-CSRF-Token': registerData.csrfToken,
       },
       body: JSON.stringify({

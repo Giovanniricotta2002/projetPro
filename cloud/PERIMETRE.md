@@ -69,4 +69,3 @@ Ce projet s’adresse à toute personne désirant mieux comprendre le fonctionne
 
 Ce projet répond à un besoin concret : regrouper et vulgariser les connaissances autour de la musculation, domaine où l’information est souvent fragmentée, imprécise ou trop technique.  
 La plateforme vise à offrir une solution complète, pédagogique et collaborative.
-
