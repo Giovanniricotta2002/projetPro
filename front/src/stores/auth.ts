@@ -198,7 +198,13 @@ export const useAuthStore = defineStore('auth', () => {
     isLoading.value = true
     
     // Essayer d'abord /api/me
-    let result = await apiRequest<User>('/api/me')
+    let result = await apiRequest<User>('/api/me', {
+      method: 'GET',
+      credentials: 'include', // Pour envoyer les cookies HTTPOnly
+      headers: {
+        ...corsRequestHeaders,
+      },
+    })
     
     if (!result.success) {
       // Si échec, essayer le refresh
@@ -231,9 +237,7 @@ export const useAuthStore = defineStore('auth', () => {
 
     const result = await apiRequest('/api/register', {
       method: 'POST',
-      credentials: 'include',
       headers: {
-        ...corsRequestHeaders,
         'X-CSRF-Token': registerData.csrfToken,
       },
       body: JSON.stringify({

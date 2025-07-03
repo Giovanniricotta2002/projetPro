@@ -195,32 +195,6 @@ final class TokenController extends AbstractController
         }
     }
 
-    #[Route('/logout', name: '_logout', methods: ['POST'])]
-    #[OA\Post(
-        path: '/api/tokens/logout',
-        operationId: 'logoutUser',
-        summary: 'Déconnecter un utilisateur',
-        description: 'Supprime les cookies de session et invalide les tokens',
-        tags: ['JWT Tokens']
-    )]
-    #[OA\Response(
-        response: 200,
-        description: 'Déconnexion réussie',
-        content: new OA\JsonContent(
-            type: 'object',
-            properties: [
-                new OA\Property(property: 'message', type: 'string', example: 'Logout successful')
-            ]
-        )
-    )]
-    public function logout(Request $request): Response
-    {
-        $response = $this->json(['message' => 'Logout successful']);
 
-        // Supprimer les cookies httpOnly
-        $this->cookieService->clearJwtCookies($response, $request);
-
-        return $response;
-    }
 
 }

@@ -6,6 +6,9 @@ import { authGuard, roleGuard } from './router/guards'
 import HelloWorld from './components/HelloWorld.vue'
 import Login from './views/Login.vue'
 import Register from './views/Register.vue'
+import Forum from './views/Forum.vue'
+import Discussion from './views/Discussion.vue'
+import Materiel from './views/Materiel.vue'
 
 const routes = [
   { 
@@ -25,6 +28,24 @@ const routes = [
     component: Register, 
     meta: { requiresGuest: true } 
   },
+  {
+    path: '/forum',
+    name: 'forum',
+    component: Forum,
+    // meta: { requiresAuth: true }
+  },
+  {
+    path: '/discussion',
+    name: 'discussion',
+    component: Discussion,
+    // meta: { requiresAuth: true }
+  },
+  {
+    path: '/materiel',
+    name: 'materiel',
+    component: Materiel,
+    // meta: { requiresAuth: true }
+  }
   // Exemple d'utilisation du roleGuard pour une route admin
   // { 
   //   path: '/admin', 
@@ -40,7 +61,7 @@ const router = createRouter({
 })
 
 // Utilisation du guard d'authentification amélioré
-router.beforeEach(authGuard)
+// router.beforeEach(authGuard)
 
 // Workaround for https://github.com/vitejs/vite/issues/11804
 router.onError((err, to) => {

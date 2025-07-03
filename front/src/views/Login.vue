@@ -13,8 +13,16 @@
                         {{ auth.isLoading ? 'Connexion...' : 'Se connecter' }}
                     </v-btn>
                     <v-btn class="mt-2" type="button" block @click="redirect">Créer un compte</v-btn>
+                    
                     <input type="hidden" name="_csrf_token" v-model="csrfToken.token">
-                    <v-alert v-if="auth.error" type="error" class="mt-2">{{ auth.error }}</v-alert>
+                    <v-alert 
+                        v-if="auth.error && auth.error.value !== ''" 
+                        type="error" 
+                        class="mt-2"
+                        closable
+                        @click:close="auth.clearError()">
+                        {{ auth.error || 'Erreur inconnue' }}
+                    </v-alert>
                 </v-form>
             </div>
         </div>
@@ -25,7 +33,9 @@
 import { useRuleInput } from '@/stores/ruleInput'
 import { useCSRFToken } from '@/stores/useCSRFToken'
 import { useAuth } from '@/composables/useAuth'
-import { ref, onMounted } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+import { ref, onMounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
 
 const login = ref('')
 const password = ref('')
@@ -34,10 +44,12 @@ const title = ref('Se connecter')
 const csrf_token = ref('')
 const valid = ref(false)
 const show1 = ref(false)
+const isDev = import.meta.env.DEV
 
 const rules = useRuleInput()
 const auth = useAuth()
 const csrfToken = useCSRFToken()
+const router = useRouter()
 
 onMounted(async () => {
     // Rediriger si déjà connecté
@@ -46,6 +58,11 @@ onMounted(async () => {
     await csrfToken.fetchCSRFToken()
     csrf_token.value = csrfToken.token
 })
+
+// Watcher pour observer les changements d'erreur
+watch(() => auth.error, (newError, oldError) => {
+    console.log('Auth error changed:', { from: oldError, to: newError })
+}, { immediate: true })
 
 async function fLogin() {
     await auth.loginAndRedirect({
@@ -56,10 +73,8 @@ async function fLogin() {
 }
 
 const redirect = () => {
-    auth.requireGuest('/register')
+    router.push('/register')
 }
-
-
 
 const formRef = ref()
 

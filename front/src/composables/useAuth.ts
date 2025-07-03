@@ -17,6 +17,7 @@ export function useAuth() {
   // Actions avec gestion de navigation
   async function loginAndRedirect(loginData: Parameters<typeof authStore.login>[0], redirectTo?: string) {
     const result = await authStore.login(loginData)
+    console.log(result);
     
     if (result.success) {
       // Utiliser l'URL de redirection depuis la query ou la valeur par défaut
