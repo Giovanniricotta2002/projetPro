@@ -2,58 +2,7 @@
 
 import { setupLayouts } from 'virtual:generated-layouts'
 import { createRouter, createWebHistory } from 'vue-router/auto'
-import { authGuard, roleGuard } from './router/guards'
-import HelloWorld from './components/HelloWorld.vue'
-import Login from './views/Login.vue'
-import Register from './views/Register.vue'
-import Forum from './views/Forum.vue'
-import Discussion from './views/Discussion.vue'
-import Materiel from './views/Materiel.vue'
-
-const routes = [
-  { 
-    path: '/', 
-    component: HelloWorld, 
-    meta: { requiresAuth: true } 
-  },
-  { 
-    path: '/login', 
-    name: 'login', 
-    component: Login, 
-    meta: { requiresGuest: true } 
-  },
-  { 
-    path: '/register', 
-    name: 'register', 
-    component: Register, 
-    meta: { requiresGuest: true } 
-  },
-  {
-    path: '/forum',
-    name: 'forum',
-    component: Forum,
-    // meta: { requiresAuth: true }
-  },
-  {
-    path: '/discussion',
-    name: 'discussion',
-    component: Discussion,
-    // meta: { requiresAuth: true }
-  },
-  {
-    path: '/materiel',
-    name: 'materiel',
-    component: Materiel,
-    // meta: { requiresAuth: true }
-  }
-  // Exemple d'utilisation du roleGuard pour une route admin
-  // { 
-  //   path: '/admin', 
-  //   component: AdminDashboard, 
-  //   meta: { requiresAuth: true },
-  //   beforeEnter: roleGuard('admin')
-  // },
-]
+import routes from './router/routes'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
