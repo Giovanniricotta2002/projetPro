@@ -11,14 +11,6 @@
                 <span>Bienvenue sur la page de discussion dédiée aux machines, inspirée du style Wikipédia. Posez vos questions, partagez des idées ou discutez des sujets techniques liés aux machines.</span>
               </div>
               <v-divider class="my-4" />
-              <div v-for="(msg, i) in messages" :key="i" class="discussion-msg">
-                <div class="msg-header">
-                  <span class="msg-author">{{ msg.author }}</span>
-                  <span class="msg-date">— {{ msg.date }}</span>
-                </div>
-                <div class="msg-content">{{ msg.content }}</div>
-                <v-divider class="my-2" v-if="i < messages.length - 1" />
-              </div>
               <v-form @submit.prevent="postMessage" class="mt-6">
                 <v-textarea
                   v-model="newMessage"
@@ -27,9 +19,21 @@
                   outlined
                   dense
                   :rules="[v => !!v || 'Message requis']"
-                />
-                <v-btn type="submit" color="primary" :disabled="!newMessage">Publier</v-btn>
+                  />
+                  <v-btn type="submit" color="primary" :disabled="!newMessage">Publier</v-btn>
               </v-form>
+                <v-divider class="my-4" />
+              <div v-for="(msg, i) in messages" :key="msg.id" class="discussion-msg">
+                <div class="msg-header">
+                  <span class="msg-author">{{ msg.utilisateur.anonimus ? 'Anonyme' : msg.utilisateur.username }}</span>
+                  <span class="msg-date">— {{ msg.dateCreation ? new Date(msg.dateCreation).toLocaleString('fr-FR', { hour: '2-digit', minute: '2-digit', year: 'numeric', month: '2-digit', day: '2-digit' }) : '' }}</span>
+                  <v-btn v-if="canModerate()" icon size="small" color="error" class="ml-2" @click="deleteMessage(i)">
+                    <v-icon>mdi-delete</v-icon>
+                  </v-btn>
+                </div>
+                <div class="msg-content" v-html="renderMarkdown(msg.text)"></div>
+                <v-divider class="my-2" v-if="i < messages.length - 1" />
+              </div>
             </v-card-text>
           </v-card>
         </v-col>
@@ -40,29 +44,109 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { marked } from 'marked'
+import type { Message } from '@/types/Message'
+import type { Utilisateur } from '@/types/Utilisateur'
+import { useAuth } from '@/composables/useAuth'
 
-interface DiscussionMessage {
-  author: string
-  content: string
-  date: string
-}
+// const { user, hasRole } = useAuth()
+const userRoles = ref<string[]>(['admin']) // ou ['editor'], ou []
+// Simule l'utilisateur connecté (à remplacer par le vrai store auth)
+const currentUser = ref<Utilisateur>({
+  id: 99,
+  username: 'AdminDemo',
+  roles: ['admin'],
+  dateCreation: new Date().toISOString(),
+  anonimus: false,
+  status: 'active',
+})
 
-const messages = ref<DiscussionMessage[]>([
-  { author: 'MachineBot', content: 'Bienvenue sur la page de discussion des machines. Posez vos questions ici !', date: '2025-07-03 14:30' },
-  { author: 'Utilisateur', content: 'Comment entretenir une fraiseuse CNC ?', date: '2025-07-03 14:32' },
-  { author: 'ExpertMachine', content: 'Pour l’entretien, pensez à lubrifier les axes et à vérifier les capteurs régulièrement.', date: '2025-07-03 14:35' },
+
+
+const messages = ref<Message[]>([
+  {
+    id: 1,
+    text: 'Bienvenue sur la page de discussion des machines. Posez vos questions ici !',
+    dateCreation: '2025-07-03T14:30:00',
+    visible: true,
+    utilisateur: {
+      id: 1,
+      username: 'MachineBot',
+      roles: [],
+      dateCreation: '2025-07-03T14:00:00',
+      anonimus: false,
+      status: 'active',
+    },
+  },
+  {
+    id: 2,
+    text: 'Comment entretenir une fraiseuse CNC ?',
+    dateCreation: '2025-07-03T14:32:00',
+    visible: true,
+    utilisateur: {
+      id: 2,
+      username: 'Utilisateur',
+      roles: [],
+      dateCreation: '2025-07-03T14:00:00',
+      anonimus: false,
+      status: 'active',
+    },
+  },
+  {
+    id: 3,
+    text: 'Pour l’entretien, pensez à lubrifier les axes et à vérifier les capteurs régulièrement.',
+    dateCreation: '2025-07-03T14:35:00',
+    visible: true,
+    utilisateur: {
+      id: 3,
+      username: 'ExpertMachine',
+      roles: [],
+      dateCreation: '2025-07-03T14:00:00',
+      anonimus: false,
+      status: 'active',
+    },
+  },
 ])
 
 const newMessage = ref('')
 
 function postMessage() {
   if (!newMessage.value) return
+  // if (!newMessage.value || !user.value) return
   messages.value.push({
-    author: 'Vous',
-    content: newMessage.value,
-    date: new Date().toLocaleString('fr-FR', { hour: '2-digit', minute: '2-digit', year: 'numeric', month: '2-digit', day: '2-digit' })
+    id: messages.value.length + 1,
+    text: newMessage.value,
+    dateCreation: new Date().toISOString(),
+    visible: true,
+    utilisateur: {
+      // id: user.value.id,
+      // username: user.value.username,
+      // roles: user.value.roles,
+      // dateCreation: user.value.createdAt || new Date().toISOString(),
+      // anonimus: user.value.anonimus ?? false,
+      // status: user.value.status || 'active',
+      id: currentUser.value.id,
+      username: currentUser.value.username,
+      roles: currentUser.value.roles,
+      dateCreation: currentUser.value.createdAt || new Date().toISOString(),
+      anonimus: currentUser.value.anonimus ?? false,
+      status: currentUser.value.status || 'active',
+    },
   })
   newMessage.value = ''
+}
+
+function renderMarkdown(text: string | null) {
+  return marked.parse(text || '')
+}
+
+function canModerate() {
+  // return hasRole('admin') || hasRole('editor')
+  return userRoles.value.includes('admin') || userRoles.value.includes('editor')
+}
+
+function deleteMessage(index: number) {
+  messages.value.splice(index, 1)
 }
 </script>
 

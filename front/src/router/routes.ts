@@ -39,7 +39,7 @@ const routes: RouteConfig[] = [
     path: '/discussion',
     name: 'discussion',
     component: Discussion,
-    meta: { requiresAuth: false, menu: false}
+    meta: { requiresAuth: false, menu: true}
   },
   {
     path: '/materiels',
