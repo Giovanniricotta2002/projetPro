@@ -3,9 +3,11 @@ import Login from '../views/Login.vue'
 import Register from '../views/Register.vue'
 import Forum from '../views/Forum.vue'
 import Discussion from '../views/Discussion.vue'
-import Materiel from '../views/Materiel.vue'
 import type { RouteConfig } from '@/types/router'
-import Materiels from '@/views/Materiels.vue'
+import Machines from '@/views/Machines.vue'
+import Machine from '@/views/Machine.vue'
+import EditMachine from '@/views/EditMachine.vue'
+import { roleGuard } from './guards'
 // import { roleGuard } from './guards' // Décommente si besoin
 
 const routes: RouteConfig[] = [
@@ -37,19 +39,26 @@ const routes: RouteConfig[] = [
     path: '/discussion',
     name: 'discussion',
     component: Discussion,
-    meta: { requiresAuth: false, menu: true}
+    meta: { requiresAuth: false, menu: false}
   },
   {
     path: '/materiels',
     name: 'materiels',
-    component: Materiels,
+    component: Machines,
     meta: { requiresAuth: false, menu: true }
   },
   {
     path: '/materiel/:id',
     name: 'materiel',
-    component: Materiel,
+    component: Machine,
     meta: { requiresAuth: false, menu: false }
+  },
+  {
+    path: '/materiel/:id/edit',
+    name: 'materiel',
+    component: EditMachine,
+    meta: { requiresAuth: false, menu: false },
+    // beforeEnter: roleGuard('admin', 'editor') // Utilisation du roleGuard pour restreindre l'accès
   }
   // Exemple d'utilisation du roleGuard pour une route admin
   // { 

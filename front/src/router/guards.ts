@@ -26,7 +26,7 @@ export async function authGuard(
   }
 }
 
-export function roleGuard(requiredRole: string) {
+export function roleGuard(...requiredRoles: string[]) {
   return (
     to: RouteLocationNormalized,
     from: RouteLocationNormalized,
@@ -39,8 +39,10 @@ export function roleGuard(requiredRole: string) {
       return
     }
     
-    if (!authStore.hasRole(requiredRole)) {
-      next({ name: 'forbidden' }) // Page 403
+    // Vérifie si l'utilisateur a au moins un des rôles requis
+    const hasRole = requiredRoles.some(role => authStore.hasRole(role))
+    if (!hasRole) {
+      next({ path: '/' }) // Page 403
       return
     }
     
