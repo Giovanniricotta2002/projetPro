@@ -13,8 +13,8 @@ export interface Forum {
   visible: boolean | null
   slug: string | null
   createdAt: string | null
-  updatedAt: string | null
-  deletedAt: string | null
+  updatedAt?: string | null
+  deletedAt?: string | null
   post?: Post[]
   categorieForums?: CategorieForum[]
   utilisateur?: Utilisateur | null

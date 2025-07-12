@@ -5,14 +5,16 @@ import Forum from '../views/Forum.vue'
 import Discussion from '../views/Discussion.vue'
 import type { RouteConfig } from '@/types/router'
 import Machines from '@/views/Machines.vue'
-import Machine from '@/views/Machine.vue'
+import MaterielInfo from '@/views/MaterielInfo.vue'
 import EditMachine from '@/views/EditMachine.vue'
+import Posts from '@/views/Posts.vue'
 import { roleGuard } from './guards'
-// import { roleGuard } from './guards' // Décommente si besoin
+import Logout from '@/views/Logout.vue' // Import de la vue Logout
+import Admin from '@/views/Admin.vue'
 
 const routes: RouteConfig[] = [
   { 
-    path: '', 
+    path: '/', 
     name: 'Accueil',
     component: Accueil, 
     meta: { requiresAuth: true, menu: true } 
@@ -36,10 +38,16 @@ const routes: RouteConfig[] = [
     meta: { requiresAuth: false, menu: true }
   },
   {
+    path: '/forum/:forumId/posts',
+    name: 'posts',
+    component: Posts,
+    meta: { requiresAuth: false, menu: false }
+  },
+  {
     path: '/discussion',
     name: 'discussion',
     component: Discussion,
-    meta: { requiresAuth: false, menu: true}
+    meta: { requiresAuth: false, menu: false}
   },
   {
     path: '/materiels',
@@ -50,7 +58,7 @@ const routes: RouteConfig[] = [
   {
     path: '/materiel/:id',
     name: 'materiel',
-    component: Machine,
+    component: MaterielInfo,
     meta: { requiresAuth: false, menu: false }
   },
   {
@@ -59,6 +67,18 @@ const routes: RouteConfig[] = [
     component: EditMachine,
     meta: { requiresAuth: false, menu: false },
     // beforeEnter: roleGuard('admin', 'editor') // Utilisation du roleGuard pour restreindre l'accès
+  },
+  {
+    path: '/logout',
+    name: 'logout',
+    component: Logout,
+    meta: { requiresAuth: true, menu: false }
+  },
+  {
+    path: '/admin',
+    name: 'admin',
+    component: Admin,
+    meta: { requiresAuth: true, menu: true, admin: true }
   }
   // Exemple d'utilisation du roleGuard pour une route admin
   // { 

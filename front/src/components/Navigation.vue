@@ -51,8 +51,10 @@ const handleLogin = () => {
   router.push('/login')
 }
 const handleLogout = () => {
-  auth.stopAuthCheck()
-  router.push('/login')
+  auth.stopAuthCheck && auth.stopAuthCheck()
+  // Appel de la vraie déconnexion si elle existe
+  if (auth.logout) auth.logout()
+  router.push('/logout')
 }
 
 watchEffect(() => {

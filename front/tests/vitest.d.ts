@@ -1,7 +1,7 @@
-import type { Vi } from 'vitest'
+export {};
 
 declare global {
-  const vi: Vi
+  const vi: typeof import('vitest')['vi']
   const describe: typeof import('vitest')['describe']
   const it: typeof import('vitest')['it']
   const test: typeof import('vitest')['test']
