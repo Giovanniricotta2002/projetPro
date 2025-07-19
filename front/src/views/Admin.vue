@@ -46,6 +46,7 @@ import AdminForums from '@/components/admin/AdminForums.vue'
 import AdminUsers from '@/components/admin/AdminUsers.vue'
 import AdminForumQuick from '@/components/admin/AdminForumQuick.vue'
 import AdminDiscussionHistory from '@/components/admin/AdminDiscussionHistory.vue'
+import { useAuth } from '@/composables/useAuth'
 import type { Forum } from '@/types/Forum'
 import type { Post } from '@/types/Post'
 import type { Utilisateur } from '@/types/Utilisateur'
@@ -85,7 +86,7 @@ const discussions = ref<MessageAdmin[]>([
   { id: 3, postId: 1, titre: 'Questions', text: 'Questions', dateCreation: '2024-01-15', visible: true, utilisateur: users.value[2], history: [ { date: '2024-01-15', text: 'Création' }, { date: '2024-03-01', text: 'Ajout réponse' } ] },
 ])
 
-const forumSelectItems = computed(() => forums.value.map(f => ({ title: f.titre, value: f.id })))
+const forumSelectItems = computed(() => forums.value.map(f => ({ title: f.titre || '', value: f.id })))
 const postSelectItems = computed(() => posts.value.map(p => ({ title: p.titre, value: p.id })))
 
 const selectedDiscussion = ref<MessageAdmin | null>(null)
@@ -123,8 +124,7 @@ const filteredDiscussions = computed(() => {
     (posts.value.find((p: PostAdmin) => p.id === d.postId)?.titre.toLowerCase().includes(search.value.toLowerCase()) ?? false)
   )
 })
-
-const orphanDiscussions = computed(() => {
+const orphanDiscussions = computed<MessageAdmin[]>(() => {
   // Discussions dont le postId ne correspond à aucun post existant
   return discussions.value.filter((d: MessageAdmin) => !posts.value.some((p: PostAdmin) => p.id === d.postId))
 })
@@ -147,4 +147,10 @@ function deletePost(post: PostAdmin) {
 function deleteDiscussion(discussion: MessageAdmin) {
   discussions.value = discussions.value.filter((d: MessageAdmin) => d.id !== discussion.id)
 }
+
+// Gestion des droits d'accès
+const { hasRole } = useAuth()
+
+// Restriction d'accès à la page admin (optionnel, à activer si besoin)
+// if (!hasRole('admin')) router.push('/')
 </script>

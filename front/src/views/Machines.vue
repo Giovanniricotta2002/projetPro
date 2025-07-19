@@ -7,6 +7,13 @@
       class="mb-6"
       clearable
     />
+    <v-row>
+      <v-col cols="12" class="d-flex justify-end mb-4">
+        <v-btn v-if="canCreateMachine" color="primary" @click="$router.push('/materiel/create')">
+          <v-icon left>mdi-plus</v-icon>Créer un matériel
+        </v-btn>
+      </v-col>
+    </v-row>
     <v-row dense>
       <v-col
         v-for="mat in filteredMateriels"
@@ -32,6 +39,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { useAuth } from '@/composables/useAuth'
 
 // Simulation : l'API doit renvoyer canEdit selon le voter Symfony
 const materiels = ref([
@@ -43,6 +51,10 @@ const materiels = ref([
     canEdit: i % 4 !== 0 // Simule le droit d'édition (à remplacer par la vraie donnée API)
   }))
 ])
+
+const { hasRole } = useAuth()
+
+const canCreateMachine = computed(() => hasRole('admin') || hasRole('editor') || true)
 
 const search = ref('')
 const filteredMateriels = computed(() => {

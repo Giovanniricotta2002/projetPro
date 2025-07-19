@@ -11,6 +11,8 @@ import Posts from '@/views/Posts.vue'
 import { roleGuard } from './guards'
 import Logout from '@/views/Logout.vue' // Import de la vue Logout
 import Admin from '@/views/Admin.vue'
+import MachineCreate from '@/views/CreateMachine.vue'
+import Utilisateur from '@/views/UserProfile.vue'
 
 const routes: RouteConfig[] = [
   { 
@@ -80,6 +82,18 @@ const routes: RouteConfig[] = [
     component: Admin,
     meta: { requiresAuth: true, menu: true, admin: true },
     // beforeEnter: roleGuard('admin') // Utilisation du roleGuard pour restreindre l'accès
+  },
+  {
+    path: '/materiel/create',
+    name: 'materiel_create',
+    component: MachineCreate,
+    meta: { requiresAuth: true, menu: false }
+  },
+  {
+    path: '/profil',
+    name: 'profil',
+    component: Utilisateur,
+    meta: { requiresAuth: true, menu: true }
   }
   // Exemple d'utilisation du roleGuard pour une route admin
   // { 
