@@ -258,7 +258,7 @@ resource "google_cloud_run_service" "backend" {
     
     spec {
       containers {
-        image = "${var.dockerhub_user}/muscuscope:backend-0.0.4"
+        image = "${var.dockerhub_user}/muscuscope:backend-0.0.8"
         
         # Configuration économique des ressources
         resources {
@@ -373,7 +373,7 @@ resource "google_cloud_run_service" "frontend" {
     
     spec {
       containers {
-        image = "${var.dockerhub_user}/muscuscope:frontend-0.0.4"
+        image = "${var.dockerhub_user}/muscuscope:frontend-0.0.12"
         
         resources {
           limits = {

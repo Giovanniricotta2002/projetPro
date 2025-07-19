@@ -63,7 +63,7 @@
                         </v-row>
                         <v-row>
                             <v-col>
-                                <v-alert v-if="auth.error" type="error" class="mt-2">{{ auth.error }}</v-alert>
+                                <v-alert v-if="auth.error && auth.error.value !== ''" type="error" class="mt-2">{{ auth.error }}</v-alert>
                             </v-col>
                         </v-row>
                     </v-container>

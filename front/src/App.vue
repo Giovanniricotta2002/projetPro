@@ -1,9 +1,13 @@
 <template>
   <v-app>
-    <router-view />
+    <Navigation>
+      <router-view />
+    </Navigation>
   </v-app>
 </template>
 
 <script lang="ts" setup>
+import Navigation from './components/Navigation.vue';
+
   //
 </script>

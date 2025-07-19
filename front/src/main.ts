@@ -22,7 +22,6 @@ registerPlugins(app)
 
 console.log(import.meta.env);
 
-
 initAuth().then(() => {
     app.mount('#app')
 })

@@ -8,8 +8,13 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AdminDiscussionHistory: typeof import('./components/admin/AdminDiscussionHistory.vue')['default']
+    AdminForumQuick: typeof import('./components/admin/AdminForumQuick.vue')['default']
+    AdminForums: typeof import('./components/admin/AdminForums.vue')['default']
+    AdminUsers: typeof import('./components/admin/AdminUsers.vue')['default']
     AppFooter: typeof import('./components/AppFooter.vue')['default']
     HelloWorld: typeof import('./components/HelloWorld.vue')['default']
+    Navigation: typeof import('./components/Navigation.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Test: typeof import('./components/Test.vue')['default']

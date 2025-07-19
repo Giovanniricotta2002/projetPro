@@ -10,13 +10,16 @@ WORKDIR /app
 # Copier les fichiers de dépendances
 COPY package*.json ./
 
+# Installer gcloud CLI pour récupérer l'URL du backend
+RUN apk add --no-cache curl python3 py3-pip bash
+
 # Installer les dépendances (incluant devDependencies pour le build)
 RUN npm ci --silent
 
 # Copier le code source
 COPY . .
 
-# Arguments de build (passés depuis Terraform/docker build)
+# Arguments de build (passés depuis docker build ou script)
 ARG VITE_API_URL=http://localhost:80
 ARG VITE_APP_NAME=MuscuScope
 
@@ -28,8 +31,8 @@ ENV VITE_APP_NAME=${VITE_APP_NAME}
 # Build de l'application pour la production (séquentiel pour éviter run-p)
 RUN npm run type-check && npm run build-only
 
-# Stage 2: Production avec Nginx
-FROM nginx:1.25-alpine AS production
+# Stage 2: Production avec Nginx (version plus sécurisée)
+FROM nginx:1.26-alpine AS production
 
 # Copier la configuration Nginx personnalisée
 COPY <<EOF /etc/nginx/conf.d/default.conf

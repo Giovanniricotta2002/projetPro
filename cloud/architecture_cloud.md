@@ -1,4 +1,131 @@
-# Infrastructure Cloud (exemple)
+# Infrastructure Cloud - MuscuScope (GCP Cloud Run)
+
+## Architecture actuelle déployée
+
+```mermaid
+flowchart TD
+    User[Utilisateur Web]
+    Internet[Internet]
+    
+    subgraph GCP["Google Cloud Platform"]
+        subgraph CloudRun["Cloud Run Services"]
+            FE[Frontend Container<br/>Vue.js + Nginx<br/>Auto-scaling 0-3]
+            BE[Backend Container<br/>Symfony API<br/>Auto-scaling 0-3]
+            GR[Grafana Container<br/>Monitoring<br/>Auto-scaling 0-2]
+        end
+        
+        subgraph Data["Données"]
+            DB[Cloud SQL PostgreSQL<br/>db-f1-micro<br/>Private IP]
+            CS1[Cloud Storage<br/>Machine Images]
+            CS2[Cloud Storage<br/>Temp Uploads]
+            CS3[Cloud Storage<br/>Grafana Dashboards]
+        end
+        
+        subgraph Security["Sécurité"]
+            SM[Secret Manager<br/>JWT, Passwords]
+            VPC[VPC Network<br/>Private Access]
+            VPCC[VPC Connector<br/>Cloud Run ↔ VPC]
+        end
+    end
+
+    User -- HTTPS --> Internet
+    Internet -- HTTPS --> FE
+    Internet -- HTTPS --> BE
+    Internet -- HTTPS --> GR
+    
+    FE -- "API Calls<br/>CORS OK" --> BE
+    BE -- "Private SQL" --> DB
+    GR -- "Private SQL" --> DB
+    
+    BE -- "Files" --> CS1
+    BE -- "Uploads" --> CS2
+    GR -- "Dashboards" --> CS3
+    
+    BE -- "Secrets" --> SM
+    GR -- "Secrets" --> SM
+    
+    BE -- "VPC Access" --> VPCC
+    GR -- "VPC Access" --> VPCC
+    VPCC -- "Private Network" --> VPC
+    DB -- "Private IP" --> VPC
+```
+
+## Résolution du problème CORS
+
+```mermaid
+sequenceDiagram
+    participant U as Utilisateur
+    participant F as Frontend<br/>(Cloud Run)
+    participant B as Backend<br/>(Cloud Run)
+    
+    Note over F,B: ❌ Problème initial
+    F->>B: GET https://api.muscuscope.local/api/csrfToken
+    B-->>F: CORS Error (domaine non autorisé)
+    
+    Note over F,B: ✅ Solution implémentée
+    Note over F: Build avec VITE_API_URL=https://backend-api-*.run.app
+    Note over B: CORS_ALLOW_ORIGIN=https://*-run.app
+    
+    U->>F: Accès à l'application
+    F->>B: GET https://backend-api-66g7tud2sq-ew.a.run.app/api/csrfToken
+    B-->>F: 200 OK + token CSRF
+    F-->>U: Application fonctionnelle
+```
+
+## Infrastructure économique (Coûts ~30-50€/mois)
+
+```mermaid
+flowchart LR
+    subgraph Compute["Compute (Cloud Run)"]
+        direction TB
+        CR1["Frontend: 0-3 instances<br/>256Mi RAM, 1 vCPU<br/>Scale-to-zero"]
+        CR2["Backend: 0-3 instances<br/>512Mi RAM, 1 vCPU<br/>Scale-to-zero"]
+        CR3["Grafana: 0-2 instances<br/>256Mi RAM, 0.5 vCPU<br/>Scale-to-zero"]
+    end
+    
+    subgraph Storage["Stockage"]
+        direction TB
+        SQL["Cloud SQL PostgreSQL<br/>db-f1-micro (0.6GB RAM)<br/>10GB HDD"]
+        CS["Cloud Storage<br/>STANDARD class<br/>Auto-delete lifecycle"]
+    end
+    
+    subgraph Network["Réseau"]
+        direction TB
+        VPC["VPC gratuit<br/>Private Google Access"]
+        VPCC["VPC Connector<br/>2-3 instances min"]
+    end
+    
+    Compute --> Storage
+    Compute --> Network
+```
+
+## Déploiement automatisé
+
+```mermaid
+flowchart TD
+    Dev[Développeur]
+    Script[rebuild-frontend.sh]
+    
+    subgraph Build["Build Process"]
+        GetURL[Récupération URL Backend<br/>gcloud describe]
+        BuildFE[Build Frontend<br/>docker build --build-arg]
+        PushImg[Push Docker Hub<br/>giovanni2002ynov/muscuscope]
+        Deploy[Deploy Cloud Run<br/>gcloud run services update]
+    end
+    
+    subgraph Result["Résultat"]
+        URLs[URLs finales<br/>Frontend + Backend]
+        Test[Tests CORS<br/>curl + browser]
+    end
+    
+    Dev --> Script
+    Script --> GetURL
+    GetURL --> BuildFE
+    BuildFE --> PushImg
+    PushImg --> Deploy
+    Deploy --> URLs
+    URLs --> Test
+```
 
 ```mermaid
 flowchart TD
