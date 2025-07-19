@@ -56,17 +56,17 @@ const routes: RouteConfig[] = [
     meta: { requiresAuth: false, menu: true }
   },
   {
-    path: '/materiel/:id',
-    name: 'materiel',
-    component: MaterielInfo,
-    meta: { requiresAuth: false, menu: false }
-  },
-  {
-    path: '/materiel/:id/edit',
-    name: 'materiel',
+    path: '/materiel/:materielId/edit',
+    name: 'materiel_edit',
     component: EditMachine,
     meta: { requiresAuth: false, menu: false },
     // beforeEnter: roleGuard('admin', 'editor') // Utilisation du roleGuard pour restreindre l'accès
+  },
+  {
+    path: '/materiel/:materielId',
+    name: 'materiel',
+    component: MaterielInfo,
+    meta: { requiresAuth: true, menu: false }
   },
   {
     path: '/logout',
@@ -78,7 +78,8 @@ const routes: RouteConfig[] = [
     path: '/admin',
     name: 'admin',
     component: Admin,
-    meta: { requiresAuth: true, menu: true, admin: true }
+    meta: { requiresAuth: true, menu: true, admin: true },
+    // beforeEnter: roleGuard('admin') // Utilisation du roleGuard pour restreindre l'accès
   }
   // Exemple d'utilisation du roleGuard pour une route admin
   // { 
