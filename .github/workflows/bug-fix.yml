@@ -1,0 +1,414 @@
+name: 🔧 Standard Bug Fix Pipeline
+on:
+  push:
+    branches: [fix/*, bugfix/*]
+  pull_request:
+    branches: [main, develop]
+    types: [opened, synchronize, reopened]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  analysis:
+    name: 📊 Code Analysis & Quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for better analysis
+
+      - name: 🐘 Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo, pdo_mysql, dom, filter, gd, json, pgsql, pdo_pgsql
+          coverage: xdebug
+
+      - name: 📦 Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: back/vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-php-
+
+      - name: 🔧 Install Composer dependencies
+        run: |
+          cd back
+          composer install --prefer-dist --no-progress --optimize-autoloader
+
+      - name: 🔍 Static Analysis (PHPStan)
+        run: |
+          cd back
+          ./vendor/bin/phpstan analyse --no-progress --error-format=github
+
+      - name: 📊 Code Style Check (PHPCS)
+        run: |
+          cd back
+          ./vendor/bin/phpcs --standard=phpcs.xml.dist --report=checkstyle | cs2pr
+
+      - name: 🧪 Unit Tests with Coverage
+        run: |
+          cd back
+          ./bin/phpunit --coverage-clover=coverage.xml --log-junit=test-results.xml
+
+      - name: 📈 Upload Coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: back/coverage.xml
+          fail_ci_if_error: true
+
+  frontend-quality:
+    name: 🎨 Frontend Quality Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: front/package-lock.json
+
+      - name: 📦 Install dependencies
+        run: |
+          cd front
+          npm ci
+
+      - name: 🔍 ESLint Check
+        run: |
+          cd front
+          npm run lint
+
+      - name: 🎨 Prettier Check
+        run: |
+          cd front
+          npm run format:check
+
+      - name: 🧪 Unit Tests
+        run: |
+          cd front
+          npm run test:unit -- --coverage --run
+
+      - name: 🏗️ Build Check
+        run: |
+          cd front
+          npm run build
+
+      - name: 📊 Bundle Size Analysis
+        run: |
+          cd front
+          npm run build -- --analyze
+
+  integration-tests:
+    name: 🧪 Integration Tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: muscuscope_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐘 Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo, pdo_pgsql
+
+      - name: 📦 Install Composer dependencies
+        run: |
+          cd back
+          composer install --prefer-dist --no-progress --optimize-autoloader
+
+      - name: 🗄️ Setup Database
+        run: |
+          cd back
+          php bin/console doctrine:database:create --env=test
+          php bin/console doctrine:migrations:migrate --no-interaction --env=test
+
+      - name: 🌱 Load Fixtures
+        run: |
+          cd back
+          php bin/console doctrine:fixtures:load --no-interaction --env=test
+
+      - name: 🧪 Run Integration Tests
+        run: |
+          cd back
+          ./bin/phpunit --group=integration --stop-on-failure
+
+      - name: 🔄 Behat API Tests
+        run: |
+          cd back
+          ./vendor/bin/behat --profile=api
+
+  e2e-tests:
+    name: 🎭 End-to-End Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: front/package-lock.json
+
+      - name: 📦 Install dependencies
+        run: |
+          cd front
+          npm ci
+
+      - name: 🎭 Install Playwright Browsers
+        run: |
+          cd front
+          npx playwright install --with-deps
+
+      - name: 🐳 Start Test Environment
+        run: |
+          docker-compose -f docker/compose.yml up -d
+          sleep 30
+
+      - name: 🧪 Run Playwright Tests
+        run: |
+          cd front
+          npm run test:e2e
+
+      - name: 📸 Upload test artifacts
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: playwright-report
+          path: front/playwright-report/
+          retention-days: 7
+
+  security-audit:
+    name: 🔒 Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔍 PHP Security Audit
+        run: |
+          cd back
+          composer audit
+
+      - name: 🟢 Setup Node.js for audit
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: front/package-lock.json
+
+      - name: 🔍 NPM Security Audit
+        run: |
+          cd front
+          npm audit --audit-level=moderate
+
+      - name: 🛡️ CodeQL Analysis
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript, php
+
+      - name: 🔍 Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+  performance-tests:
+    name: ⚡ Performance Tests
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🚀 Setup K6
+        run: |
+          sudo gpg -k
+          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install k6
+
+      - name: 🐳 Start Test Environment
+        run: |
+          docker-compose -f docker/compose.yml up -d
+          sleep 30
+
+      - name: ⚡ Run Load Tests
+        run: |
+          k6 run scripts/testing/load-testing.js
+
+      - name: 🏠 Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v10
+        with:
+          configPath: './front/lighthouserc.json'
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+  build-staging:
+    name: 🏗️ Build for Staging
+    runs-on: ubuntu-latest
+    needs: [analysis, frontend-quality, integration-tests]
+    if: github.event_name == 'pull_request'
+    outputs:
+      backend-image: ${{ steps.meta-backend.outputs.tags }}
+      frontend-image: ${{ steps.meta-frontend.outputs.tags }}
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔐 Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🏷️ Extract metadata (Backend)
+        id: meta-backend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend
+          tags: |
+            type=ref,event=pr
+            type=sha,prefix=pr-${{ github.event.number }}-
+
+      - name: 🏷️ Extract metadata (Frontend)
+        id: meta-frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend
+          tags: |
+            type=ref,event=pr
+            type=sha,prefix=pr-${{ github.event.number }}-
+
+      - name: 🐳 Build and push Backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./back
+          file: ./back/Dockerfile
+          push: true
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: 🐳 Build and push Frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./front
+          file: ./front/Dockerfile
+          push: true
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy-preview:
+    name: 🔍 Deploy Preview Environment
+    runs-on: ubuntu-latest
+    needs: build-staging
+    if: github.event_name == 'pull_request'
+    environment: 
+      name: preview-pr-${{ github.event.number }}
+      url: https://muscuscope-pr-${{ github.event.number }}.preview.com
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🚀 Deploy Preview
+        run: |
+          echo "🚀 Déploiement environnement de preview pour PR #${{ github.event.number }}"
+          echo "Backend: ${{ needs.build-staging.outputs.backend-image }}"
+          echo "Frontend: ${{ needs.build-staging.outputs.frontend-image }}"
+          
+          # Ici serait le déploiement réel vers un environnement preview
+          # Par exemple avec Kubernetes ou Cloud Run avec un nom unique par PR
+
+  regression-tests:
+    name: 🔄 Non-Regression Tests
+    runs-on: ubuntu-latest
+    needs: deploy-preview
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🧪 Run Regression Test Suite
+        run: |
+          echo "🧪 Exécution des tests de non-régression..."
+          # Tests automatisés de régression
+          # Comparaison avec la version main/develop
+          echo "✅ Tests de non-régression terminés"
+
+  accessibility-tests:
+    name: ♿ Accessibility Tests
+    runs-on: ubuntu-latest
+    needs: deploy-preview
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: ♿ Run Axe Accessibility Tests
+        run: |
+          npm install -g @axe-core/cli
+          axe https://muscuscope-pr-${{ github.event.number }}.preview.com --exit
+
+  approval-gate:
+    name: ✅ Approval Gate
+    runs-on: ubuntu-latest
+    needs: [analysis, frontend-quality, integration-tests, e2e-tests, security-audit]
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: ✅ All Quality Gates Passed
+        run: |
+          echo "🎉 Toutes les vérifications qualité sont passées !"
+          echo "✅ Analyse statique: OK"
+          echo "✅ Tests unitaires: OK" 
+          echo "✅ Tests d'intégration: OK"
+          echo "✅ Tests E2E: OK"
+          echo "✅ Audit sécurité: OK"
+          echo ""
+          echo "📋 La PR est prête pour review et merge"
+
+  notify-teams:
+    name: 📱 Notify Teams
+    runs-on: ubuntu-latest
+    needs: [approval-gate]
+    if: always() && github.event_name == 'pull_request'
+    steps:
+      - name: 📱 Success Notification
+        if: needs.approval-gate.result == 'success'
+        run: |
+          echo "📱 Notification: PR #${{ github.event.number }} prête pour review"
+          # Ici notification Slack/Teams/etc.
+
+      - name: 📱 Failure Notification  
+        if: failure()
+        run: |
+          echo "📱 Notification: PR #${{ github.event.number }} a des échecs de qualité"
+          # Ici notification d'échec

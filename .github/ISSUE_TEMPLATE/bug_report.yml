@@ -1,0 +1,219 @@
+name: 🐛 Fiche d'Anomalie Standard
+description: Template standardisé pour le signalement d'anomalies dans MuscuScope
+title: "[BUG] "
+labels: [ "bug", "needs-triage" ]
+projects: [ "Giovanniricotta2002/1" ]
+assignees: []
+body:
+- type: markdown
+  attributes:
+    value: |
+      # 🐛 Fiche d'Anomalie Standard - MuscuScope
+
+      Merci de remplir ce formulaire avec le maximum de détails pour nous aider à reproduire et corriger l'anomalie rapidement.
+
+      ---
+
+- type: dropdown
+  id: criticite
+  attributes:
+    label: 🎯 Niveau de Criticité
+    description: Évaluez l'impact de l'anomalie sur l'application
+    options:
+    - 🔴 CRITIQUE - Blocage complet de l'application
+    - 🟠 MAJEUR - Fonctionnalité principale indisponible
+    - 🟡 MINEUR - Dysfonctionnement partiel
+    - 🔵 COSMÉTIQUE - Problème d'affichage sans impact
+    default: 2
+  validations:
+    required: true
+
+- type: dropdown
+  id: type_anomalie
+  attributes:
+    label: 📂 Type d'Anomalie
+    description: Catégorisez le type de problème rencontré
+    options:
+    - 🔧 FONCTIONNELLE - Calcul incorrect, flux cassé
+    - ⚡ PERFORMANCE - Lenteur, timeout
+    - 🔒 SÉCURITÉ - Faille, accès non autorisé
+    - 🎨 INTERFACE - Responsive cassé, bouton non cliquable
+    - 💾 DONNÉES - Corruption, perte d'intégrité
+    default: 0
+  validations:
+    required: true
+
+- type: input
+  id: environment_version
+  attributes:
+    label: 📱 Version de l'Application
+    description: "Exemple: v1.2.0"
+    placeholder: "v1.2.0"
+  validations:
+    required: true
+
+- type: dropdown
+  id: environment_browser
+  attributes:
+    label: 🌐 Navigateur
+    description: Navigateur utilisé lors de la détection
+    options:
+    - Chrome
+    - Firefox
+    - Safari
+    - Edge
+    - Autre
+  validations:
+    required: true
+
+- type: input
+  id: environment_os
+  attributes:
+    label: 💻 Système d'Exploitation
+    description: "Exemple: Windows 11, macOS 14.0, Ubuntu 22.04"
+    placeholder: "Windows 11"
+  validations:
+    required: true
+
+- type: input
+  id: environment_url
+  attributes:
+    label: 🔗 URL de la Page Concernée
+    description: URL complète où l'anomalie a été détectée
+    placeholder: "https://app.muscuscope.com/machines"
+  validations:
+    required: true
+
+- type: textarea
+  id: description
+  attributes:
+    label: 📝 Description de l'Anomalie
+    description: Décrivez clairement le problème rencontré
+    placeholder: |
+      Exemple:
+      La liste des machines ne se charge pas après connexion.
+      Erreur 500 retournée par l'API /api/machines
+  validations:
+    required: true
+
+- type: textarea
+  id: reproduction_steps
+  attributes:
+    label: 🔄 Étapes de Reproduction
+    description: Listez les étapes précises pour reproduire l'anomalie
+    placeholder: |
+      1. Se connecter avec user@test.com
+      2. Naviguer vers /machines
+      3. Observer l'erreur 500
+    value: |
+      1. 
+      2. 
+      3. 
+  validations:
+    required: true
+
+- type: textarea
+  id: expected_behavior
+  attributes:
+    label: ✅ Comportement Attendu
+    description: Décrivez ce qui devrait se passer normalement
+    placeholder: "La liste des machines devrait s'afficher avec toutes les machines disponibles"
+  validations:
+    required: true
+
+- type: textarea
+  id: actual_behavior
+  attributes:
+    label: ❌ Comportement Observé
+    description: Décrivez ce qui se passe réellement
+    placeholder: "Une erreur 500 s'affiche et la liste reste vide"
+  validations:
+    required: true
+
+- type: textarea
+  id: technical_data
+  attributes:
+    label: 🔧 Données Techniques
+    description: Informations techniques supplémentaires (stack trace, erreurs console, etc.)
+    placeholder: |
+      - Stack trace: TypeError: Cannot read property 'length' of undefined
+      - Request ID: req-789456123
+      - User Agent: Mozilla/5.0...
+      - IP: 192.168.1.100
+      - Erreur console: [object Object]
+
+- type: checkboxes
+  id: impact_assessment
+  attributes:
+    label: 📊 Évaluation de l'Impact
+    description: Cochez les impacts observés
+    options:
+    - label: Blocage complet pour certains utilisateurs
+    - label: Fonctionnalité core indisponible
+    - label: Dégradation de l'expérience utilisateur
+    - label: Problème de performance
+    - label: Problème de sécurité potentiel
+    - label: Perte de données possible
+
+- type: textarea
+  id: users_affected
+  attributes:
+    label: 👥 Utilisateurs Affectés
+    description: Précisez quels utilisateurs sont concernés
+    placeholder: |
+      - Nombre estimé: 100 utilisateurs
+      - Type: Tous les utilisateurs connectés
+      - Profils: Administrateurs uniquement
+
+- type: textarea
+  id: workaround
+  attributes:
+    label: 🔄 Contournement Disponible
+    description: Y a-t-il une solution de contournement ?
+    placeholder: |
+      - Rafraîchir la page fonctionne temporairement
+      - OU: Aucun contournement disponible
+
+- type: textarea
+  id: additional_context
+  attributes:
+    label: 📎 Contexte Supplémentaire
+    description: Toute information supplémentaire utile
+    placeholder: |
+      - L'erreur est apparue après le déploiement v1.2.0
+      - Semble affecter uniquement les nouveaux utilisateurs
+      - Le problème est intermittent
+
+- type: checkboxes
+  id: attachments_checklist
+  attributes:
+    label: 📎 Pièces Jointes
+    description: Cochez les éléments que vous pouvez fournir
+    options:
+    - label: 📸 Captures d'écran de l'erreur
+    - label: 🎥 Vidéo de reproduction
+    - label: 📄 Logs d'erreur (fichier .txt)
+    - label: 🌐 Export des logs réseau (.har)
+    - label: 📊 Métriques de performance
+
+- type: markdown
+  attributes:
+    value: |
+      ---
+
+      ## 📋 Pour l'Équipe de Développement
+
+      **Les champs suivants seront complétés par l'équipe technique :**
+
+      - **ID Anomalie** : Sera généré automatiquement
+      - **Assignation** : Tech Lead assignera
+      - **Estimation** : Complexité évaluée lors du triage
+      - **Sprint** : Planification selon criticité
+
+      ---
+
+      **🚨 Pour les anomalies critiques**, contactez immédiatement :
+      - 📞 Astreinte DevOps : +33 6 XX XX XX XX
+      - 💬 Slack : #incidents-production
+
+      Merci pour votre contribution à l'amélioration de MuscuScope ! 🙏
