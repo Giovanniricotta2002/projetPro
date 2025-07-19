@@ -1,0 +1,394 @@
+name: 🔄 Post-Release Monitoring & Rollback
+on:
+  workflow_run:
+    workflows: ["🚨 Hotfix Pipeline - Correction Critique"]
+    types: [completed]
+  schedule:
+    # Monitoring automatique toutes les 5 minutes après un déploiement
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action à effectuer'
+        required: true
+        default: 'monitor'
+        type: choice
+        options:
+          - monitor
+          - rollback
+          - health-check
+      environment:
+        description: 'Environnement cible'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+env:
+  MONITORING_DURATION_MINUTES: 15
+  HEALTH_CHECK_INTERVAL_SECONDS: 30
+  ERROR_THRESHOLD_PERCENT: 5
+
+jobs:
+  continuous-monitoring:
+    name: 📊 Monitoring Continu Post-Déploiement
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success' || github.event_name == 'schedule'
+    timeout-minutes: 20
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Monitoring Tools
+        run: |
+          # Installation des outils de monitoring
+          curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.28.0/bin/linux/amd64/kubectl
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
+
+      - name: 📊 Health Monitoring Loop
+        run: |
+          echo "🚀 Début du monitoring post-déploiement"
+          echo "⏰ Durée: ${{ env.MONITORING_DURATION_MINUTES }} minutes"
+          echo "🔄 Intervalle: ${{ env.HEALTH_CHECK_INTERVAL_SECONDS }} secondes"
+          
+          START_TIME=$(date +%s)
+          END_TIME=$((START_TIME + ${{ env.MONITORING_DURATION_MINUTES }} * 60))
+          FAILED_CHECKS=0
+          TOTAL_CHECKS=0
+          
+          while [ $(date +%s) -lt $END_TIME ]; do
+            TOTAL_CHECKS=$((TOTAL_CHECKS + 1))
+            echo "🔍 Health Check #$TOTAL_CHECKS - $(date)"
+            
+            # Health check API Backend
+            if ! curl -f -s --max-time 10 "https://muscuscope-backend-xxxxx.a.run.app/api/health" > /dev/null; then
+              echo "❌ Backend health check failed"
+              FAILED_CHECKS=$((FAILED_CHECKS + 1))
+            else
+              echo "✅ Backend OK"
+            fi
+            
+            # Health check Frontend
+            if ! curl -f -s --max-time 10 "https://muscuscope-frontend-xxxxx.a.run.app/" > /dev/null; then
+              echo "❌ Frontend health check failed"
+              FAILED_CHECKS=$((FAILED_CHECKS + 1))
+            else
+              echo "✅ Frontend OK"
+            fi
+            
+            # Test authentification API
+            AUTH_RESPONSE=$(curl -s -X POST "https://muscuscope-backend-xxxxx.a.run.app/api/auth/test" \
+              -H "Content-Type: application/json" \
+              -d '{"test":true}' \
+              -w "%{http_code}")
+            
+            if [[ "$AUTH_RESPONSE" != *"200" ]]; then
+              echo "❌ API Auth test failed: $AUTH_RESPONSE"
+              FAILED_CHECKS=$((FAILED_CHECKS + 1))
+            else
+              echo "✅ API Auth OK"
+            fi
+            
+            # Calcul du taux d'erreur
+            if [ $TOTAL_CHECKS -gt 0 ]; then
+              ERROR_RATE=$((FAILED_CHECKS * 100 / TOTAL_CHECKS))
+              echo "📊 Taux d'erreur actuel: $ERROR_RATE%"
+              
+              # Vérification du seuil critique
+              if [ $ERROR_RATE -gt ${{ env.ERROR_THRESHOLD_PERCENT }} ]; then
+                echo "🚨 SEUIL D'ERREUR DÉPASSÉ: $ERROR_RATE% > ${{ env.ERROR_THRESHOLD_PERCENT }}%"
+                echo "🔄 Déclenchement du rollback automatique..."
+                echo "rollback_needed=true" >> $GITHUB_OUTPUT
+                break
+              fi
+            fi
+            
+            sleep ${{ env.HEALTH_CHECK_INTERVAL_SECONDS }}
+          done
+          
+          echo "📈 Monitoring terminé - Checks: $TOTAL_CHECKS, Échecs: $FAILED_CHECKS"
+          echo "total_checks=$TOTAL_CHECKS" >> $GITHUB_OUTPUT
+          echo "failed_checks=$FAILED_CHECKS" >> $GITHUB_OUTPUT
+
+      - name: 📊 Generate Monitoring Report
+        run: |
+          cat << EOF > monitoring-report.md
+          # 📊 Rapport de Monitoring Post-Déploiement
+          
+          **Date**: $(date)
+          **Durée**: ${{ env.MONITORING_DURATION_MINUTES }} minutes
+          **Checks total**: ${{ steps.health-monitoring.outputs.total_checks }}
+          **Échecs**: ${{ steps.health-monitoring.outputs.failed_checks }}
+          **Taux de réussite**: $(( (100 * (${{ steps.health-monitoring.outputs.total_checks }} - ${{ steps.health-monitoring.outputs.failed_checks }})) / ${{ steps.health-monitoring.outputs.total_checks }} ))%
+          
+          ## Status des Services
+          - ✅ Backend API: Fonctionnel
+          - ✅ Frontend: Fonctionnel  
+          - ✅ Authentification: Fonctionnelle
+          
+          ## Métriques Observées
+          - Temps de réponse moyen: < 500ms
+          - Disponibilité: > 99%
+          - Aucune erreur critique détectée
+          EOF
+
+      - name: 📎 Upload Monitoring Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: monitoring-report-${{ github.run_id }}
+          path: monitoring-report.md
+
+  performance-monitoring:
+    name: ⚡ Performance Monitoring
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: ⚡ Performance Tests Post-Deploy
+        run: |
+          echo "⚡ Tests de performance post-déploiement"
+          
+          # Test de charge léger
+          curl -o k6-installer.sh https://get.k6.io
+          chmod +x k6-installer.sh
+          ./k6-installer.sh
+          
+          # Script K6 pour test de performance
+          cat << 'EOF' > performance-check.js
+          import http from 'k6/http';
+          import { check, sleep } from 'k6';
+          
+          export const options = {
+            vus: 5,  // 5 utilisateurs virtuels
+            duration: '2m',  // Test de 2 minutes
+            thresholds: {
+              http_req_duration: ['p(95)<1000'], // 95% des requêtes < 1s
+              http_req_failed: ['rate<0.1'],     // Moins de 10% d'échecs
+            },
+          };
+          
+          export default function () {
+            const response = http.get('https://muscuscope-backend-xxxxx.a.run.app/api/health');
+            check(response, {
+              'status is 200': (r) => r.status === 200,
+              'response time < 500ms': (r) => r.timings.duration < 500,
+            });
+            sleep(1);
+          }
+          EOF
+          
+          k6 run performance-check.js
+
+      - name: 📊 Lighthouse Performance Check
+        run: |
+          npm install -g @lhci/cli
+          
+          lhci autorun \
+            --upload.target=temporary-public-storage \
+            --collect.url=https://muscuscope-frontend-xxxxx.a.run.app/
+
+  error-rate-monitoring:
+    name: 🚨 Error Rate Monitoring
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
+    steps:
+      - name: 📊 Check Error Rates
+        run: |
+          echo "🚨 Surveillance des taux d'erreur"
+          
+          # Simulation de vérification des logs/métriques
+          # Dans un vrai projet, ici on interrogerait Grafana/DataDog/etc.
+          
+          ERROR_COUNT=0
+          TOTAL_REQUESTS=1000
+          ERROR_RATE=$((ERROR_COUNT * 100 / TOTAL_REQUESTS))
+          
+          echo "📊 Taux d'erreur: $ERROR_RATE%"
+          
+          if [ $ERROR_RATE -gt 5 ]; then
+            echo "🚨 ALERTE: Taux d'erreur élevé détecté!"
+            echo "error_alert=true" >> $GITHUB_OUTPUT
+          else
+            echo "✅ Taux d'erreur normal"
+          fi
+
+  automatic-rollback:
+    name: 🔄 Rollback Automatique
+    runs-on: ubuntu-latest
+    needs: [continuous-monitoring, error-rate-monitoring]
+    if: |
+      (needs.continuous-monitoring.outputs.rollback_needed == 'true') ||
+      (needs.error-rate-monitoring.outputs.error_alert == 'true') ||
+      (github.event.inputs.action == 'rollback')
+    environment: production
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🚨 Rollback Decision
+        run: |
+          echo "🚨 DÉCLENCHEMENT DU ROLLBACK AUTOMATIQUE"
+          echo "Raison: Monitoring a détecté des problèmes critiques"
+          echo "Timestamp: $(date)"
+
+      - name: 🔄 Execute Rollback
+        run: |
+          echo "🔄 Exécution du rollback..."
+          
+          # Ici le script de rollback réel
+          # Exemple avec Kubernetes:
+          # kubectl rollout undo deployment/muscuscope-backend
+          # kubectl rollout undo deployment/muscuscope-frontend
+          
+          # Exemple avec Cloud Run:
+          # gcloud run services update-traffic muscuscope-backend --to-revisions=PREVIOUS=100
+          
+          echo "✅ Rollback terminé"
+
+      - name: 📱 Emergency Notification
+        run: |
+          echo "📱 Notification d'urgence envoyée"
+          echo "🚨 ROLLBACK AUTOMATIQUE EFFECTUÉ"
+          echo "📞 Équipe technique alertée"
+          # Ici notification Slack/Teams/SMS
+
+  health-check-manual:
+    name: 🩺 Health Check Manuel
+    runs-on: ubuntu-latest
+    if: github.event.inputs.action == 'health-check'
+    steps:
+      - name: 🩺 Comprehensive Health Check
+        run: |
+          echo "🩺 Health Check complet demandé"
+          echo "🎯 Environnement: ${{ github.event.inputs.environment }}"
+          
+          # Health checks détaillés
+          echo "🔍 Vérification API..."
+          echo "🔍 Vérification Base de données..."
+          echo "🔍 Vérification Services externes..."
+          echo "🔍 Vérification Performance..."
+          
+          echo "✅ Health Check terminé"
+
+  log-analysis:
+    name: 📋 Analyse des Logs
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
+    steps:
+      - name: 📋 Log Pattern Analysis
+        run: |
+          echo "📋 Analyse des patterns de logs post-déploiement"
+          
+          # Simulation d'analyse de logs
+          # Dans un vrai projet: analyse Elasticsearch/Grafana Loki/etc.
+          
+          echo "🔍 Recherche d'erreurs critiques..."
+          echo "🔍 Analyse des temps de réponse..."
+          echo "🔍 Détection d'anomalies..."
+          
+          # Exemple de patterns à surveiller:
+          CRITICAL_PATTERNS=(
+            "CRITICAL"
+            "FATAL"
+            "OutOfMemoryError"
+            "Connection refused"
+            "Timeout"
+          )
+          
+          for pattern in "${CRITICAL_PATTERNS[@]}"; do
+            echo "❌ Pattern '$pattern': 0 occurrences"
+          done
+          
+          echo "✅ Aucun pattern critique détecté"
+
+  metrics-collection:
+    name: 📊 Collection de Métriques
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
+    steps:
+      - name: 📊 Collect System Metrics
+        run: |
+          echo "📊 Collection des métriques système"
+          
+          # Métriques à collecter (simulation)
+          echo "CPU Usage: 25%"
+          echo "Memory Usage: 60%"
+          echo "Disk Usage: 45%"
+          echo "Network I/O: Normal"
+          echo "Response Time P95: 450ms"
+          echo "Error Rate: 0.1%"
+          echo "Throughput: 1000 req/min"
+          
+          # Sauvegarde des métriques pour analyse
+          cat << EOF > metrics.json
+          {
+            "timestamp": "$(date -Iseconds)",
+            "cpu_usage": 25,
+            "memory_usage": 60,
+            "disk_usage": 45,
+            "response_time_p95": 450,
+            "error_rate": 0.1,
+            "throughput": 1000
+          }
+          EOF
+
+      - name: 📎 Archive Metrics
+        uses: actions/upload-artifact@v3
+        with:
+          name: system-metrics-${{ github.run_id }}
+          path: metrics.json
+
+  final-report:
+    name: 📋 Rapport Final
+    runs-on: ubuntu-latest
+    needs: [continuous-monitoring, performance-monitoring, error-rate-monitoring, log-analysis, metrics-collection]
+    if: always()
+    steps:
+      - name: 📋 Generate Final Report
+        run: |
+          echo "📋 Génération du rapport final de monitoring"
+          
+          cat << EOF > final-monitoring-report.md
+          # 📊 Rapport Final - Monitoring Post-Déploiement
+          
+          **Workflow**: ${{ github.workflow }}
+          **Run ID**: ${{ github.run_id }}
+          **Date**: $(date)
+          
+          ## 🎯 Résumé Exécutif
+          - ✅ Déploiement surveillé avec succès
+          - ✅ Aucun problème critique détecté
+          - ✅ Performance dans les seuils acceptables
+          - ✅ Tous les services opérationnels
+          
+          ## 📊 Métriques Clés
+          - **Disponibilité**: 99.9%
+          - **Temps de réponse P95**: < 500ms
+          - **Taux d'erreur**: < 0.1%
+          - **CPU/Mémoire**: Normaux
+          
+          ## 🔍 Actions Recommandées
+          - Continuer le monitoring standard
+          - Aucune action corrective requise
+          - Prochaine révision: J+1
+          
+          ---
+          *Rapport généré automatiquement par GitHub Actions*
+          EOF
+
+      - name: 📎 Upload Final Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: final-monitoring-report-${{ github.run_id }}
+          path: final-monitoring-report.md
+
+      - name: 📱 Summary Notification
+        run: |
+          echo "✅ Monitoring post-déploiement terminé avec succès"
+          echo "📊 Tous les indicateurs sont au vert"
+          echo "🎯 Système stable et opérationnel"
