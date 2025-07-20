@@ -1,0 +1,22 @@
+# 🚀 Template Configuration pour Issues GitHub
+
+Ce fichier configure les templates d'issues disponibles dans le repository MuscuScope.
+
+about: |
+  Choisissez le type d'issue approprié pour votre demande.
+  Pour les anomalies, utilisez le template "Fiche d'Anomalie Standard".
+
+blank_issues_enabled: false
+
+contact_links:
+  - name: 📚 Documentation
+    url: https://github.com/Giovanniricotta2002/projetPro/blob/main/README.md
+    about: Consultez la documentation complète du projet
+  
+  - name: 🔧 Support Technique
+    url: https://github.com/Giovanniricotta2002/projetPro/discussions
+    about: Posez vos questions techniques dans les discussions
+  
+  - name: 🚨 Incident Critique
+    url: mailto:tech.lead@muscuscope.com
+    about: Pour les incidents critiques, contactez directement l'équipe technique
