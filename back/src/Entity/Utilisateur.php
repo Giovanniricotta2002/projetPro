@@ -80,6 +80,12 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
+    /**
+     * @var Collection<int, Machine>
+     */
+    #[ORM\OneToMany(targetEntity: Machine::class, mappedBy: 'utilisateur')]
+    private Collection $creationMachine;
+
     public function __construct()
     {
         $this->dateCreation = new \DateTime();
@@ -89,6 +95,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
         $this->droits = new ArrayCollection();
         $this->forums = new ArrayCollection();
+        $this->creationMachine = new ArrayCollection();
     }
 
     public function getRoles(): array
@@ -107,7 +114,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getUserIdentifier(): string
     {
-        return ''; 
+        return '';
     }
 
     public function eraseCredentials(): void
@@ -235,6 +242,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     public function activate(): static
     {
         $this->status = UserStatus::ACTIVE;
+
         return $this;
     }
 
@@ -244,6 +252,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     public function deactivate(): static
     {
         $this->status = UserStatus::INACTIVE;
+
         return $this;
     }
 
@@ -253,6 +262,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     public function suspend(): static
     {
         $this->status = UserStatus::SUSPENDED;
+
         return $this;
     }
 
@@ -262,6 +272,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     public function ban(): static
     {
         $this->status = UserStatus::BANNED;
+
         return $this;
     }
 
@@ -272,6 +283,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->status = UserStatus::DELETED;
         $this->deletedAt = new \DateTime();
+
         return $this;
     }
 
@@ -433,5 +445,34 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
-    
+
+    /**
+     * @return Collection<int, Machine>
+     */
+    public function getCreationMachine(): Collection
+    {
+        return $this->creationMachine;
+    }
+
+    public function addCreationMachine(Machine $creationMachine): static
+    {
+        if (!$this->creationMachine->contains($creationMachine)) {
+            $this->creationMachine->add($creationMachine);
+            $creationMachine->setUtilisateur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCreationMachine(Machine $creationMachine): static
+    {
+        if ($this->creationMachine->removeElement($creationMachine)) {
+            // set the owning side to null (unless already changed)
+            if ($creationMachine->getUtilisateur() === $this) {
+                $creationMachine->setUtilisateur(null);
+            }
+        }
+
+        return $this;
+    }
 }

@@ -12,13 +12,11 @@ use App\DTO\TokenValidationResponseDTO;
 use App\Repository\UtilisateurRepository;
 use App\Service\HttpOnlyCookieService;
 use App\Service\InitSerializerService;
-use App\Service\JWTSecurityService;
 use App\Service\JWTService;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
-use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -65,9 +63,10 @@ final class TokenController extends AbstractController
     {
         // Extraire le refresh token depuis les cookies ou le body
         $refreshToken = $this->cookieService->extractRefreshToken($request);
-        
+
         if (!$refreshToken) {
             $errorDto = ErrorResponseDTO::create('Missing refresh token');
+
             return $this->json($errorDto->toArray(), Response::HTTP_BAD_REQUEST);
         }
 
@@ -194,7 +193,4 @@ final class TokenController extends AbstractController
             return $this->json($errorDto->toArray(), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
-
-
-
 }

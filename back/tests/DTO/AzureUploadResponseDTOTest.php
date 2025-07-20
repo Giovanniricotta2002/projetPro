@@ -15,7 +15,7 @@ class AzureUploadResponseDTOTest extends TestCase
         $expiresAt = '2025-07-03T12:00:00Z';
         $headers = [
             'x-ms-blob-type' => 'BlockBlob',
-            'Content-Type' => 'image/jpeg'
+            'Content-Type' => 'image/jpeg',
         ];
 
         // Act
@@ -41,7 +41,7 @@ class AzureUploadResponseDTOTest extends TestCase
         $expiresAt = '2025-07-03T12:00:00Z';
         $headers = [
             'x-ms-blob-type' => 'BlockBlob',
-            'Content-Type' => 'image/jpeg'
+            'Content-Type' => 'image/jpeg',
         ];
 
         $dto = new AzureUploadResponseDTO(
@@ -59,7 +59,7 @@ class AzureUploadResponseDTOTest extends TestCase
             'upload_url' => $uploadUrl,
             'blob_name' => $blobName,
             'expires_at' => $expiresAt,
-            'headers' => $headers
+            'headers' => $headers,
         ];
 
         $this->assertEquals($expectedArray, $array);
@@ -74,8 +74,8 @@ class AzureUploadResponseDTOTest extends TestCase
             'expires_at' => '2025-07-03T12:00:00Z',
             'headers' => [
                 'x-ms-blob-type' => 'BlockBlob',
-                'Content-Type' => 'image/jpeg'
-            ]
+                'Content-Type' => 'image/jpeg',
+            ],
         ];
 
         // Act
@@ -92,7 +92,7 @@ class AzureUploadResponseDTOTest extends TestCase
     {
         // Arrange - URL qui expire dans 1 heure
         $futureExpiry = (new \DateTime('+1 hour'))->format('Y-m-d\TH:i:s\Z');
-        
+
         $dto = new AzureUploadResponseDTO(
             uploadUrl: 'https://storage.blob.core.windows.net/container/blob?sig=signature',
             blobName: 'images/test.jpg',
@@ -108,7 +108,7 @@ class AzureUploadResponseDTOTest extends TestCase
     {
         // Arrange - URL expirée depuis 1 heure
         $pastExpiry = (new \DateTime('-1 hour'))->format('Y-m-d\TH:i:s\Z');
-        
+
         $dto = new AzureUploadResponseDTO(
             uploadUrl: 'https://storage.blob.core.windows.net/container/blob?sig=signature',
             blobName: 'images/test.jpg',
@@ -124,7 +124,7 @@ class AzureUploadResponseDTOTest extends TestCase
     {
         // Arrange - URL qui expire dans 3600 secondes (1 heure)
         $futureExpiry = (new \DateTime('+1 hour'))->format('Y-m-d\TH:i:s\Z');
-        
+
         $dto = new AzureUploadResponseDTO(
             uploadUrl: 'https://storage.blob.core.windows.net/container/blob?sig=signature',
             blobName: 'images/test.jpg',
@@ -144,7 +144,7 @@ class AzureUploadResponseDTOTest extends TestCase
     {
         // Arrange - URL expirée depuis 1 heure
         $pastExpiry = (new \DateTime('-1 hour'))->format('Y-m-d\TH:i:s\Z');
-        
+
         $dto = new AzureUploadResponseDTO(
             uploadUrl: 'https://storage.blob.core.windows.net/container/blob?sig=signature',
             blobName: 'images/test.jpg',
@@ -169,7 +169,7 @@ class AzureUploadResponseDTOTest extends TestCase
         // Act & Assert
         $reflection = new \ReflectionClass($dto);
         $this->assertTrue($reflection->isReadOnly());
-        
+
         foreach ($reflection->getProperties() as $property) {
             $this->assertTrue($property->isReadOnly());
         }
@@ -201,7 +201,7 @@ class AzureUploadResponseDTOTest extends TestCase
             headers: [
                 'x-ms-blob-type' => 'BlockBlob',
                 'Content-Type' => 'image/jpeg',
-                'Content-Length' => '1048576'
+                'Content-Length' => '1048576',
             ]
         );
 
@@ -228,7 +228,7 @@ class AzureUploadResponseDTOTest extends TestCase
 
         // Assert
         $this->assertEquals($expiresAt, $dto->expiresAt);
-        
+
         // Vérifier que c'est un format ISO 8601 valide
         $dateTime = \DateTime::createFromFormat('Y-m-d\TH:i:s\Z', $expiresAt);
         $this->assertInstanceOf(\DateTime::class, $dateTime);
@@ -257,7 +257,7 @@ class AzureUploadResponseDTOTest extends TestCase
             'upload_url' => 'https://storage.blob.core.windows.net/container/blob?sig=signature',
             'blob_name' => 'test.jpg',
             // expires_at manquant
-            'headers' => []
+            'headers' => [],
         ];
 
         // Act & Assert

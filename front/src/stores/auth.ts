@@ -2,7 +2,8 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch, readonly } from 'vue'
 import { apiEndpoint, corsRequestHeaders } from '../config'
-import type { ApiResponse, LoginData, RegisterData, User } from '../types/types'
+import type { ApiResponse, LoginData, User } from '../types/auth'
+import type { RegisterData } from '../types/auth'
 
 export const useAuthStore = defineStore('auth', () => {
   // État
@@ -323,13 +324,13 @@ export const useAuthStore = defineStore('auth', () => {
     isLoading: readonly(isLoading),
     error: readonly(error),
     isInitialized: readonly(isInitialized),
-    
+
     // Getters
     isAuthenticated,
     userName,
     userEmail,
     hasRole,
-    
+
     // Actions
     login,
     logout,
@@ -339,11 +340,14 @@ export const useAuthStore = defineStore('auth', () => {
     changePassword,
     clearError,
     $reset,
-    
+
     // Nouvelles fonctions pour cookies HTTPOnly et refresh
     refreshToken,
     startAuthCheck,
     stopAuthCheck,
     forceLogout,
+
+    // Expose apiRequest for use in components
+    apiRequest,
   }
 })

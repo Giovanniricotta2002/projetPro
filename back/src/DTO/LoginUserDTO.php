@@ -26,10 +26,10 @@ final readonly class LoginUserDTO
     public function __construct(
         #[OA\Property(property: 'id', type: 'integer', description: 'Identifiant unique de l\'utilisateur', example: 1)]
         public int $id,
-        
+
         #[OA\Property(property: 'username', type: 'string', description: 'Nom d\'utilisateur', example: 'john.doe')]
         public string $username,
-        
+
         #[OA\Property(
             property: 'roles',
             type: 'array',
@@ -38,7 +38,7 @@ final readonly class LoginUserDTO
             example: ['ROLE_USER']
         )]
         public array $roles,
-        
+
         #[OA\Property(
             property: 'last_visit',
             type: 'string',

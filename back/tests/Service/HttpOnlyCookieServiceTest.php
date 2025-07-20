@@ -155,7 +155,7 @@ class HttpOnlyCookieServiceTest extends TestCase
         $this->cookieService->setJwtCookies($response, $request, $tokens);
 
         $cookies = $response->headers->getCookies();
-        
+
         // Les cookies ne doivent pas être secure sur HTTP
         foreach ($cookies as $cookie) {
             $this->assertFalse($cookie->isSecure());

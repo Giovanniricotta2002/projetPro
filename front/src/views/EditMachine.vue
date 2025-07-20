@@ -6,6 +6,7 @@
         <v-form @submit.prevent="save">
           <v-text-field v-model="form.nom" label="Nom de la machine" required class="mb-4" />
           <v-text-field v-model="form.image" label="URL de l'image" required class="mb-4" />
+          <v-text-field v-model="form.description" label="Description" required class="mb-4" />
           <v-img :src="form.image" max-width="200" max-height="120" class="mb-4 mx-auto" v-if="form.image" />
           <h3 class="text-h6 font-weight-bold mb-2">Bulles</h3>
           <v-row>
@@ -33,13 +34,18 @@
           </v-card-actions>
         </v-form>
       </v-card>
+      <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000" location="top">
+        {{ snackbar.text }}
+      </v-snackbar>
     </v-container>
   </v-app>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
-import { useRouter } from 'vue-router'
+
+
+import { useAuthStore } from '@/stores/auth'
+import type { Machine } from '@/types/Machine'
 
 const types = [
   { title: 'Usage', value: 'usage' },
@@ -49,15 +55,43 @@ const types = [
   { title: 'Autre', value: 'autre' },
 ]
 
+
 const router = useRouter()
+const route = useRoute()
+const authStore = useAuthStore()
+
+const snackbar = ref<{ show: boolean; color: string; text: string }>({ show: false, color: 'success', text: '' })
+const showSnackbar = (msg: string, color: 'error'|'success' = 'error') => {
+  return { show: true, color: color, text: msg }
+}
 
 const form = reactive({
-  nom: 'Haltère hexagonale',
-  image: 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fimages.ctfassets.net%2Fipjoepkmtnha%2F5fQCLXzP2H5BG5VcODED43%2Fc3d521f38437d3181c1705bb9979568f%2Fhex-dumbbell_hero&f=1&nofb=1&ipt=15dc359e6340d1aa00a421d911774013ca9723ab3180ca199263745a24cd805f',
-  bulles: [
-    { id: 1, text: 'Musculation variée', type: 'usage' },
-    { id: 2, text: 'Poids variable', type: 'carac' },
-  ]
+  nom: '',
+  image: '',
+  bulles: [] as { id: number; text: string; type: string }[],
+})
+
+const machineId = Number(route.params.materielId)
+
+onMounted(async () => {
+  try {
+    const response = await authStore.apiRequest<Machine>(`/api/machines/${machineId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+    if (response.success && response.data) {
+      form.nom = response.data.name || ''
+      form.image = response.data.image || ''
+      form.bulles = response.data.infoMachines || []
+      form.description = response.data.description || ''
+    } else {
+      snackbar.value = showSnackbar(response.message || 'Erreur lors du chargement')
+    }
+  } catch (e) {
+    snackbar.value = showSnackbar('Erreur lors du chargement de la machine')
+  }
 })
 
 function addBulle() {
@@ -68,11 +102,28 @@ function addBulle() {
 function removeBulle(i: number) {
   form.bulles.splice(i, 1)
 }
-function save() {
-  // Ici tu peux envoyer form à l'API ou faire un emit
-  alert('Machine enregistrée ! (simulation)')
-//   router.back()
+async function save() {
+  try {
+    const response = await authStore.apiRequest(`/api/machines/${machineId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        nom: form.nom,
+        image: form.image,
+        description: form.description,
+        infoMachines: form.bulles,
+      }),
+    })
+    if (!response.success) throw new Error(response.message || 'Erreur lors de la modification')
+    snackbar.value = showSnackbar('Machine modifiée avec succès!', 'success')
+    setTimeout(() => router.back(), 1200)
+  } catch (e) {
+    snackbar.value = showSnackbar('Erreur lors de la modification de la machine')
+  }
 }
+
 </script>
 
 <style scoped>

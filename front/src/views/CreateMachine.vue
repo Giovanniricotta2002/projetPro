@@ -6,6 +6,7 @@
         <v-form @submit.prevent="save">
           <v-text-field v-model="form.nom" label="Nom de la machine" required class="mb-4" />
           <v-text-field v-model="form.image" label="URL de l'image" required class="mb-4" />
+          <v-text-field v-model="form.description" label="Description" required class="mb-4" />
           <v-img :src="form.image" max-width="200" max-height="120" class="mb-4 mx-auto" v-if="form.image" />
           <h3 class="text-h6 font-weight-bold mb-2">Bulles</h3>
           <v-row>
@@ -33,6 +34,9 @@
           </v-card-actions>
         </v-form>
       </v-card>
+      <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000" location="top">
+        {{ snackbar.text }}
+      </v-snackbar>
     </v-container>
   </v-app>
 </template>
@@ -42,26 +46,50 @@ import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { typesBulle } from '@/config/typesBulle'
 import type { InfoMachine } from '@/types/InfoMachine'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
+const snackbar = ref<{ show: boolean; color: string; text: string }>({ show: false, color: 'success', text: '' })
 
 const form = reactive({
   nom: '',
   image: '',
+  description: '',
   bulles: [] as InfoMachine[],
 })
 
 const types = typesBulle
+const authStore = useAuthStore()
 
 function addBulle() {
-  form.bulles.push({ id: Date.now() + Math.random(), text: '', type: types[0].value } as InfoMachine)
+  form.bulles.push({ text: '', type: types[0].value } as InfoMachine)
 }
 function removeBulle(i: number) {
   form.bulles.splice(i, 1)
 }
-function save() {
-  // TODO: Envoyer la machine à l'API/backend
-  // Simule un retour à la liste
-  router.push('/materiels')
+async function save() {
+  try {
+    const response = await authStore.apiRequest('/api/machines/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        nom: form.nom,
+        description: form.description,
+        image: form.image,
+        infoMachines: form.bulles,
+      }),
+    })
+    console.log(response, authStore.$id);
+    
+    if (!response.success) throw new Error(response.message || 'Erreur lors de la création')
+    snackbar.value = { show: true, color: 'success', text: 'Machine créée avec succès !' }
+    setTimeout(() => router.push('/materiels'), 1200)
+  } catch (e) {
+    console.log(e);
+    
+    snackbar.value = { show: true, color: 'error', text: 'Erreur lors de la création de la machine' }
+  }
 }
 </script>

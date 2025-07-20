@@ -38,11 +38,17 @@ class Machine
     /**
      * @var Collection<int, InfoMachine>
      */
-    #[ORM\OneToMany(targetEntity: InfoMachine::class, mappedBy: 'machine')]
+    #[ORM\OneToMany(targetEntity: InfoMachine::class, mappedBy: 'machine', cascade: ['persist'])]
     private Collection $infoMachines;
 
-    #[ORM\Column(type: Types::BLOB)]
-    private $image;
+    #[ORM\Column()]
+    private ?string $image = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $description = null;
+
+    #[ORM\ManyToOne(inversedBy: 'creationMachine')]
+    private ?Utilisateur $utilisateur = null;
 
     public function __construct()
     {
@@ -160,14 +166,38 @@ class Machine
         return $this;
     }
 
-    public function getImage()
+    public function getImage(): ?string
     {
         return $this->image;
     }
 
-    public function setImage($image): static
+    public function setImage(?string $image): static
     {
         $this->image = $image;
+
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): static
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    public function getUtilisateur(): ?Utilisateur
+    {
+        return $this->utilisateur;
+    }
+
+    public function setUtilisateur(?Utilisateur $utilisateur): static
+    {
+        $this->utilisateur = $utilisateur;
 
         return $this;
     }

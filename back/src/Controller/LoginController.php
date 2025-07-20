@@ -19,7 +19,6 @@ use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
-use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -71,7 +70,7 @@ final class LoginController extends AbstractController
             required: ['login', 'password'],
             properties: [
                 new OA\Property(property: 'login', type: 'string', description: 'Nom d\'utilisateur ou adresse email', example: 'john.doe'),
-                new OA\Property(property: 'password', type: 'string', description: 'Mot de passe de l\'utilisateur', format: 'password', example: 'motDePasseSecret123')
+                new OA\Property(property: 'password', type: 'string', description: 'Mot de passe de l\'utilisateur', format: 'password', example: 'motDePasseSecret123'),
             ]
         )
     )]
@@ -210,16 +209,19 @@ final class LoginController extends AbstractController
         // Sécurité supplémentaire sur le login
         if (strlen($username) < 3) {
             $errorDto = ErrorResponseDTO::create('Login must be at least 3 characters long');
+
             return $this->json($errorDto->toArray(), Response::HTTP_BAD_REQUEST);
         }
         if (strlen($username) > 180) {
             $errorDto = ErrorResponseDTO::create('Login must be less than 180 characters');
+
             return $this->json($errorDto->toArray(), Response::HTTP_BAD_REQUEST);
         }
 
         // Sécurité supplémentaire sur le mot de passe
         if (strlen($password) < 6) {
             $errorDto = ErrorResponseDTO::create('Password must be at least 6 characters long');
+
             return $this->json($errorDto->toArray(), Response::HTTP_BAD_REQUEST);
         }
 
@@ -270,7 +272,7 @@ final class LoginController extends AbstractController
         content: new OA\JsonContent(
             type: 'object',
             properties: [
-                new OA\Property(property: 'message', type: 'string', example: 'Logout successful')
+                new OA\Property(property: 'message', type: 'string', example: 'Logout successful'),
             ]
         )
     )]
@@ -283,5 +285,4 @@ final class LoginController extends AbstractController
 
         return $response;
     }
-
 }

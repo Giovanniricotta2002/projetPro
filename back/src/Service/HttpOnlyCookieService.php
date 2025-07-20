@@ -13,7 +13,7 @@ class HttpOnlyCookieService
 {
     public const ACCESS_TOKEN_COOKIE = 'access_token';
     public const REFRESH_TOKEN_COOKIE = 'refresh_token';
-    
+
     private const ACCESS_TOKEN_TTL = 3600; // 1 heure
     private const REFRESH_TOKEN_TTL = 604800; // 7 jours
     private const REFRESH_TOKEN_PATH = '/api/tokens/refresh';
@@ -72,7 +72,7 @@ class HttpOnlyCookieService
 
     /**
      * Extrait l'access token depuis les cookies httpOnly ou les headers Authorization.
-     * Priorité : Cookie > Header Authorization
+     * Priorité : Cookie > Header Authorization.
      */
     public function extractAccessToken(Request $request): ?string
     {
@@ -92,7 +92,7 @@ class HttpOnlyCookieService
 
     /**
      * Extrait le refresh token depuis les cookies httpOnly ou le body de la requête.
-     * Priorité : Cookie > Body JSON
+     * Priorité : Cookie > Body JSON.
      */
     public function extractRefreshToken(Request $request): ?string
     {
@@ -104,6 +104,7 @@ class HttpOnlyCookieService
         // Priorité 2 : Body de la requête (fallback pour les API clients)
         try {
             $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+
             return $data['refresh_token'] ?? null;
         } catch (\JsonException) {
             return null;
@@ -118,7 +119,7 @@ class HttpOnlyCookieService
         string $value,
         int $ttl,
         string $path,
-        Request $request
+        Request $request,
     ): Cookie {
         return new Cookie(
             name: $name,
@@ -156,7 +157,7 @@ class HttpOnlyCookieService
      */
     public function hasJwtCookies(Request $request): bool
     {
-        return $request->cookies->has(self::ACCESS_TOKEN_COOKIE) 
+        return $request->cookies->has(self::ACCESS_TOKEN_COOKIE)
             || $request->cookies->has(self::REFRESH_TOKEN_COOKIE);
     }
 

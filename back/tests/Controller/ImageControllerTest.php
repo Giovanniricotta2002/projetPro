@@ -21,7 +21,7 @@ class ImageControllerTest extends WebTestCase
     {
         // Arrange
         $client = static::createClient();
-        
+
         $filename = 'test-image.jpg';
         $uploadUrl = 'https://storage.blob.core.windows.net/container/test-image.jpg?sig=signature';
         $blobUrl = 'https://storage.blob.core.windows.net/container/test-image.jpg';
@@ -34,7 +34,7 @@ class ImageControllerTest extends WebTestCase
                 'upload_url' => $uploadUrl,
                 'blob_url' => $blobUrl,
                 'filename' => $filename,
-                'expires_at' => (new \DateTime('+1 hour'))->format('c')
+                'expires_at' => (new \DateTime('+1 hour'))->format('c'),
             ]);
 
         $client->getContainer()->set(AzureBlobImageService::class, $this->blobServiceMock);
@@ -44,13 +44,13 @@ class ImageControllerTest extends WebTestCase
             'CONTENT_TYPE' => 'application/json',
         ], json_encode([
             'filename' => $filename,
-            'expiry' => 3600
+            'expiry' => 3600,
         ]));
 
         // Assert
         $this->assertResponseIsSuccessful();
         $responseData = json_decode($client->getResponse()->getContent(), true);
-        
+
         $this->assertArrayHasKey('upload_url', $responseData);
         $this->assertArrayHasKey('blob_url', $responseData);
         $this->assertArrayHasKey('filename', $responseData);
@@ -73,7 +73,7 @@ class ImageControllerTest extends WebTestCase
         // Assert
         $this->assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
         $responseData = json_decode($client->getResponse()->getContent(), true);
-        
+
         $this->assertArrayHasKey('error', $responseData);
     }
 
@@ -81,7 +81,7 @@ class ImageControllerTest extends WebTestCase
     {
         // Arrange
         $client = static::createClient();
-        
+
         $filename = 'test-image.png';
         $defaultExpiry = 3600; // 1 heure par défaut
 
@@ -93,7 +93,7 @@ class ImageControllerTest extends WebTestCase
                 'upload_url' => 'https://storage.blob.core.windows.net/container/test-image.png?sig=signature',
                 'blob_url' => 'https://storage.blob.core.windows.net/container/test-image.png',
                 'filename' => $filename,
-                'expires_at' => (new \DateTime('+1 hour'))->format('c')
+                'expires_at' => (new \DateTime('+1 hour'))->format('c'),
             ]);
 
         $client->getContainer()->set(AzureBlobImageService::class, $this->blobServiceMock);
@@ -102,7 +102,7 @@ class ImageControllerTest extends WebTestCase
         $client->request('POST', '/api/images/upload-url', [], [], [
             'CONTENT_TYPE' => 'application/json',
         ], json_encode([
-            'filename' => $filename
+            'filename' => $filename,
             // pas d'expiry fourni
         ]));
 
@@ -114,7 +114,7 @@ class ImageControllerTest extends WebTestCase
     {
         // Arrange
         $client = static::createClient();
-        
+
         $filename = 'test-image.gif';
 
         $this->blobServiceMock
@@ -130,13 +130,13 @@ class ImageControllerTest extends WebTestCase
             'CONTENT_TYPE' => 'application/json',
         ], json_encode([
             'filename' => $filename,
-            'expiry' => 3600
+            'expiry' => 3600,
         ]));
 
         // Assert
         $this->assertResponseStatusCodeSame(Response::HTTP_INTERNAL_SERVER_ERROR);
         $responseData = json_decode($client->getResponse()->getContent(), true);
-        
+
         $this->assertArrayHasKey('error', $responseData);
         $this->assertStringContainsString('Azure service unavailable', $responseData['error']);
     }
@@ -145,7 +145,7 @@ class ImageControllerTest extends WebTestCase
     {
         // Arrange
         $client = static::createClient();
-        
+
         $filename = 'test-image-to-delete.jpg';
 
         $this->blobServiceMock
@@ -162,7 +162,7 @@ class ImageControllerTest extends WebTestCase
         // Assert
         $this->assertResponseIsSuccessful();
         $responseData = json_decode($client->getResponse()->getContent(), true);
-        
+
         $this->assertArrayHasKey('message', $responseData);
         $this->assertEquals('Image deleted successfully', $responseData['message']);
     }
@@ -171,7 +171,7 @@ class ImageControllerTest extends WebTestCase
     {
         // Arrange
         $client = static::createClient();
-        
+
         $filename = 'non-existent-image.jpg';
 
         $this->blobServiceMock
@@ -188,7 +188,7 @@ class ImageControllerTest extends WebTestCase
         // Assert
         $this->assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
         $responseData = json_decode($client->getResponse()->getContent(), true);
-        
+
         $this->assertArrayHasKey('error', $responseData);
     }
 
@@ -196,14 +196,14 @@ class ImageControllerTest extends WebTestCase
     {
         // Arrange
         $client = static::createClient();
-        
+
         $filename = 'existing-image.jpg';
         $imageInfo = [
             'filename' => $filename,
             'url' => 'https://storage.blob.core.windows.net/container/' . $filename,
             'size' => 1024000,
             'content_type' => 'image/jpeg',
-            'last_modified' => '2025-07-01T10:30:00Z'
+            'last_modified' => '2025-07-01T10:30:00Z',
         ];
 
         $this->blobServiceMock
@@ -220,7 +220,7 @@ class ImageControllerTest extends WebTestCase
         // Assert
         $this->assertResponseIsSuccessful();
         $responseData = json_decode($client->getResponse()->getContent(), true);
-        
+
         $this->assertEquals($imageInfo, $responseData);
     }
 
@@ -233,13 +233,13 @@ class ImageControllerTest extends WebTestCase
         $client->request('POST', '/api/images/upload-url', [], [], [
             'CONTENT_TYPE' => 'application/json',
         ], json_encode([
-            'filename' => '../../../malicious.exe'
+            'filename' => '../../../malicious.exe',
         ]));
 
         // Assert
         $this->assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
         $responseData = json_decode($client->getResponse()->getContent(), true);
-        
+
         $this->assertArrayHasKey('error', $responseData);
         $this->assertStringContainsString('filename', strtolower($responseData['error']));
     }
@@ -260,13 +260,13 @@ class ImageControllerTest extends WebTestCase
         $client->request('POST', '/api/images/upload-url', [], [], [
             'CONTENT_TYPE' => 'application/json',
         ], json_encode([
-            'filename' => 'document.pdf'
+            'filename' => 'document.pdf',
         ]));
 
         // Assert
         $this->assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
         $responseData = json_decode($client->getResponse()->getContent(), true);
-        
+
         $this->assertArrayHasKey('error', $responseData);
         $this->assertStringContainsString('Unsupported file type', $responseData['error']);
     }

@@ -4,7 +4,7 @@ namespace App\Enum;
 
 /**
  * Énumération des statuts possibles d'un utilisateur.
- * 
+ *
  * Définit les différents états dans lesquels peut se trouver un compte utilisateur
  * pour gérer l'accès et les permissions de manière granulaire.
  */
@@ -77,10 +77,10 @@ enum UserStatus: string
     {
         return match ($this) {
             self::ACTIVE => true,
-            self::INACTIVE, 
-            self::SUSPENDED, 
-            self::PENDING, 
-            self::BANNED, 
+            self::INACTIVE,
+            self::SUSPENDED,
+            self::PENDING,
+            self::BANNED,
             self::DELETED => false,
         };
     }
@@ -107,11 +107,11 @@ enum UserStatus: string
     public function isTemporary(): bool
     {
         return match ($this) {
-            self::INACTIVE, 
-            self::SUSPENDED, 
+            self::INACTIVE,
+            self::SUSPENDED,
             self::PENDING => true,
-            self::ACTIVE, 
-            self::BANNED, 
+            self::ACTIVE,
+            self::BANNED,
             self::DELETED => false,
         };
     }
@@ -133,7 +133,7 @@ enum UserStatus: string
 
     /**
      * Retourne tous les statuts sous forme de tableau associatif.
-     * 
+     *
      * @return array<string, string> [value => label]
      */
     public static function getChoices(): array
@@ -142,25 +142,26 @@ enum UserStatus: string
         foreach (self::cases() as $case) {
             $choices[$case->value] = $case->getLabel();
         }
+
         return $choices;
     }
 
     /**
      * Retourne les statuts qui permettent la connexion.
-     * 
+     *
      * @return array<UserStatus>
      */
     public static function getLoginAllowed(): array
     {
         return array_filter(
             self::cases(),
-            fn(UserStatus $status) => $status->canLogin()
+            fn (UserStatus $status) => $status->canLogin()
         );
     }
 
     /**
      * Retourne les statuts actifs (non supprimés/bannis).
-     * 
+     *
      * @return array<UserStatus>
      */
     public static function getActiveStatuses(): array
@@ -175,7 +176,7 @@ enum UserStatus: string
 
     /**
      * Créer depuis une chaîne de caractères avec validation.
-     * 
+     *
      * @throws \InvalidArgumentException Si le statut n'existe pas
      */
     public static function fromString(string $value): self
@@ -184,6 +185,7 @@ enum UserStatus: string
         if ($status === null) {
             throw new \InvalidArgumentException("Invalid user status: {$value}");
         }
+
         return $status;
     }
 }

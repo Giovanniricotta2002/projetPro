@@ -2,7 +2,6 @@
 
 namespace App\Tests\Controller;
 
-use App\DTO\TokenRefreshRequestDTO;
 use App\Entity\Utilisateur;
 use App\Repository\UtilisateurRepository;
 use App\Service\HttpOnlyCookieService;
@@ -29,10 +28,10 @@ class TokenControllerTest extends WebTestCase
     {
         // Arrange
         $client = static::createClient();
-        
+
         $user = new Utilisateur();
         $user->setUsername('testuser');
-        
+
         $refreshToken = 'valid_refresh_token';
         $newAccessToken = 'new_access_token';
         $newRefreshToken = 'new_refresh_token';
@@ -50,7 +49,7 @@ class TokenControllerTest extends WebTestCase
             ->willReturn([
                 'access_token' => $newAccessToken,
                 'refresh_token' => $newRefreshToken,
-                'expires_in' => 3600
+                'expires_in' => 3600,
             ]);
 
         // Mock des services dans le conteneur
@@ -62,13 +61,13 @@ class TokenControllerTest extends WebTestCase
         $client->request('POST', '/api/tokens/refresh', [], [], [
             'CONTENT_TYPE' => 'application/json',
         ], json_encode([
-            'refresh_token' => $refreshToken
+            'refresh_token' => $refreshToken,
         ]));
 
         // Assert
         $this->assertResponseIsSuccessful();
         $responseData = json_decode($client->getResponse()->getContent(), true);
-        
+
         $this->assertArrayHasKey('access_token', $responseData);
         $this->assertArrayHasKey('refresh_token', $responseData);
         $this->assertArrayHasKey('expires_in', $responseData);
@@ -78,7 +77,7 @@ class TokenControllerTest extends WebTestCase
     {
         // Arrange
         $client = static::createClient();
-        
+
         $invalidRefreshToken = 'invalid_refresh_token';
 
         $this->jwtServiceMock
@@ -95,13 +94,13 @@ class TokenControllerTest extends WebTestCase
         $client->request('POST', '/api/tokens/refresh', [], [], [
             'CONTENT_TYPE' => 'application/json',
         ], json_encode([
-            'refresh_token' => $invalidRefreshToken
+            'refresh_token' => $invalidRefreshToken,
         ]));
 
         // Assert
         $this->assertResponseStatusCodeSame(Response::HTTP_UNAUTHORIZED);
         $responseData = json_decode($client->getResponse()->getContent(), true);
-        
+
         $this->assertArrayHasKey('error', $responseData);
         $this->assertEquals('INVALID_REFRESH_TOKEN', $responseData['error']);
     }
@@ -119,7 +118,7 @@ class TokenControllerTest extends WebTestCase
         // Assert
         $this->assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
         $responseData = json_decode($client->getResponse()->getContent(), true);
-        
+
         $this->assertArrayHasKey('error', $responseData);
     }
 
@@ -127,7 +126,7 @@ class TokenControllerTest extends WebTestCase
     {
         // Arrange
         $client = static::createClient();
-        
+
         $validToken = 'valid_access_token';
         $user = new Utilisateur();
         $user->setUsername('testuser');
@@ -144,13 +143,13 @@ class TokenControllerTest extends WebTestCase
         $client->request('POST', '/api/tokens/validate', [], [], [
             'CONTENT_TYPE' => 'application/json',
         ], json_encode([
-            'token' => $validToken
+            'token' => $validToken,
         ]));
 
         // Assert
         $this->assertResponseIsSuccessful();
         $responseData = json_decode($client->getResponse()->getContent(), true);
-        
+
         $this->assertTrue($responseData['valid']);
         $this->assertArrayHasKey('user', $responseData);
     }
@@ -159,7 +158,7 @@ class TokenControllerTest extends WebTestCase
     {
         // Arrange
         $client = static::createClient();
-        
+
         $invalidToken = 'invalid_access_token';
 
         $this->jwtServiceMock
@@ -174,13 +173,13 @@ class TokenControllerTest extends WebTestCase
         $client->request('POST', '/api/tokens/validate', [], [], [
             'CONTENT_TYPE' => 'application/json',
         ], json_encode([
-            'token' => $invalidToken
+            'token' => $invalidToken,
         ]));
 
         // Assert
         $this->assertResponseIsSuccessful();
         $responseData = json_decode($client->getResponse()->getContent(), true);
-        
+
         $this->assertFalse($responseData['valid']);
     }
 
@@ -188,14 +187,14 @@ class TokenControllerTest extends WebTestCase
     {
         // Arrange
         $client = static::createClient();
-        
+
         $token = 'valid_token';
         $tokenInfo = [
             'user_id' => 1,
             'username' => 'testuser',
             'roles' => ['ROLE_USER'],
             'exp' => time() + 3600,
-            'iat' => time()
+            'iat' => time(),
         ];
 
         $this->jwtServiceMock
@@ -210,13 +209,13 @@ class TokenControllerTest extends WebTestCase
         $client->request('POST', '/api/tokens/info', [], [], [
             'CONTENT_TYPE' => 'application/json',
         ], json_encode([
-            'token' => $token
+            'token' => $token,
         ]));
 
         // Assert
         $this->assertResponseIsSuccessful();
         $responseData = json_decode($client->getResponse()->getContent(), true);
-        
+
         $this->assertArrayHasKey('user_id', $responseData);
         $this->assertArrayHasKey('username', $responseData);
         $this->assertArrayHasKey('roles', $responseData);
@@ -234,7 +233,7 @@ class TokenControllerTest extends WebTestCase
             ->method('clearJwtCookies')
             ->willReturn([
                 'access_token' => null,
-                'refresh_token' => null
+                'refresh_token' => null,
             ]);
 
         $client->getContainer()->set(HttpOnlyCookieService::class, $this->cookieServiceMock);
@@ -245,7 +244,7 @@ class TokenControllerTest extends WebTestCase
         // Assert
         $this->assertResponseIsSuccessful();
         $responseData = json_decode($client->getResponse()->getContent(), true);
-        
+
         $this->assertArrayHasKey('message', $responseData);
         $this->assertEquals('Cookies cleared successfully', $responseData['message']);
     }

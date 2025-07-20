@@ -27,7 +27,7 @@ class TokenRefreshRequestDTOTest extends TestCase
         // Arrange
         $refreshToken = 'valid_refresh_token_that_is_long_enough_to_pass_validation_requirements';
         $data = [
-            'refreshToken' => $refreshToken
+            'refreshToken' => $refreshToken,
         ];
 
         // Act
@@ -54,7 +54,7 @@ class TokenRefreshRequestDTOTest extends TestCase
         // Arrange
         $refreshToken = 'valid_refresh_token_that_is_long_enough_to_pass_validation_requirements';
         $parameterBag = new ParameterBag([
-            'refreshToken' => $refreshToken
+            'refreshToken' => $refreshToken,
         ]);
 
         // Act
@@ -89,7 +89,7 @@ class TokenRefreshRequestDTOTest extends TestCase
 
         // Assert
         $expectedArray = [
-            'refreshToken' => $refreshToken
+            'refreshToken' => $refreshToken,
         ];
 
         $this->assertEquals($expectedArray, $array);
@@ -120,10 +120,10 @@ class TokenRefreshRequestDTOTest extends TestCase
         $reflection = new \ReflectionClass($dto);
         $constructor = $reflection->getConstructor();
         $parameters = $constructor->getParameters();
-        
+
         $refreshTokenParam = $parameters[0];
         $this->assertEquals('refreshToken', $refreshTokenParam->getName());
-        
+
         // Vérifier les attributs de validation
         $attributes = $refreshTokenParam->getAttributes();
         $this->assertGreaterThan(0, count($attributes));
@@ -180,7 +180,7 @@ class TokenRefreshRequestDTOTest extends TestCase
         // Arrange - Test avec une clé différente pour vérifier la robustesse
         $data = [
             'refresh_token' => 'valid_token', // snake_case au lieu de camelCase
-            'refreshToken' => 'valid_refresh_token_that_is_long_enough_to_pass_validation_requirements'
+            'refreshToken' => 'valid_refresh_token_that_is_long_enough_to_pass_validation_requirements',
         ];
 
         // Act
@@ -200,7 +200,7 @@ class TokenRefreshRequestDTOTest extends TestCase
 
         // Act & Assert - Les propriétés readonly ne peuvent pas être modifiées après création
         $this->assertEquals($originalToken, $dto->refreshToken);
-        
+
         // Tentative de modification via réflexion devrait échouer car readonly
         $reflection = new \ReflectionProperty($dto, 'refreshToken');
         $this->assertTrue($reflection->isReadOnly());

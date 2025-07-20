@@ -22,7 +22,7 @@ class HealthControllerTest extends WebTestCase
     {
         // Arrange
         $client = static::createClient();
-        
+
         // Mock successful database connection
         $this->connectionMock
             ->expects($this->once())
@@ -38,9 +38,9 @@ class HealthControllerTest extends WebTestCase
         // Assert
         $this->assertResponseIsSuccessful();
         $this->assertResponseHeaderSame('content-type', 'application/json');
-        
+
         $responseData = json_decode($client->getResponse()->getContent(), true);
-        
+
         $this->assertEquals('healthy', $responseData['status']);
         $this->assertEquals('MuscuScope Backend', $responseData['service']);
         $this->assertEquals('1.0.0', $responseData['version']);
@@ -53,7 +53,7 @@ class HealthControllerTest extends WebTestCase
     {
         // Arrange
         $client = static::createClient();
-        
+
         // Mock database connection failure
         $this->connectionMock
             ->expects($this->once())
@@ -68,9 +68,9 @@ class HealthControllerTest extends WebTestCase
 
         // Assert
         $this->assertResponseStatusCodeSame(Response::HTTP_SERVICE_UNAVAILABLE);
-        
+
         $responseData = json_decode($client->getResponse()->getContent(), true);
-        
+
         $this->assertEquals('unhealthy', $responseData['status']);
         $this->assertEquals('disconnected', $responseData['database']);
         $this->assertArrayHasKey('error', $responseData);
@@ -88,9 +88,9 @@ class HealthControllerTest extends WebTestCase
         // Assert
         $this->assertResponseIsSuccessful();
         $this->assertResponseHeaderSame('content-type', 'application/json');
-        
+
         $responseData = json_decode($client->getResponse()->getContent(), true);
-        
+
         $this->assertEquals('healthy', $responseData['status']);
     }
 
@@ -98,7 +98,7 @@ class HealthControllerTest extends WebTestCase
     {
         // Arrange
         $client = static::createClient();
-        
+
         $this->connectionMock
             ->expects($this->once())
             ->method('executeQuery')
@@ -111,7 +111,7 @@ class HealthControllerTest extends WebTestCase
 
         // Assert
         $responseData = json_decode($client->getResponse()->getContent(), true);
-        
+
         // Vérifier la structure de la réponse
         $this->assertIsArray($responseData);
         $this->assertArrayHasKey('status', $responseData);
@@ -120,7 +120,7 @@ class HealthControllerTest extends WebTestCase
         $this->assertArrayHasKey('version', $responseData);
         $this->assertArrayHasKey('database', $responseData);
         $this->assertArrayHasKey('environment', $responseData);
-        
+
         // Vérifier les types
         $this->assertIsString($responseData['status']);
         $this->assertIsString($responseData['timestamp']);
@@ -133,7 +133,7 @@ class HealthControllerTest extends WebTestCase
     {
         // Arrange
         $client = static::createClient();
-        
+
         $this->connectionMock
             ->expects($this->once())
             ->method('executeQuery')
@@ -146,11 +146,11 @@ class HealthControllerTest extends WebTestCase
 
         // Assert
         $responseData = json_decode($client->getResponse()->getContent(), true);
-        
+
         // Vérifier que le timestamp est au format ISO 8601
         $timestamp = $responseData['timestamp'];
         $this->assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/', $timestamp);
-        
+
         // Vérifier que le timestamp peut être parsé
         $dateTime = \DateTime::createFromFormat('c', $timestamp);
         $this->assertInstanceOf(\DateTime::class, $dateTime);

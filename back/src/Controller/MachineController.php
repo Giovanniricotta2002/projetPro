@@ -10,7 +10,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 #[Route('/api/machine', name: 'app_api_machine')]
@@ -22,7 +21,7 @@ final class MachineController extends AbstractController
         if (!$authChecker->isGranted(MachineVoter::EDIT, $machine)) {
             return $this->json([
                 'error' => 'Access Denied',
-                'message' => 'You do not have permission to edit this machine.'
+                'message' => 'You do not have permission to edit this machine.',
             ], Response::HTTP_FORBIDDEN);
         }
 

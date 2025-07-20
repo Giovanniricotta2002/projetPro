@@ -5,8 +5,8 @@
         <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
         <v-toolbar-title>MuscuScope</v-toolbar-title>
         <v-spacer />
-        <v-btn v-if="!isLoggedIn" color="secondary" @click="handleLogin">Connexion</v-btn>
-        <v-btn v-else color="secondary" @click="handleLogout">Déconnexion</v-btn>
+        <v-btn v-if="!isLoggedIn" color="white" @click="handleLogin">Connexion</v-btn>
+        <v-btn v-else color="white" @click="handleLogout">Déconnexion</v-btn>
       </v-app-bar>
 
       <v-navigation-drawer v-model="drawer" :location="$vuetify.display.mobile ? 'bottom' : undefined" temporary>

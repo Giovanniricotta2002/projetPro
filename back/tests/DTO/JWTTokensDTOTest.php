@@ -65,7 +65,7 @@ class JWTTokensDTOTest extends TestCase
             'refresh_token' => 'refresh_token_456',
             'token_type' => 'Bearer',
             'expires_in' => 3600,
-            'refresh_expires_in' => 604800
+            'refresh_expires_in' => 604800,
         ];
 
         // Act
@@ -86,7 +86,7 @@ class JWTTokensDTOTest extends TestCase
             'access_token' => 'access_token_123',
             'refresh_token' => 'refresh_token_456',
             'token_type' => 'Bearer',
-            'expires_in' => 3600
+            'expires_in' => 3600,
         ];
 
         // Act
@@ -120,7 +120,7 @@ class JWTTokensDTOTest extends TestCase
             'refresh_token' => 'refresh_token_456',
             'token_type' => 'Bearer',
             'expires_in' => 3600,
-            'refresh_expires_in' => 604800
+            'refresh_expires_in' => 604800,
         ];
 
         $this->assertEquals($expectedArray, $array);
@@ -145,7 +145,7 @@ class JWTTokensDTOTest extends TestCase
             'refresh_token' => 'refresh_token_456',
             'token_type' => 'Bearer',
             'expires_in' => 3600,
-            'refresh_expires_in' => null
+            'refresh_expires_in' => null,
         ];
 
         $this->assertEquals($expectedArray, $array);
@@ -158,7 +158,7 @@ class JWTTokensDTOTest extends TestCase
             'access_token' => 'access_token_123',
             // refresh_token manquant
             'token_type' => 'Bearer',
-            'expires_in' => 3600
+            'expires_in' => 3600,
         ];
 
         // Act & Assert
@@ -179,7 +179,7 @@ class JWTTokensDTOTest extends TestCase
         // Act & Assert - Les propriétés readonly ne peuvent pas être modifiées
         $reflection = new \ReflectionClass($dto);
         $this->assertTrue($reflection->isReadOnly());
-        
+
         // Vérifier que toutes les propriétés sont readonly
         foreach ($reflection->getProperties() as $property) {
             $this->assertTrue($property->isReadOnly());
@@ -198,7 +198,7 @@ class JWTTokensDTOTest extends TestCase
 
         // Assert
         $this->assertEquals('Bearer', $dto->tokenType);
-        
+
         // Test avec d'autres types de tokens
         $dto2 = new JWTTokensDTO(
             accessToken: 'access_token_123',
@@ -206,7 +206,7 @@ class JWTTokensDTOTest extends TestCase
             tokenType: 'Basic',
             expiresIn: 3600
         );
-        
+
         $this->assertEquals('Basic', $dto2->tokenType);
     }
 
@@ -222,7 +222,7 @@ class JWTTokensDTOTest extends TestCase
 
         // Assert
         $this->assertEquals(0, $dto->expiresIn);
-        
+
         // Test avec valeur négative
         $dto2 = new JWTTokensDTO(
             accessToken: 'access_token_123',
@@ -230,7 +230,7 @@ class JWTTokensDTOTest extends TestCase
             tokenType: 'Bearer',
             expiresIn: -1
         );
-        
+
         $this->assertEquals(-1, $dto2->expiresIn);
     }
 }

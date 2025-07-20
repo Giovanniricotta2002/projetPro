@@ -21,7 +21,7 @@ class LoginStatsControllerTest extends WebTestCase
     {
         // Arrange
         $client = static::createClient();
-        
+
         $mockStatistics = [
             'total_logins' => 150,
             'unique_users' => 45,
@@ -30,8 +30,8 @@ class LoginStatsControllerTest extends WebTestCase
             'daily_breakdown' => [
                 '2025-07-01' => ['successful' => 20, 'failed' => 2],
                 '2025-07-02' => ['successful' => 25, 'failed' => 1],
-                '2025-07-03' => ['successful' => 18, 'failed' => 3]
-            ]
+                '2025-07-03' => ['successful' => 18, 'failed' => 3],
+            ],
         ];
 
         $this->loginLoggerMock
@@ -50,7 +50,7 @@ class LoginStatsControllerTest extends WebTestCase
         // Assert
         $this->assertResponseIsSuccessful();
         $responseData = json_decode($client->getResponse()->getContent(), true);
-        
+
         $this->assertTrue($responseData['success']);
         $this->assertEquals($mockStatistics, $responseData['statistics']);
         $this->assertArrayHasKey('period', $responseData);
@@ -62,7 +62,7 @@ class LoginStatsControllerTest extends WebTestCase
     {
         // Arrange
         $client = static::createClient();
-        
+
         $fromDate = '2025-06-01';
         $toDate = '2025-06-30';
 
@@ -85,13 +85,13 @@ class LoginStatsControllerTest extends WebTestCase
         // Act
         $client->request('GET', '/api/admin/login-logs/statistics', [
             'from' => $fromDate,
-            'to' => $toDate
+            'to' => $toDate,
         ]);
 
         // Assert
         $this->assertResponseIsSuccessful();
         $responseData = json_decode($client->getResponse()->getContent(), true);
-        
+
         $this->assertTrue($responseData['success']);
         $this->assertEquals($fromDate . ' 00:00:00', $responseData['period']['from']);
         $this->assertEquals($toDate . ' 00:00:00', $responseData['period']['to']);
@@ -113,7 +113,7 @@ class LoginStatsControllerTest extends WebTestCase
     {
         // Arrange
         $client = static::createClient();
-        
+
         // Connecter un utilisateur normal (pas admin)
         $client->loginUser($this->createRegularUser());
 
@@ -143,7 +143,7 @@ class LoginStatsControllerTest extends WebTestCase
         // Assert
         $this->assertResponseStatusCodeSame(Response::HTTP_INTERNAL_SERVER_ERROR);
         $responseData = json_decode($client->getResponse()->getContent(), true);
-        
+
         $this->assertFalse($responseData['success']);
         $this->assertArrayHasKey('error', $responseData);
     }
@@ -152,7 +152,7 @@ class LoginStatsControllerTest extends WebTestCase
     {
         // Arrange
         $client = static::createClient();
-        
+
         $mockLogs = [
             [
                 'id' => 1,
@@ -160,7 +160,7 @@ class LoginStatsControllerTest extends WebTestCase
                 'ip_address' => '192.168.1.1',
                 'user_agent' => 'Mozilla/5.0...',
                 'success' => true,
-                'login_time' => '2025-07-03T10:30:00Z'
+                'login_time' => '2025-07-03T10:30:00Z',
             ],
             [
                 'id' => 2,
@@ -168,8 +168,8 @@ class LoginStatsControllerTest extends WebTestCase
                 'ip_address' => '192.168.1.2',
                 'user_agent' => 'Chrome/91.0...',
                 'success' => false,
-                'login_time' => '2025-07-03T09:45:00Z'
-            ]
+                'login_time' => '2025-07-03T09:45:00Z',
+            ],
         ];
 
         $this->loginLoggerMock
@@ -187,7 +187,7 @@ class LoginStatsControllerTest extends WebTestCase
         // Assert
         $this->assertResponseIsSuccessful();
         $responseData = json_decode($client->getResponse()->getContent(), true);
-        
+
         $this->assertTrue($responseData['success']);
         $this->assertEquals($mockLogs, $responseData['logs']);
     }
@@ -209,7 +209,7 @@ class LoginStatsControllerTest extends WebTestCase
 
         // Act
         $client->request('GET', '/api/admin/login-logs/recent', [
-            'limit' => $limit
+            'limit' => $limit,
         ]);
 
         // Assert
@@ -220,20 +220,20 @@ class LoginStatsControllerTest extends WebTestCase
     {
         // Arrange
         $client = static::createClient();
-        
+
         $mockFailedAttempts = [
             [
                 'ip_address' => '192.168.1.100',
                 'attempts_count' => 5,
                 'last_attempt' => '2025-07-03T11:00:00Z',
-                'usernames_tried' => ['admin', 'root', 'user']
+                'usernames_tried' => ['admin', 'root', 'user'],
             ],
             [
                 'ip_address' => '10.0.0.50',
                 'attempts_count' => 3,
                 'last_attempt' => '2025-07-03T10:30:00Z',
-                'usernames_tried' => ['test', 'demo']
-            ]
+                'usernames_tried' => ['test', 'demo'],
+            ],
         ];
 
         $this->loginLoggerMock
@@ -250,7 +250,7 @@ class LoginStatsControllerTest extends WebTestCase
         // Assert
         $this->assertResponseIsSuccessful();
         $responseData = json_decode($client->getResponse()->getContent(), true);
-        
+
         $this->assertTrue($responseData['success']);
         $this->assertEquals($mockFailedAttempts, $responseData['failed_attempts']);
     }

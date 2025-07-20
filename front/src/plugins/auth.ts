@@ -5,12 +5,12 @@ export async function initAuth() {
   const authStore = useAuthStore()
   
   // Vérifier l'authentification au démarrage
-  // await authStore.checkAuth()
+  await authStore.checkAuth()
   
-  // // Si authentifié, démarrer la vérification périodique
-  // if (authStore.isAuthenticated) {
-  //   authStore.startAuthCheck()
-  // }
+  // Si authentifié, démarrer la vérification périodique
+  if (authStore.isAuthenticated) {
+    authStore.startAuthCheck()
+  }
 }
 
 // Plugin pour Vue

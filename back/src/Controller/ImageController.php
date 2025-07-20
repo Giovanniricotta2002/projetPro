@@ -43,7 +43,7 @@ class ImageController extends AbstractController
             required: ['filename'],
             properties: [
                 new OA\Property(property: 'filename', type: 'string', description: 'Nom du fichier avec extension', example: 'photo.jpg'),
-                new OA\Property(property: 'expiry', type: 'integer', description: 'Durée de validité en secondes', example: 3600)
+                new OA\Property(property: 'expiry', type: 'integer', description: 'Durée de validité en secondes', example: 3600),
             ]
         )
     )]

@@ -20,7 +20,7 @@ class InfoMachine
     #[ORM\Column(length: 30)]
     private ?string $type = null;
 
-    #[ORM\ManyToOne(inversedBy: 'infoMachines')]
+    #[ORM\ManyToOne(inversedBy: 'infoMachines', cascade: ['persist'])]
     private ?Machine $machine = null;
 
     public function getId(): ?int
