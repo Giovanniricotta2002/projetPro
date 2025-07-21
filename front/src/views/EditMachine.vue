@@ -42,10 +42,10 @@
 </template>
 
 <script setup lang="ts">
-
-
 import { useAuthStore } from '@/stores/auth'
 import type { Machine } from '@/types/Machine'
+import type { InfoMachine } from '@/types/InfoMachine'
+
 
 const types = [
   { title: 'Usage', value: 'usage' },
@@ -68,7 +68,7 @@ const showSnackbar = (msg: string, color: 'error'|'success' = 'error') => {
 const form = reactive({
   nom: '',
   image: '',
-  bulles: [] as { id: number; text: string; type: string }[],
+  bulles: InfoMachine[],
 })
 
 const machineId = Number(route.params.materielId)
@@ -100,7 +100,7 @@ function addBulle() {
   form.bulles.push({ id: maxId + 1, text: '', type: 'usage' })
 }
 function removeBulle(i: number) {
-  form.bulles.splice(i, 1)
+  form.bulles[i].remove = true
 }
 async function save() {
   try {

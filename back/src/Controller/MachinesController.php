@@ -90,6 +90,7 @@ final class MachinesController extends AbstractController
         $machine
             ->setName($data->get('nom'))
             ->setImage($data->get('image'))
+            ->setDescription($data->get('description'))
         ;
 
         foreach ($data->get('infoMachines') as $infoMachine) {
@@ -131,10 +132,8 @@ final class MachinesController extends AbstractController
         $context = [
             AbstractNormalizer::ATTRIBUTES => [
                 'id',
-                'uuid',
+                // 'uuid',
                 'name',
-                'dateCreation',
-                'dateModif',
                 'visible',
                 'image',
                 'description',
@@ -152,9 +151,8 @@ final class MachinesController extends AbstractController
         $context = [
             AbstractNormalizer::ATTRIBUTES => [
                 'id',
-                'uuid',
+                // 'uuid',
                 'name',
-                'dateCreation',
                 'dateModif',
                 'visible',
                 'image',
@@ -172,10 +170,8 @@ final class MachinesController extends AbstractController
         Request $request,
         Machine $materielId,
     ): Response {
-        dd($materielId);
         $data = new ParameterBag($this->serializer->decode($request->getContent(), 'json'));
-        dd($data);
-        foreach (['nom', 'image', 'infoMachines'] as $field) {
+        foreach (['nom', 'image', 'infoMachines', 'description'] as $field) {
             if (!$data->has($field)) {
                 return $this->json([
                     'success' => false,
@@ -189,11 +185,36 @@ final class MachinesController extends AbstractController
             ->setDescription($data->get('description'))
             ->setDateModif(new \DateTime())
         ;
-
         foreach ($data->get('infoMachines') as $infoMachine) {
             $infoM = $this->serializer->denormalize($infoMachine, InfoMachine::class);
-            dd($infoM);
+            dd($infoM, $materielId->getInfoMachines()->contains($infoM), $infoMachine);
             if ($materielId->getInfoMachines()->contains($infoM)) {
+                /**
+                 * @var InfoMachine
+                 */
+                $im = $materielId->getInfoMachines()->get($infoM);
+                if ($im->getText() !== $infoMachine['text']) {
+                    $im->setText($infoMachine['text']);
+                }
+
+                if ($im->getType() !== $infoMachine['type']) {
+                    $im->setType($infoMachine['type']);
+                }
+                try {
+                    $this->entityManager->persist($im);
+                    $this->entityManager->flush();
+                } catch (ORMException $orm) {
+                    return $this->json($orm->getMessage(), 404);
+                }
+            } elseif ($infoMachine['remove']) {
+                $materielId->removeInfoMachine($infoM);
+
+                try {
+                    $this->entityManager->persist($materielId);
+                    $this->entityManager->flush();
+                } catch (ORMException $orm) {
+                    return $this->json($orm->getMessage(), 404);
+                }
             } else {
                 $im = new InfoMachine();
                 $im
@@ -211,7 +232,7 @@ final class MachinesController extends AbstractController
 
             $materielId->addInfoMachine($im);
         }
-        exit;
+
         try {
             $this->entityManager->persist($materielId);
             $this->entityManager->flush();

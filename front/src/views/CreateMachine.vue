@@ -65,7 +65,7 @@ function addBulle() {
   form.bulles.push({ text: '', type: types[0].value } as InfoMachine)
 }
 function removeBulle(i: number) {
-  form.bulles.splice(i, 1)
+  form.bulles[i].remove = true
 }
 async function save() {
   try {
@@ -81,7 +81,12 @@ async function save() {
         infoMachines: form.bulles,
       }),
     })
-    console.log(response, authStore.$id);
+    console.log(response, authStore.$id, JSON.stringify({
+        nom: form.nom,
+        description: form.description,
+        image: form.image,
+        infoMachines: form.bulles,
+      }));
     
     if (!response.success) throw new Error(response.message || 'Erreur lors de la création')
     snackbar.value = { show: true, color: 'success', text: 'Machine créée avec succès !' }
