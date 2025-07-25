@@ -65,11 +65,17 @@ const showSnackbar = (msg: string, color: 'error'|'success' = 'error') => {
   return { show: true, color: color, text: msg }
 }
 
-const form = reactive({
+interface FormData {
+  nom: string;
+  image: string;
+  bulles: InfoMachine[];
+}
+
+const form = reactive<FormData>({
   nom: '',
   image: '',
-  bulles: InfoMachine[],
-})
+  bulles: [], // ← valeur initiale correcte
+});
 
 const machineId = Number(route.params.materielId)
 
