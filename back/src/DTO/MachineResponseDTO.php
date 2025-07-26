@@ -23,8 +23,15 @@ class MachineResponseDTO
     #[OA\Property(type: 'array', items: new OA\Items(type: 'object', properties: [new OA\Property(property: 'id', type: 'integer', example: 1), new OA\Property(property: 'text', type: 'string', example: 'RAM 16Go'), new OA\Property(property: 'type', type: 'string', example: 'hardware')]))]
     public array $infoMachines;
 
-    public function __construct($id, $name, $visible, $image, $description, $forum, $infoMachines)
-    {
+    public function __construct(
+        int $id,
+        string $name,
+        bool $visible,
+        string $image,
+        ?string $description,
+        ?array $forum,
+        array $infoMachines
+    ) {
         $this->id = $id;
         $this->name = $name;
         $this->visible = $visible;
@@ -43,13 +50,11 @@ class MachineResponseDTO
             $machine->getImage(),
             $machine->getDescription(),
             $machine->getForum() ? ['id' => $machine->getForum()->getId()] : null,
-            array_map(function ($im) {
-                return [
+            array_map(fn($im) => [
                     'id' => $im->getId(),
                     'text' => $im->getText(),
                     'type' => $im->getType(),
-                ];
-            }, $machine->getInfoMachines()->toArray())
+                ], $machine->getInfoMachines()->toArray())
         );
     }
 }

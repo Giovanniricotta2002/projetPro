@@ -2,51 +2,59 @@
 
 namespace App\DTO;
 
+use App\Entity\Message;
+use App\Entity\Post;
 use OpenApi\Attributes as OA;
 
-#[OA\Schema(description: 'Post', required: ['id', 'titre', 'dateCreation', 'description', 'ordreAffichage', 'visible', 'slug', 'createdAt'])]
+#[OA\Schema(description: 'Post', required: ['id', 'titre', 'dateCreation', 'vues', 'epingle', 'verrouille', 'messages'])]
 class PostResponseDTO
 {
     #[OA\Property(type: 'integer', example: 1)]
     public int $id;
     #[OA\Property(type: 'string', example: 'Titre du post')]
     public string $titre;
-    #[OA\Property(type: 'string', format: 'date-time', example: '2025-07-27T10:00:00')]
-    public string $dateCreation;
-    #[OA\Property(type: 'string', example: 'Description du post')]
-    public string $description;
-    #[OA\Property(type: 'integer', example: 1)]
-    public int $ordreAffichage;
-    #[OA\Property(type: 'boolean', example: true)]
-    public bool $visible;
-    #[OA\Property(type: 'string', example: 'post-slug')]
-    public string $slug;
-    #[OA\Property(type: 'string', format: 'date-time', example: '2025-07-27T10:00:00')]
-    public string $createdAt;
+    #[OA\Property(type: 'string', format: 'date-time', example: '2025-07-27 10:00:00')]
+    public ?string $dateCreation;
+    #[OA\Property(type: 'integer', example: 42)]
+    public ?int $vues;
+    #[OA\Property(type: 'boolean', example: false)]
+    public bool $epingle;
+    #[OA\Property(type: 'boolean', example: false)]
+    public bool $verrouille;
+    /**
+     * @var MessageResponseDTO[]
+     */
+    #[OA\Property(type: 'array', items: new OA\Items(ref: MessageResponseDTO::class))]
+    public array $messages;
 
-    public function __construct($id, $titre, $dateCreation, $description, $ordreAffichage, $visible, $slug, $createdAt)
-    {
+    public function __construct(
+        int $id,
+        string $titre,
+        ?string $dateCreation,
+        ?int $vues,
+        bool $epingle,
+        bool $verrouille,
+        array $messages
+    ) {
         $this->id = $id;
         $this->titre = $titre;
         $this->dateCreation = $dateCreation;
-        $this->description = $description;
-        $this->ordreAffichage = $ordreAffichage;
-        $this->visible = $visible;
-        $this->slug = $slug;
-        $this->createdAt = $createdAt;
+        $this->vues = $vues;
+        $this->epingle = $epingle;
+        $this->verrouille = $verrouille;
+        $this->messages = $messages;
     }
 
-    public static function fromEntity($post): self
+    public static function fromEntity(Post $post): self
     {
         return new self(
             $post->getId(),
             $post->getTitre(),
             $post->getDateCreation()?->format('Y-m-d H:i:s'),
-            $post->getDescription(),
-            $post->getOrdreAffichage(),
-            $post->isVisible(),
-            $post->getSlug(),
-            $post->getCreatedAt()?->format('Y-m-d H:i:s'),
+            $post->getVues(),
+            $post->isEpingle(),
+            $post->isVerrouille(),
+            array_map(fn(Message $message) => MessageResponseDTO::fromEntity($message), $post->getMessages()->toArray()),
         );
     }
 }

@@ -27,8 +27,17 @@ class UtilisateurResponseDTO
     #[OA\Property(type: 'string', format: 'date-time', example: '2025-07-27T10:00:00')]
     public string $createdAt;
 
-    public function __construct($id, $username, $roles, $dateCreation, $anonimus, $status, $mail, $lastVisit, $createdAt)
-    {
+    public function __construct(
+        int $id,
+        string $username,
+        array $roles,
+        string $dateCreation,
+        bool $anonimus,
+        string $status,
+        string $mail,
+        ?string $lastVisit,
+        string $createdAt
+    ) {
         $this->id = $id;
         $this->username = $username;
         $this->roles = $roles;

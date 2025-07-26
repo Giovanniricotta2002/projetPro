@@ -2,6 +2,7 @@
 
 namespace App\DTO;
 
+use App\Entity\Forum;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(description: 'Forum', required: ['id', 'titre', 'dateCreation', 'description', 'ordreAffichage', 'visible', 'slug', 'createdAt'])]
@@ -24,7 +25,7 @@ class ForumResponseDTO
     #[OA\Property(type: 'string', format: 'date-time', example: '2025-07-27T10:00:00')]
     public string $createdAt;
 
-    public function __construct($id, $titre, $dateCreation, $description, $ordreAffichage, $visible, $slug, $createdAt)
+    public function __construct(int $id, string $titre, ?string $dateCreation, ?string $description, int $ordreAffichage, bool $visible, ?string $slug, ?string $createdAt)
     {
         $this->id = $id;
         $this->titre = $titre;
@@ -36,7 +37,7 @@ class ForumResponseDTO
         $this->createdAt = $createdAt;
     }
 
-    public static function fromEntity($forum): self
+    public static function fromEntity(Forum $forum): self
     {
         return new self(
             $forum->getId(),

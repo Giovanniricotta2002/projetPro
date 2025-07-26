@@ -78,6 +78,97 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponseDTO'
+  /api/categorie-forum/:
+    get:
+      tags:
+        - CategorieForum
+      summary: 'Liste des catégories de forum'
+      description: 'Retourne la liste des catégories de forum'
+      operationId: get_app_categorie_forum_load
+      responses:
+        '200':
+          description: 'Liste des catégories'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CategorieForumResponseDTO'
+  /api/forum/:
+    get:
+      tags:
+        - Forum
+      summary: 'Liste des forums'
+      description: 'Retourne la liste des forums'
+      operationId: get_app_forum_forum
+      responses:
+        '200':
+          description: 'Liste des forums'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ForumResponseDTO'
+    post:
+      tags:
+        - Forum
+      summary: 'Créer un forum'
+      description: 'Crée un nouveau forum'
+      operationId: post_app_forum_create_forum
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForumCreateRequestDTO'
+      responses:
+        '200':
+          description: 'Forum créé'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForumResponseDTO'
+        '400':
+          description: 'Erreur de validation'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success: { type: boolean }
+                  message: { type: string }
+                type: object
+  '/api/forum/{forum}':
+    delete:
+      tags:
+        - Forum
+      summary: 'Supprimer un forum'
+      description: 'Supprime un forum par son ID'
+      operationId: delete_app_forum_delete_forum
+      parameters:
+        -
+          name: forum
+          in: path
+          description: 'ID du forum'
+          required: true
+          schema:
+            type: integer
+            pattern: '\d*'
+      responses:
+        '200':
+          description: 'Forum supprimé'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success: { type: boolean, example: true }
+                type: object
+  /api/health:
+    get:
+      operationId: get_health_check
+      responses:
+        default:
+          description: ''
   /api/images/upload-url:
     post:
       tags:
@@ -215,6 +306,18 @@ paths:
       responses:
         default:
           description: ''
+  /api/register:
+    post:
+      operationId: post_app_login_register
+      responses:
+        default:
+          description: ''
+  /api/logout:
+    post:
+      operationId: post_app_login_logout
+      responses:
+        default:
+          description: ''
   /api/admin/login-logs/statistics:
     get:
       summary: 'Récupère les statistiques de connexion pour une période donnée.'
@@ -285,6 +388,311 @@ paths:
       responses:
         default:
           description: ''
+  /api/machines/:
+    get:
+      tags:
+        - Machine
+      summary: 'Liste des machines'
+      description: 'Retourne la liste de toutes les machines'
+      operationId: get_app_machines_all_machines
+      responses:
+        '200':
+          description: 'Liste des machines'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MachineResponseDTO'
+    post:
+      summary: 'Créer une machine'
+      operationId: post_app_machines_create_machine
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MachineCreateRequestDTO'
+      responses:
+        '201':
+          description: 'Machine créée'
+        '400':
+          description: 'Erreur de validation'
+  '/api/machines/{materielId}':
+    get:
+      tags:
+        - Machine
+      summary: 'Récupérer une machine'
+      description: "Retourne les informations d'une machine par son ID"
+      operationId: get_app_machines_machine_by_id
+      parameters:
+        -
+          name: materielId
+          in: path
+          description: 'ID de la machine'
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 'Données de la machine'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MachineResponseDTO'
+    put:
+      tags:
+        - Machine
+      summary: 'Mettre à jour une machine'
+      description: 'Met à jour une machine existante'
+      operationId: put_app_machines_update_machine
+      parameters:
+        -
+          name: materielId
+          in: path
+          description: 'ID de la machine'
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MachineUpdateRequestDTO'
+      responses:
+        '200':
+          description: 'Machine mise à jour'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MachineResponseDTO'
+        '400':
+          description: 'Erreur de validation'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success: { type: boolean }
+                  message: { type: string }
+                type: object
+        '404':
+          description: 'Erreur lors de la mise à jour'
+          content:
+            application/json:
+              schema:
+                properties:
+                  error: { type: string }
+                type: object
+  '/api/messages/{post}':
+    get:
+      tags:
+        - Message
+      summary: "Liste des messages d'un post"
+      description: 'Retourne la liste des messages pour un post donné'
+      operationId: get_app_messages_load
+      parameters:
+        -
+          name: post
+          in: path
+          description: 'ID du post'
+          required: true
+          schema:
+            type: integer
+            pattern: '\d*'
+      responses:
+        '200':
+          description: 'Liste des messages'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MessageResponseDTO'
+    post:
+      tags:
+        - Message
+      summary: 'Créer un message'
+      description: 'Crée un message pour un post donné'
+      operationId: post_app_messages_create
+      parameters:
+        -
+          name: post
+          in: path
+          description: 'ID du post'
+          required: true
+          schema:
+            type: integer
+            pattern: '\d*'
+      requestBody:
+        description: 'Contenu du message'
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - text
+                - utilisateurId
+              properties:
+                text:
+                  type: string
+                utilisateurId:
+                  type: integer
+              type: object
+      responses:
+        '201':
+          description: 'Message créé'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponseDTO'
+        '400':
+          description: 'Paramètres manquants ou invalides'
+  '/api/messages/{message}':
+    delete:
+      tags:
+        - Message
+      summary: 'Supprimer un message'
+      description: 'Supprime un message par son ID'
+      operationId: delete_app_messages_delete
+      parameters:
+        -
+          name: message
+          in: path
+          description: 'ID du message'
+          required: true
+          schema:
+            type: integer
+            pattern: '\d*'
+      responses:
+        '204':
+          description: 'Message supprimé avec succès'
+        '404':
+          description: 'Message non trouvé'
+  '/api/post/{forum}/posts':
+    get:
+      tags:
+        - Post
+      summary: "Liste des posts d'un forum"
+      description: 'Retourne la liste des posts pour un forum donné'
+      operationId: get_app_post_forum_posts
+      parameters:
+        -
+          name: forum
+          in: path
+          description: 'ID du forum'
+          required: true
+          schema:
+            type: integer
+            pattern: '\d*'
+      responses:
+        '200':
+          description: 'Liste des posts'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PostResponseDTO'
+  '/api/post/{post}':
+    put:
+      tags:
+        - Post
+      summary: 'Mettre à jour un post'
+      description: 'Met à jour un post existant'
+      operationId: put_app_post_update_post
+      parameters:
+        -
+          name: post
+          in: path
+          description: 'ID du post'
+          required: true
+          schema:
+            type: integer
+            pattern: '\d*'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                epingle:
+                  type: boolean
+                  example: true
+              type: object
+      responses:
+        '200':
+          description: 'Post mis à jour avec succès'
+          content:
+            application/json:
+              schema:
+                properties:
+                  message: { type: string, example: 'Post mis à jour avec succès' }
+                type: object
+        '500':
+          description: 'Erreur lors de la mise à jour'
+          content:
+            application/json:
+              schema:
+                properties:
+                  error: { type: string, example: "Message d'erreur" }
+                type: object
+    delete:
+      tags:
+        - Post
+      summary: 'Supprimer un post'
+      description: 'Supprime un post par son ID'
+      operationId: delete_app_post_remove_post
+      parameters:
+        -
+          name: post
+          in: path
+          description: 'ID du post'
+          required: true
+          schema:
+            type: integer
+            pattern: '\d*'
+      responses:
+        '200':
+          description: 'Post supprimé avec succès'
+          content:
+            application/json:
+              schema:
+                properties:
+                  message: { type: string, example: 'Post supprimé avec succès' }
+                type: object
+  /api/post/:
+    post:
+      tags:
+        - Post
+      summary: 'Créer un post'
+      description: 'Crée un nouveau post dans un forum'
+      operationId: post_app_post_create_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                titre:
+                  type: string
+                  example: 'Titre du post'
+                utilisateur:
+                  type: integer
+                  example: 1
+                forum:
+                  type: integer
+                  example: 1
+              type: object
+      responses:
+        '200':
+          description: 'Post créé avec succès'
+          content:
+            application/json:
+              schema:
+                properties:
+                  message: { type: string, example: 'Post créé avec succès' }
+                type: object
   /api/tokens/refresh:
     post:
       tags:
@@ -321,6 +729,41 @@ paths:
   /api/tokens/info:
     get:
       operationId: get_app_tokens_info
+      responses:
+        default:
+          description: ''
+  /api/me:
+    get:
+      tags:
+        - User
+      summary: "Récupérer les informations de l'utilisateur actuel"
+      description: "Retourne les informations de profil de l'utilisateur authentifié"
+      operationId: get_app_api_me
+      responses:
+        '200':
+          description: 'Informations utilisateur récupérées avec succès'
+          content:
+            application/json:
+              schema:
+                properties:
+                  id: { description: "Identifiant unique de l'utilisateur", type: integer, example: 1 }
+                  username: { description: "Nom d'utilisateur", type: string, example: john_doe }
+                  roles: { description: "Liste des rôles de l'utilisateur", type: array, items: { type: string }, example: [ROLE_USER] }
+                  lastVisit: { description: 'Date et heure de la dernière visite', type: string, format: date-time, example: '2025-07-01 10:30:00' }
+                type: object
+        '401':
+          description: 'Utilisateur non authentifié'
+          content:
+            application/json:
+              schema:
+                properties:
+                  error: { description: "Code d'erreur", type: string, example: UNAUTHORIZED }
+                  message: { description: "Message d'erreur", type: string, example: 'User not authenticated' }
+                type: object
+    options:
+      tags:
+        - User
+      operationId: options_app_api_me_options
       responses:
         default:
           description: ''
@@ -377,6 +820,94 @@ components:
         message:
           type: string
       type: object
+    CategorieForumResponseDTO:
+      description: 'Catégorie de forum'
+      required:
+        - id
+        - name
+        - ordre
+      properties:
+        id:
+          description: 'ID de la catégorie'
+          type: integer
+          example: 1
+        name:
+          description: 'Nom de la catégorie'
+          type: string
+          example: Général
+        ordre:
+          description: "Ordre d'affichage"
+          type: integer
+          example: 1
+      type: object
+    ForumResponseDTO:
+      description: Forum
+      required:
+        - id
+        - titre
+        - dateCreation
+        - description
+        - ordreAffichage
+        - visible
+        - slug
+        - createdAt
+      properties:
+        id:
+          type: integer
+          example: 1
+        titre:
+          type: string
+          example: 'Forum général'
+        dateCreation:
+          type: string
+          format: date-time
+          example: '2025-07-27T10:00:00'
+        description:
+          type: string
+          example: 'Description du forum'
+        ordreAffichage:
+          type: integer
+          example: 1
+        visible:
+          type: boolean
+          example: true
+        slug:
+          type: string
+          example: forum-general
+        createdAt:
+          type: string
+          format: date-time
+          example: '2025-07-27T10:00:00'
+      type: object
+    ForumCreateRequestDTO:
+      description: 'Forum creation request'
+      required:
+        - titre
+        - categories
+        - description
+        - ordreAffichage
+        - visible
+        - utilisateur
+      properties:
+        titre:
+          type: string
+          example: 'Forum général'
+        categories:
+          type: integer
+          example: 1
+        description:
+          type: string
+          example: 'Description du forum'
+        ordreAffichage:
+          type: integer
+          example: 1
+        visible:
+          type: boolean
+          example: true
+        utilisateur:
+          type: integer
+          example: 1
+      type: object
     AzureUploadResponseDTO:
       title: "Réponse d'upload Azure"
       description: 'Informations pour uploader directement vers Azure Blob Storage'
@@ -431,6 +962,158 @@ components:
         tokens:
           type: array
           items: {  }
+      type: object
+    MachineResponseDTO:
+      description: Machine
+      required:
+        - id
+        - name
+        - visible
+        - image
+        - description
+        - forum
+        - infoMachines
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: 'PC Portable'
+        visible:
+          type: boolean
+          example: true
+        image:
+          type: string
+          example: image.png
+        description:
+          type: string
+          example: 'Ordinateur performant'
+        forum:
+          properties:
+            id:
+              type: integer
+              example: 1
+          type: object
+        infoMachines:
+          type: array
+          items:
+            properties:
+              id:
+                type: integer
+                example: 1
+              text:
+                type: string
+                example: 'RAM 16Go'
+              type:
+                type: string
+                example: hardware
+            type: object
+      type: object
+    MachineCreateRequestDTO:
+      description: 'Machine creation request'
+      required:
+        - nom
+        - image
+        - infoMachines
+      properties:
+        nom:
+          type: string
+          example: 'PC Portable'
+        image:
+          type: string
+          example: image.png
+        infoMachines:
+          type: array
+          items:
+            $ref: App\DTO\InfoMachineBaseDTO
+      type: object
+    MachineUpdateRequestDTO:
+      description: 'Machine update request'
+      required:
+        - nom
+        - image
+        - description
+        - infoMachines
+      properties:
+        nom:
+          type: string
+          example: 'PC Portable'
+        image:
+          type: string
+          example: image.png
+        description:
+          type: string
+          example: 'Ordinateur performant'
+        infoMachines:
+          type: array
+          items:
+            $ref: App\DTO\InfoMachineUpdateDTO
+      type: object
+    MessageResponseDTO:
+      description: Message
+      required:
+        - id
+        - text
+        - dateCreation
+        - dateModification
+        - visible
+        - utilisateur
+      properties:
+        id:
+          type: integer
+          example: 1
+        text:
+          type: string
+          example: 'Ceci est un message'
+        dateCreation:
+          type: string
+          format: date-time
+          example: '2025-07-27T10:00:00'
+        dateModification:
+          type: string
+          format: date-time
+          example: '2025-07-27T10:05:00'
+        visible:
+          type: boolean
+          example: true
+        utilisateur:
+          $ref: App\DTO\MessageUserResponseDTO
+      type: object
+    PostResponseDTO:
+      description: Post
+      required:
+        - id
+        - titre
+        - dateCreation
+        - vues
+        - epingle
+        - verrouille
+        - messages
+      properties:
+        id:
+          type: integer
+          example: 1
+        titre:
+          type: string
+          example: 'Titre du post'
+        dateCreation:
+          type: string
+          format: date-time
+          example: '2025-07-27 10:00:00'
+        vues:
+          type: integer
+          example: 42
+        epingle:
+          type: boolean
+          example: false
+        verrouille:
+          type: boolean
+          example: false
+        messages:
+          type: array
+          items:
+            $ref: App\DTO\MessageResponseDTO
       type: object
     TokenRefreshRequestDTO:
       required:
@@ -546,4 +1229,22 @@ tags:
   -
     name: Images
     description: 'Gestion des images via Azure Blob Storage'
+  -
+    name: CategorieForum
+    description: 'Gestion des catégories de forum'
+  -
+    name: Forum
+    description: 'Gestion des forums'
+  -
+    name: Message
+    description: 'Gestion des messages'
+  -
+    name: User
+    description: 'Gestion des utilisateurs'
+  -
+    name: Machine
+    description: Machine
+  -
+    name: Post
+    description: Post
 

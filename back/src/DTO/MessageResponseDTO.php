@@ -2,6 +2,7 @@
 
 namespace App\DTO;
 
+use App\Entity\Message;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(description: 'Message', required: ['id', 'text', 'dateCreation', 'dateModification', 'visible', 'utilisateur'])]
@@ -17,11 +18,17 @@ class MessageResponseDTO
     public string $dateModification;
     #[OA\Property(type: 'boolean', example: true)]
     public bool $visible;
-    #[OA\Property(type: 'object', ref: '#/components/schemas/MessageUserResponseDTO')]
+    #[OA\Property(type: 'object', ref: MessageUserResponseDTO::class)]
     public $utilisateur;
 
-    public function __construct($id, $text, $dateCreation, $dateModification, $visible, $utilisateur)
-    {
+    public function __construct(
+        int $id,
+        string $text,
+        ?string $dateCreation,
+        ?string $dateModification,
+        bool $visible,
+        MessageUserResponseDTO $utilisateur
+    ) {
         $this->id = $id;
         $this->text = $text;
         $this->dateCreation = $dateCreation;
@@ -30,7 +37,7 @@ class MessageResponseDTO
         $this->utilisateur = $utilisateur;
     }
 
-    public static function fromEntity($message): self
+    public static function fromEntity(Message $message): self
     {
         return new self(
             $message->getId(),

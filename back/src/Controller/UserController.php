@@ -14,13 +14,6 @@ use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/api', name: 'app_api')]
 #[OA\Tag(name: 'User', description: 'Gestion des utilisateurs')]
-#[OA\SecurityScheme(
-    securityScheme: 'bearerAuth',
-    type: 'http',
-    scheme: 'bearer',
-    bearerFormat: 'JWT',
-    description: 'Entrez votre token JWT au format: Bearer {votre_token}'
-)]
 final class UserController extends AbstractController
 {
     /**
