@@ -2,6 +2,9 @@
 
 namespace App\Controller;
 
+use App\DTO\MachineCreateRequestDTO;
+use App\DTO\MachineResponseDTO;
+use App\DTO\MachineUpdateRequestDTO;
 use App\Entity\InfoMachine;
 use App\Entity\Machine;
 use App\Repository\MachineRepository;
@@ -11,6 +14,7 @@ use App\Service\InitSerializerService;
 use App\Service\JWTService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
+use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -19,7 +23,6 @@ use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -50,13 +53,7 @@ final class MachinesController extends AbstractController
         summary: 'Créer une machine',
         requestBody: new OA\RequestBody(
             required: true,
-            content: new OA\JsonContent(
-                properties: [
-                    new OA\Property(property: 'nom', type: 'string'),
-                    new OA\Property(property: 'image', type: 'string'),
-                    new OA\Property(property: 'infoMachines', type: 'string'),
-                ]
-            )
+            content: new OA\JsonContent(ref: new Model(type: MachineCreateRequestDTO::class))
         ),
         responses: [
             new OA\Response(response: 201, description: 'Machine créée'),
@@ -125,47 +122,112 @@ final class MachinesController extends AbstractController
     }
 
     #[Route('/', name: '_all_machines', methods: ['GET'])]
+    #[OA\Get(
+        path: '/api/machines/',
+        summary: 'Liste des machines',
+        description: 'Retourne la liste de toutes les machines',
+        tags: ['Machine'],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Liste des machines',
+                content: new OA\JsonContent(
+                    type: 'array',
+                    items: new OA\Items(
+                        ref: new Model(type: MachineResponseDTO::class)
+                    )
+                )
+            ),
+        ]
+    )]
     public function getAllMachines(MachineRepository $mRepository): Response
     {
         $machines = $mRepository->findAll();
+        $dtos = array_map(fn ($machine) => MachineResponseDTO::fromEntity($machine), $machines);
 
-        $context = [
-            AbstractNormalizer::ATTRIBUTES => [
-                'id',
-                // 'uuid',
-                'name',
-                'visible',
-                'image',
-                'description',
-                'forum' => ['id'],
-                'infoMachines' => ['id'],
-            ],
-        ];
-
-        return $this->json($this->serializer->normalize($machines, 'json', $context));
+        return $this->json($this->serializer->normalize($dtos, 'json'));
     }
 
     #[Route('/{materielId}', name: '_machine_by_id', methods: ['GET'])]
+    #[OA\Get(
+        path: '/api/machines/{materielId}',
+        summary: 'Récupérer une machine',
+        description: 'Retourne les informations d\'une machine par son ID',
+        tags: ['Machine'],
+        parameters: [
+            new OA\Parameter(
+                name: 'materielId',
+                in: 'path',
+                required: true,
+                description: 'ID de la machine',
+                schema: new OA\Schema(type: 'integer')
+            ),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Données de la machine',
+                content: new OA\JsonContent(
+                    ref: new Model(type: MachineResponseDTO::class)
+                )
+            ),
+        ]
+    )]
     public function getMachineById(Machine $materielId): Response
     {
-        $context = [
-            AbstractNormalizer::ATTRIBUTES => [
-                'id',
-                // 'uuid',
-                'name',
-                'dateModif',
-                'visible',
-                'image',
-                'description',
-                'forum' => ['id'],
-                'infoMachines' => ['id', 'text', 'type'],
-            ],
-        ];
+        $dto = MachineResponseDTO::fromEntity($materielId);
 
-        return $this->json($this->serializer->normalize($materielId, 'json', $context));
+        return $this->json($this->serializer->normalize($dto, 'json'));
     }
 
     #[Route('/{materielId}', name: '_update_machine', methods: ['PUT'])]
+    #[OA\Put(
+        path: '/api/machines/{materielId}',
+        summary: 'Mettre à jour une machine',
+        description: 'Met à jour une machine existante',
+        tags: ['Machine'],
+        parameters: [
+            new OA\Parameter(
+                name: 'materielId',
+                in: 'path',
+                required: true,
+                description: 'ID de la machine',
+                schema: new OA\Schema(type: 'integer')
+            ),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(ref: new Model(type: MachineUpdateRequestDTO::class))
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Machine mise à jour',
+                content: new OA\JsonContent(
+                    ref: new Model(type: MachineResponseDTO::class)
+                )
+            ),
+            new OA\Response(
+                response: 400,
+                description: 'Erreur de validation',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean'),
+                        new OA\Property(property: 'message', type: 'string'),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 404,
+                description: 'Erreur lors de la mise à jour',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'error', type: 'string'),
+                    ]
+                )
+            ),
+        ]
+    )]
     public function updateMachine(
         Request $request,
         Machine $materielId,
@@ -187,7 +249,6 @@ final class MachinesController extends AbstractController
         ;
         foreach ($data->get('infoMachines') as $infoMachine) {
             $infoM = $this->serializer->denormalize($infoMachine, InfoMachine::class);
-            dd($infoM, $materielId->getInfoMachines()->contains($infoM), $infoMachine);
             if ($materielId->getInfoMachines()->contains($infoM)) {
                 /**
                  * @var InfoMachine
@@ -228,23 +289,18 @@ final class MachinesController extends AbstractController
                 } catch (ORMException $orm) {
                     return $this->json($orm->getMessage(), 404);
                 }
+                $materielId->addInfoMachine($im);
             }
-
-            $materielId->addInfoMachine($im);
         }
 
         try {
             $this->entityManager->persist($materielId);
             $this->entityManager->flush();
+            $dto = MachineResponseDTO::fromEntity($materielId);
 
-            return $this->json([
-                'success' => true,
-                'data' => [
-                    'id' => $materielId->getId(),
-                ],
-            ], 200);
+            return $this->json($this->serializer->normalize($dto, 'json'));
         } catch (ORMException $orm) {
-            return $this->json($orm->getMessage(), 404);
+            return $this->json(['error' => $orm->getMessage()], 404);
         }
     }
 }

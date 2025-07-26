@@ -2,16 +2,18 @@
 
 namespace App\Controller;
 
+use App\DTO\UtilisateurResponseDTO;
 use App\Entity\Utilisateur;
 use App\Repository\UtilisateurRepository;
 use App\Service\HttpOnlyCookieService;
 use App\Service\InitSerializerService;
 use App\Service\JWTService;
 use Doctrine\ORM\EntityManagerInterface;
+use Nelmio\ApiDocBundle\Attribute\Model;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Serializer;
 
 #[Route('/api/utilisateur', name: 'app_api_utilisateur')]
@@ -36,36 +38,34 @@ final class UtilisateurController extends AbstractController
         ]);
     }
 
-    #[Route('/{utilisateur<\d*>}', name: '_me', methods: ['GET'])]
+    #[OA\Get(
+        path: '/api/utilisateur/{utilisateur}',
+        summary: 'Récupérer un utilisateur',
+        description: 'Retourne les informations d\'un utilisateur par son ID',
+        tags: ['Utilisateur'],
+        parameters: [
+            new OA\Parameter(
+                name: 'utilisateur',
+                in: 'path',
+                required: true,
+                description: 'ID de l\'utilisateur',
+                schema: new OA\Schema(type: 'integer')
+            ),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Données de l\'utilisateur',
+                content: new OA\JsonContent(
+                    ref: new Model(type: UtilisateurResponseDTO::class)
+                )
+            ),
+        ]
+    )]
     public function getUtilisateur(Utilisateur $utilisateur): Response
     {
-        //          id: 1,
-        //   username: 'johndoe',
-        //   roles: ['user'],
-        //   dateCreation: '2024-01-01',
-        //   anonimus: false,
-        //   status: 'active',
-        //   mail: 'johndoe@example.com',
-        //   lastVisit: '2025-07-19',
-        //   forums: [
-        //     { id: 1, titre: 'Forum général', ordreAffichage: 1, visible: true, slug: 'forum-general', dateCreation: null, createdAt: null },
-        //     { id: 2, titre: 'Matériel', ordreAffichage: 2, visible: true, slug: 'materiel', dateCreation: null, createdAt: null },
-        //   ],
+        $dto = UtilisateurResponseDTO::fromEntity($utilisateur);
 
-        $context = [
-            AbstractNormalizer::ATTRIBUTES => [
-                'id',
-                'username',
-                'roles',
-                'password',
-                'dateCreation',
-                'anonimus',
-                'mail',
-                'status',
-                'createdAt',
-            ],
-        ];
-
-        return $this->json($this->serializer->normalize($utilisateur, 'json', $context));
+        return $this->json($this->serializer->normalize($dto, 'json'));
     }
 }

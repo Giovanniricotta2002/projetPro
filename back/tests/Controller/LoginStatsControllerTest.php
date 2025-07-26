@@ -2,6 +2,7 @@
 
 namespace App\Tests\Controller;
 
+use App\Entity\Utilisateur;
 use App\Service\LoginLoggerService;
 use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -257,14 +258,14 @@ class LoginStatsControllerTest extends WebTestCase
 
     private function createAdminUser(): object
     {
-        return $this->createMock(\App\Entity\Utilisateur::class);
+        return $this->createMock(Utilisateur::class);
         // Mock d'un utilisateur avec ROLE_ADMIN
         // En réalité, vous devrez adapter selon votre système d'auth
     }
 
     private function createRegularUser(): object
     {
-        return $this->createMock(\App\Entity\Utilisateur::class);
+        return $this->createMock(Utilisateur::class);
         // Mock d'un utilisateur avec ROLE_USER seulement
     }
 }
