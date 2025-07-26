@@ -93,7 +93,7 @@ const newMessage = ref('')
 async function postMessage() {
   if (!newMessage.value || !currentUser.value) return
   try {
-    const response = await authStore.apiRequest(`/api/messages/${postId}`, {
+    const response = await authStore.apiRequest<Message>(`/api/messages/${postId}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
