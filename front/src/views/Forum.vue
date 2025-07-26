@@ -66,6 +66,12 @@
               label="Catégorie du forum"
               required
             />
+            <v-textarea
+              v-model="newForumDescription"
+              label="Description du forum"
+              rows="3"
+              required
+            />
           </v-card-text>
           <v-card-actions>
             <v-spacer />
@@ -79,56 +85,64 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import type { Forum } from '@/types/Forum'
 import type { CategorieForum } from '@/types/CategorieForum'
 
-const forums = ref<Forum[]>([
-  {
-    id: 1,
-    titre: 'Bienvenue sur le forum !',
-    dateCreation: '2025-07-03T14:00:00',
-    ordreAffichage: 1,
-    visible: true,
-    slug: 'bienvenue',
-    createdAt: '2025-07-03T14:00:00',
-    updatedAt: '2025-07-03T14:00:00',
-    deletedAt: null,
-    description: 'Forum d’accueil',
-    categorieForums: [
-      { id: 1, name: 'Accueil', ordre: 1, slug: 'accueil', createdAt: '2025-07-03T14:00:00', updatedAt: '2025-07-03T14:00:00' }
-    ]
-  },
-  {
-    id: 2,
-    titre: 'Discussions générales',
-    dateCreation: '2025-07-03T14:05:00',
-    ordreAffichage: 2,
-    visible: true,
-    slug: 'general',
-    createdAt: '2025-07-03T14:05:00',
-    updatedAt: '2025-07-03T14:05:00',
-    deletedAt: null,
-    description: 'Parlez de tout ici',
-    categorieForums: [
-      { id: 2, name: 'Général', ordre: 1, slug: 'general', createdAt: '2025-07-03T14:05:00', updatedAt: '2025-07-03T14:05:00' },
-      { id: 3, name: 'Blabla', ordre: 2, slug: 'blabla', createdAt: '2025-07-03T14:06:00', updatedAt: '2025-07-03T14:06:00' }
-    ]
-  },
-])
+const forums = ref<Forum[]>([])
+const authStore = useAuthStore()
+
+const snackbar = ref<{ show: boolean; color: string; text: string }>({ show: false, color: 'success', text: '' })
+const showSnackbar = (msg: string, color: 'error'|'success' = 'error') => {
+  return { show: true, color: color, text: msg }
+}
+
+onMounted(async () => {
+  try {
+    const response = await authStore.apiRequest<Forum[]>('/api/forum', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+    if (response.success && response.data) {
+      forums.value = response.data
+    } else {
+      snackbar.value = showSnackbar(response.message || 'Erreur lors du chargement des forums')
+    }
+  } catch (e) {
+    snackbar.value = showSnackbar('Erreur lors du chargement des forums')
+  }
+})
 
 const router = useRouter()
 const dialog = ref(false)
 const newForumTitle = ref('')
 const newForumCategory = ref<number|null>(null)
 const search = ref('')
+const newForumDescription = ref('')
 
-const categories = ref<CategorieForum[]>([
-  { id: 1, name: 'Accueil', ordre: 1, slug: 'accueil', createdAt: '', updatedAt: '' },
-  { id: 2, name: 'Général', ordre: 2, slug: 'general', createdAt: '', updatedAt: '' },
-  { id: 3, name: 'Blabla', ordre: 3, slug: 'blabla', createdAt: '', updatedAt: '' },
-])
+const categories = ref<CategorieForum[]>([])
+
+onMounted(async () => {
+  try {
+    const response = await authStore.apiRequest<CategorieForum[]>('/api/categorie-forum', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+    if (response.success && response.data) {
+      categories.value = response.data
+    } else {
+      snackbar.value = showSnackbar(response.message || 'Erreur lors du chargement des catégories')
+    }
+  } catch (e) {
+    snackbar.value = showSnackbar('Erreur lors du chargement des catégories')
+  }
+})
 
 const filteredForums = computed(() => {
   if (!search.value) return forums.value
@@ -137,37 +151,62 @@ const filteredForums = computed(() => {
   )
 })
 
-function deleteMessage(index: number) {
-  forums.value.splice(index, 1)
+async function deleteMessage(index: number) {
+  const forum = forums.value[index]
+  if (!forum) return
+  try {
+    const response = await authStore.apiRequest(`/api/forum/${forum.id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+    if (response.success) {
+      forums.value.splice(index, 1)
+      snackbar.value = showSnackbar('Forum supprimé avec succès!', 'success')
+    } else {
+      snackbar.value = showSnackbar(response.message || 'Erreur lors de la suppression du forum')
+    }
+  } catch (e) {
+    snackbar.value = showSnackbar('Erreur lors de la suppression du forum')
+  }
 }
 
 function openForum(forum: Forum) {
-  router.push(`/forum/${forum.id}/posts`)
+  router.push({
+    path: `/forum/${forum.id}/posts`,
+    query: { forumTitre: forum.titre }
+  })
 }
 
-function submitNewForum() {
+async function submitNewForum() {
   if (!newForumTitle.value.trim() || !newForumCategory.value) return
-  const cat = categories.value.find(c => c.id === newForumCategory.value)
-  forums.value.unshift({
-    id: Date.now(),
-    titre: newForumTitle.value.trim(),
-    dateCreation: new Date().toISOString(),
-    ordreAffichage: forums.value.length + 1,
-    visible: true,
-    slug: newForumTitle.value.trim().toLowerCase().replace(/\s+/g, '-'),
-    createdAt: new Date().toISOString(),
-    updatedAt: null,
-    deletedAt: null,
-    description: '',
-    dateCloture: null,
-    post: [],
-    categorieForums: cat ? [cat] : [],
-    utilisateur: null,
-    machine: null,
-  })
-  newForumTitle.value = ''
-  newForumCategory.value = null
-  dialog.value = false
+  try {
+    const response = await authStore.apiRequest<Forum>('/api/forum', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        titre: newForumTitle.value.trim(),
+        categories: newForumCategory.value,
+        description: newForumDescription.value.trim(),
+        ordreAffichage: forums.value.length + 1,
+        utilisateur: authStore.user?.id,
+      })
+    })
+    if (response.success && response.data) {
+      forums.value.unshift(response.data)
+      snackbar.value = showSnackbar('Forum créé avec succès!', 'success')
+      newForumTitle.value = ''
+      newForumCategory.value = null
+      dialog.value = false
+    } else {
+      snackbar.value = showSnackbar(response.message || 'Erreur lors de la création du forum')
+    }
+  } catch (e) {
+    snackbar.value = showSnackbar('Erreur lors de la création du forum')
+  }
 }
 </script>
 

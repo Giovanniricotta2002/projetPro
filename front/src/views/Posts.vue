@@ -5,7 +5,7 @@
         <v-col cols="12">
           <v-card class="pa-4">
             <v-card-title class="headline d-flex align-center justify-space-between">
-              <span>Posts du forum : {{ forum?.titre }}</span>
+              <span>Posts du forum : {{ route.query.forumTitre }}</span>
               <v-btn color="success" @click="createPost" v-if="isAuthenticated || true">Nouveau post</v-btn>
             </v-card-title>
             <v-card-text>
@@ -108,60 +108,42 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import type { Forum } from '@/types/Forum'
+
+import { onMounted } from 'vue'
+import { useAuthStore } from '@/stores/auth'
 import type { Post } from '@/types/Post'
 import { useAuth } from '@/composables/useAuth'
+
 
 const route = useRoute()
 const router = useRouter()
 const { user, isAuthenticated } = useAuth()
+const authStore = useAuthStore()
+const snackbar = ref<{ show: boolean; color: string; text: string }>({ show: false, color: 'success', text: '' })
+const showSnackbar = (msg: string, color: 'error'|'success' = 'error') => {
+  return { show: true, color: color, text: msg }
+}
 
-// Simule la récupération du forum courant (à remplacer par un fetch API)
-const forums = ref<Forum[]>([
-  {
-    id: 1,
-    titre: 'Bienvenue sur le forum !',
-    dateCreation: '2025-07-03T14:00:00',
-    ordreAffichage: 1,
-    visible: true,
-    slug: 'bienvenue',
-    createdAt: '2025-07-03T14:00:00',
-    description: 'Forum d’accueil',
-  },
-])
 
 const forumId = computed(() => Number(route.params.forumId))
-const forum = computed(() => forums.value.find(f => f.id === forumId.value))
+const posts = ref<Post[]>([])
 
-// Simule des posts pour ce forum
-const posts = ref<Post[]>([
-  {
-    id: 1,
-    titre: 'Présentation du forum',
-    dateCreation: '2025-07-03T14:10:00',
-    vues: 10,
-    epingle: true,
-    verrouille: false,
-  },
-  {
-    id: 2,
-    titre: 'Règles à respecter',
-    dateCreation: '2025-07-03T14:12:00',
-    vues: 5,
-    epingle: false,
-    verrouille: false,
-  },
-  {
-    id: 3,
-    titre: 'Votre première question',
-    dateCreation: '2025-07-03T14:15:00',
-    vues: 2,
-    epingle: false,
-    verrouille: false,
-  },
-])
+onMounted(async () => {
+  // GET posts
+  try {
+    const postsRes = await authStore.apiRequest<Post[]>(`/api/post/forum/${forumId.value}/posts`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    })
+    if (postsRes.success && postsRes.data) {
+      posts.value = postsRes.data
+    } else {
+      snackbar.value = showSnackbar(postsRes.message || 'Erreur lors du chargement des posts')
+    }
+  } catch (e) {
+    snackbar.value = showSnackbar('Erreur lors du chargement des posts')
+  }
+})
 
 const search = ref('')
 const filteredPosts = computed(() => {
@@ -173,9 +155,12 @@ const filteredPosts = computed(() => {
 const hasPinnedPost = computed(() => posts.value.some(p => p.epingle))
 const pinnedPost = computed(() => posts.value.find(p => p.epingle))
 const unpinnedPosts = computed(() => filteredPosts.value.filter(p => !p.epingle))
-const canModerate = computed(() => { return true
+const canModerate = computed(() => {
   if (!user.value) return false
-  return user.value.roles.includes('ROLE_ADMIN') || user.value.roles.includes('ROLE_EDITOR')
+  return (
+    user.value.roles?.includes('ROLE_ADMIN') ||
+    user.value.roles?.includes('ROLE_EDITOR')
+  )
 })
 
 function goBack() {
@@ -190,11 +175,25 @@ function openDiscussion(post: Post) {
 function canDelete(post: Post) {
   if (!user.value) return false
   // Admin ou créateur du post (simulé ici, à adapter avec le vrai champ userId du post)
-  return user.value.roles.includes('ROLE_ADMIN') //|| post.creatorId === user.value.id
+  return user.value.roles?.includes('ROLE_ADMIN') //|| post.creatorId === user.value.id
 }
 
-function deletePost(post: Post) {
-  posts.value = posts.value.filter(p => p.id !== post.id)
+async function deletePost(post: Post) {
+  try {
+    const response = await authStore.apiRequest(`/api/post/${post.id}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ utilisateur: user.value?.id })
+    })
+    if (response.success) {
+      posts.value = posts.value.filter(p => p.id !== post.id)
+      snackbar.value = showSnackbar('Post supprimé avec succès!', 'success')
+    } else {
+      snackbar.value = showSnackbar(response.message || 'Erreur lors de la suppression du post')
+    }
+  } catch (e) {
+    snackbar.value = showSnackbar('Erreur lors de la suppression du post')
+  }
 }
 
 const dialog = ref(false)
@@ -204,28 +203,49 @@ function createPost() {
   dialog.value = true
 }
 
-function submitNewPost() {
+async function submitNewPost() {
   if (!user.value || !newPostTitle.value.trim()) return
-  const nouveauPost: Post = {
-    id: Math.max(0, ...posts.value.map(p => p.id)) + 1,
-    titre: newPostTitle.value.trim(),
-    dateCreation: new Date().toISOString(),
-    vues: 0,
-    epingle: false,
-    verrouille: false,
-    // creatorId: user.value.id // à ajouter dans le type Post pour la vraie logique
+  try {
+    const response = await authStore.apiRequest<Post>(`/api/post/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        titre: newPostTitle.value.trim(),
+        forum: forumId.value,
+      })
+    })
+    if (response.success && response.data) {
+      posts.value.unshift(response.data)
+      snackbar.value = showSnackbar('Post créé avec succès!', 'success')
+      newPostTitle.value = ''
+      dialog.value = false
+    } else {
+      snackbar.value = showSnackbar(response.message || 'Erreur lors de la création du post')
+    }
+  } catch (e) {
+    snackbar.value = showSnackbar('Erreur lors de la création du post')
   }
-  posts.value.unshift(nouveauPost)
-  newPostTitle.value = ''
-  dialog.value = false
 }
 
-function togglePin(post: Post) {
+async function togglePin(post: Post) {
   if (!canModerate.value) return
-  if (post.epingle) {
-    post.epingle = false
-  } else if (!hasPinnedPost.value) {
-    post.epingle = true
+  try {
+    const response = await authStore.apiRequest<Post>(`/api/post/${post.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        epingle: !post.epingle,
+        utilisateur: user.value?.id,
+      })
+    })
+    if (response.success && response.data) {
+      post.epingle = response.data.epingle
+      snackbar.value = showSnackbar('Post mis à jour!', 'success')
+    } else {
+      snackbar.value = showSnackbar(response.message || 'Erreur lors de la mise à jour du post')
+    }
+  } catch (e) {
+    snackbar.value = showSnackbar('Erreur lors de la mise à jour du post')
   }
 }
 </script>

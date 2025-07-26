@@ -39,101 +39,79 @@
         </v-col>
       </v-row>
     </v-container>
+    <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="4000">
+      {{ snackbar.text }}
+    </v-snackbar>
   </v-app>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import { marked } from 'marked'
+import { useAuthStore } from '@/stores/auth'
 import type { Message } from '@/types/Message'
-import type { Utilisateur } from '@/types/Utilisateur'
-import { useAuth } from '@/composables/useAuth'
-
-// const { user, hasRole } = useAuth()
-const userRoles = ref<string[]>(['admin']) // ou ['editor'], ou []
-// Simule l'utilisateur connecté (à remplacer par le vrai store auth)
-const currentUser = ref<Utilisateur>({
-  id: 99,
-  username: 'AdminDemo',
-  roles: ['admin'],
-  dateCreation: new Date().toISOString(),
-  anonimus: false,
-  status: 'active',
-})
 
 
+const authStore = useAuthStore()
+const route = useRoute()
 
-const messages = ref<Message[]>([
-  {
-    id: 1,
-    text: 'Bienvenue sur la page de discussion des machines. Posez vos questions ici !',
-    dateCreation: '2025-07-03T14:30:00',
-    visible: true,
-    utilisateur: {
-      id: 1,
-      username: 'MachineBot',
-      roles: [],
-      dateCreation: '2025-07-03T14:00:00',
-      anonimus: false,
-      status: 'active',
-    },
-  },
-  {
-    id: 2,
-    text: 'Comment entretenir une fraiseuse CNC ?',
-    dateCreation: '2025-07-03T14:32:00',
-    visible: true,
-    utilisateur: {
-      id: 2,
-      username: 'Utilisateur',
-      roles: [],
-      dateCreation: '2025-07-03T14:00:00',
-      anonimus: false,
-      status: 'active',
-    },
-  },
-  {
-    id: 3,
-    text: 'Pour l’entretien, pensez à lubrifier les axes et à vérifier les capteurs régulièrement.',
-    dateCreation: '2025-07-03T14:35:00',
-    visible: true,
-    utilisateur: {
-      id: 3,
-      username: 'ExpertMachine',
-      roles: [],
-      dateCreation: '2025-07-03T14:00:00',
-      anonimus: false,
-      status: 'active',
-    },
-  },
-])
+const currentUser = computed(() => authStore.user)
+const userRoles = computed(() => authStore.user?.roles || [])
+
+
+const messages = ref<Message[]>([])
+const snackbar = ref({ show: false, color: 'success', text: '' })
+const showSnackbar = (msg: string, color: 'error'|'success' = 'error') => {
+  return { show: true, color: color, text: msg }
+}
+
+const postId = route.params.postId
+
+async function fetchMessages() {
+  try {
+    const response = await authStore.apiRequest<Message[]>(`/api/messages/${postId}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    })
+    if (response.success && response.data) {
+      messages.value = response.data
+    } else {
+      snackbar.value = showSnackbar(response.message || 'Erreur lors du chargement des messages')
+      messages.value = []
+    }
+  } catch (e) {
+    snackbar.value = showSnackbar('Erreur lors du chargement des messages')
+    messages.value = []
+  }
+}
+
+onMounted(fetchMessages)
 
 const newMessage = ref('')
 
-function postMessage() {
-  if (!newMessage.value) return
-  // if (!newMessage.value || !user.value) return
-  messages.value.push({
-    id: messages.value.length + 1,
-    text: newMessage.value,
-    dateCreation: new Date().toISOString(),
-    visible: true,
-    utilisateur: {
-      // id: user.value.id,
-      // username: user.value.username,
-      // roles: user.value.roles,
-      // dateCreation: user.value.createdAt || new Date().toISOString(),
-      // anonimus: user.value.anonimus ?? false,
-      // status: user.value.status || 'active',
-      id: currentUser.value.id,
-      username: currentUser.value.username,
-      roles: currentUser.value.roles,
-      dateCreation: currentUser.value.createdAt || new Date().toISOString(),
-      anonimus: currentUser.value.anonimus ?? false,
-      status: currentUser.value.status || 'active',
-    },
-  })
-  newMessage.value = ''
+async function postMessage() {
+  if (!newMessage.value || !currentUser.value) return
+  try {
+    const response = await authStore.apiRequest(`/api/messages/${postId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text: newMessage.value,
+        utilisateurId: currentUser.value.id,
+      })
+    })
+    if (response.success && response.data) {
+      snackbar.value = showSnackbar('Message publié avec succès !', 'success')
+      // Ajout local du message retourné par l'API
+      messages.value.push(response.data)
+      newMessage.value = ''
+    } else {
+      snackbar.value = showSnackbar(response.message || 'Erreur lors de la publication du message')
+    }
+  } catch (e) {
+    snackbar.value = showSnackbar('Erreur lors de la publication du message')
+  }
 }
 
 function renderMarkdown(text: string | null) {
@@ -145,8 +123,23 @@ function canModerate() {
   return userRoles.value.includes('admin') || userRoles.value.includes('editor')
 }
 
-function deleteMessage(index: number) {
-  messages.value.splice(index, 1)
+async function deleteMessage(index: number) {
+  const message = messages.value[index]
+  if (!message) return
+  try {
+    const response = await authStore.apiRequest(`/messages/${message.id}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+    })
+    if (response.success) {
+      messages.value.splice(index, 1)
+      snackbar.value = showSnackbar('Message supprimé avec succès !', 'success')
+    } else {
+      snackbar.value = showSnackbar(response.message || 'Erreur lors de la suppression du message')
+    }
+  } catch (e) {
+    snackbar.value = showSnackbar('Erreur lors de la suppression du message')
+  }
 }
 </script>
 

@@ -46,7 +46,7 @@ const routes: RouteConfig[] = [
     meta: { requiresAuth: false, menu: false }
   },
   {
-    path: '/discussion',
+    path: '/:postId/discussion',
     name: 'discussion',
     component: Discussion,
     meta: { requiresAuth: false, menu: false}
