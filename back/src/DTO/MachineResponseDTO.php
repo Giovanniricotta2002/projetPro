@@ -30,7 +30,7 @@ class MachineResponseDTO
         string $image,
         ?string $description,
         ?array $forum,
-        array $infoMachines
+        array $infoMachines,
     ) {
         $this->id = $id;
         $this->name = $name;
@@ -50,11 +50,11 @@ class MachineResponseDTO
             $machine->getImage(),
             $machine->getDescription(),
             $machine->getForum() ? ['id' => $machine->getForum()->getId()] : null,
-            array_map(fn($im) => [
-                    'id' => $im->getId(),
-                    'text' => $im->getText(),
-                    'type' => $im->getType(),
-                ], $machine->getInfoMachines()->toArray())
+            array_map(fn ($im) => [
+                'id' => $im->getId(),
+                'text' => $im->getText(),
+                'type' => $im->getType(),
+            ], $machine->getInfoMachines()->toArray())
         );
     }
 }

@@ -36,7 +36,7 @@ class UtilisateurResponseDTO
         string $status,
         string $mail,
         ?string $lastVisit,
-        string $createdAt
+        string $createdAt,
     ) {
         $this->id = $id;
         $this->username = $username;

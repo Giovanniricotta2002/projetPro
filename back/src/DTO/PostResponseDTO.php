@@ -34,7 +34,7 @@ class PostResponseDTO
         ?int $vues,
         bool $epingle,
         bool $verrouille,
-        array $messages
+        array $messages,
     ) {
         $this->id = $id;
         $this->titre = $titre;
@@ -54,7 +54,7 @@ class PostResponseDTO
             $post->getVues(),
             $post->isEpingle(),
             $post->isVerrouille(),
-            array_map(fn(Message $message) => MessageResponseDTO::fromEntity($message), $post->getMessages()->toArray()),
+            array_map(fn (Message $message) => MessageResponseDTO::fromEntity($message), $post->getMessages()->toArray()),
         );
     }
 }

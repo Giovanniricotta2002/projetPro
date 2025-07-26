@@ -27,7 +27,7 @@ class MessageResponseDTO
         ?string $dateCreation,
         ?string $dateModification,
         bool $visible,
-        MessageUserResponseDTO $utilisateur
+        MessageUserResponseDTO $utilisateur,
     ) {
         $this->id = $id;
         $this->text = $text;
