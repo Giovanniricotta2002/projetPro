@@ -5,7 +5,7 @@ namespace App\DTO;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(description: 'InfoMachine update', allOf: [
-    new OA\Schema(ref: InfoMachineBaseDTO::class)
+    new OA\Schema(ref: InfoMachineBaseDTO::class),
 ], required: ['id', 'remove'])]
 class InfoMachineUpdateDTO extends InfoMachineBaseDTO
 {
