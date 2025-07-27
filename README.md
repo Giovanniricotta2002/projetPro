@@ -94,17 +94,16 @@ docker-compose up -d
 ```bash
 cd back/
 
+docker compose up -d
+
+docker compose exec -itu 1000 backen bash
+
 # Installation des dépendances
 composer install
 
 # Configuration de la base de données
-php bin/console doctrine:database:create
 php bin/console doctrine:migrations:migrate
 
-# Démarrage du serveur de développement
-symfony server:start
-# ou
-php -S localhost:8000 -t public/
 ```
 
 #### Frontend
@@ -130,6 +129,8 @@ npm run build
 
 ```bash
 cd back/
+
+docker compose exec -itu 1000 backen bash
 
 # Tests unitaires
 ./bin/phpunit
@@ -354,6 +355,7 @@ jobs:
 
 Ce projet de fin d'année démontre la maîtrise de :
 
+
 ### Compétences techniques
 
 1. **Développement Full-Stack** moderne (Symfony + Vue.js)
@@ -363,35 +365,40 @@ Ce projet de fin d'année démontre la maîtrise de :
 5. **DevOps** (Docker, Kubernetes, IaC)
 6. **Sécurité** (authentification, autorisation, audit)
 
+
 ### Compétences C2 - Développement et Déploiement
 
 #### C2.1 - Environnements et CI/CD
 
 **C2.1.1 - Environnements de déploiement** : [📖 Documentation Exploitation](./DOCUMENTATION_EXPLOITATION.md)
-- ✅ **Développement** : Docker Compose local avec hot-reload
-- ✅ **Staging** : Kubernetes (Kind) + tests automatisés
-- ✅ **Production** : Google Cloud Run avec auto-scaling
-- ✅ **Monitoring intégré** : Grafana dans tous les environnements
+
+- **Développement** : Docker Compose local avec hot-reload
+- **Staging** : Kubernetes (Kind) + tests automatisés
+- **Production** : Google Cloud Run avec auto-scaling
+- **Monitoring intégré** : Grafana dans tous les environnements
 
 **C2.1.2 - CI/CD Pipeline opérationnel** : [🔄 Stratégie Tests](./STRATEGIE_TESTS.md)
-- ✅ **GitHub Actions** : Tests automatisés sur chaque commit
-- ✅ **Tests de régression** : 300+ tests unitaires + intégration
-- ✅ **Fusion automatique** : Merge après validation complète
-- ✅ **Déploiement continu** : Production via merge sur main
+
+- **GitHub Actions** : Tests automatisés sur chaque commit
+- **Tests de régression** : 300+ tests unitaires + intégration
+- **Fusion automatique** : Merge après validation complète
+- **Déploiement continu** : Production via merge sur main
 
 #### C2.2 - Développement et Qualité
 
 **C2.2.1 - Prototype et ergonomie** : [🎨 Prototype Ergonomie](./PROTOTYPE_ERGONOMIE.md)
-- ✅ **Design responsive** : Mobile-first avec Vuetify 3
-- ✅ **Tests utilisabilité** : SUS score 78/100, 15 participants
-- ✅ **Accessibilité WCAG** : Niveau AA compliance
-- ✅ **Sécurité UX** : Privacy by design, RGPD compliant
+
+- **Design responsive** : Mobile-first avec Vuetify 3
+- **Tests utilisabilité** : SUS score 78/100, 15 participants
+- **Accessibilité WCAG** : Niveau AA compliance
+- **Sécurité UX** : Privacy by design, RGPD compliant
 
 **C2.2.2 - Harnais de tests** : [🧪 Stratégie Tests](./STRATEGIE_TESTS.md)
-- ✅ **Tests unitaires** : 85% couverture backend, 80% frontend
-- ✅ **Tests intégration** : API endpoints + base de données
-- ✅ **Tests E2E** : Scénarios utilisateur avec Playwright
-- ✅ **Prévention régressions** : Hooks pre-commit + CI/CD
+
+- **Tests unitaires** : 85% couverture backend, 80% frontend
+- **Tests intégration** : API endpoints + base de données
+- **Tests E2E** : Scénarios utilisateur avec Playwright
+- **Prévention régressions** : Hooks pre-commit + CI/CD
 
 **C2.2.3 - Évolutivité et sécurisation** : [🔒 Documentation Technique](./DOCUMENTATION_EXPLOITATION.md)
 - ✅ **Architecture modulaire** : Services découplés, API-first

@@ -11,6 +11,7 @@
 **📍 Référence** : [DOCUMENTATION_EXPLOITATION.md](./DOCUMENTATION_EXPLOITATION.md#déploiement-continu)
 
 **Détails couverts** :
+
 - **Pipeline automatisé** : GitHub Actions → Build → Test → Deploy
 - **Blue/Green deployment** : Zero-downtime sur Google Cloud Run
 - **Rollback automatique** : En cas de détection d'anomalies (< 4 minutes)
@@ -21,6 +22,7 @@
 **📍 Référence** : [DOCUMENTATION_EXPLOITATION.md](./DOCUMENTATION_EXPLOITATION.md#environnement-local)
 
 **Outils identifiés** :
+
 - ✅ **Éditeur de code** : VS Code avec extensions recommandées
 - ✅ **Compilateur** : PHP 8.3 + TypeScript 5.3
 - ✅ **Serveur d'application** : Symfony 7.3 + Vite dev server
@@ -30,6 +32,7 @@
 ### ✅ **"Le protocole permet de définir les différentes séquences de déploiement"**
 
 **Séquences définies** :
+
 1. **Développement** → Docker Compose local
 2. **Staging** → Kubernetes (Kind) + tests automatisés
 3. **Production** → Google Cloud Run + monitoring
@@ -37,6 +40,7 @@
 ### ✅ **"Les critères de qualité et de performance permettent de répondre aux exigences du projet"**
 
 **Critères définis** :
+
 - **Performance** : Temps de réponse < 2s, 99% uptime
 - **Qualité** : Couverture tests 80%+, PHPStan niveau 8
 - **Sécurité** : OWASP Top 10, HTTPS obligatoire
@@ -50,6 +54,7 @@
 **📍 Référence** : [STRATEGIE_TESTS.md](./STRATEGIE_TESTS.md#ci-cd-integration)
 
 **Pipeline CI/CD** :
+
 ```yaml
 Commit → Build → Tests Unitaires → Tests Intégration → Tests E2E → Deploy
 ```
@@ -57,6 +62,7 @@ Commit → Build → Tests Unitaires → Tests Intégration → Tests E2E → De
 ### ✅ **"Il permet de définir les séquences d'intégration"**
 
 **Séquences automatisées** :
+
 1. **Pre-commit** : Hooks ESLint + PHPStan
 2. **Pull Request** : Tests complets + review obligatoire
 3. **Merge main** : Déploiement automatique production
@@ -71,6 +77,7 @@ Commit → Build → Tests Unitaires → Tests Intégration → Tests E2E → De
 **📍 Référence** : [PROTOTYPE_ERGONOMIE.md](./PROTOTYPE_ERGONOMIE.md#architecture-technique)
 
 **Frameworks et paradigmes** :
+
 - ✅ **Frontend** : Vue.js 3 (Composition API) + Vuetify 3 (Material Design)
 - ✅ **Backend** : Symfony 7 (Clean Architecture, DDD patterns)
 - ✅ **Paradigmes** : SOLID, DRY, KISS, Repository pattern
@@ -79,6 +86,7 @@ Commit → Build → Tests Unitaires → Tests Intégration → Tests E2E → De
 ### ✅ **"Le prototype est fonctionnel et permet de répondre aux besoins identifiés"**
 
 **Fonctionnalités implémentées** :
+
 - ✅ Authentification sécurisée (JWT + refresh tokens)
 - ✅ Gestion utilisateurs multi-rôles
 - ✅ Interface responsive (mobile/desktop)
@@ -87,6 +95,7 @@ Commit → Build → Tests Unitaires → Tests Intégration → Tests E2E → De
 ### ✅ **"Le prototype met en œuvre un ensemble cohérent de fonctionnalités principales et user stories"**
 
 **User Stories couvertes** :
+
 - ✅ En tant qu'utilisateur, je peux me connecter de manière sécurisée
 - ✅ En tant qu'admin, je peux gérer les utilisateurs et leurs permissions
 - ✅ En tant qu'utilisateur mobile, j'ai une interface adaptée
@@ -95,6 +104,7 @@ Commit → Build → Tests Unitaires → Tests Intégration → Tests E2E → De
 ### ✅ **"Les composants de l'interface sont présents et fonctionnels"**
 
 **Composants UI** :
+
 - ✅ **Fenêtres** : Modales Vue.js avec gestion des états
 - ✅ **Boutons** : Composants Vuetify avec feedback utilisateur
 - ✅ **Menus** : Navigation responsive avec breadcrumbs
@@ -103,6 +113,7 @@ Commit → Build → Tests Unitaires → Tests Intégration → Tests E2E → De
 ### ✅ **"Le prototype permet de satisfaire aux exigences de sécurité"**
 
 **Sécurité implémentée** :
+
 - ✅ Authentification multi-facteurs optionnelle
 - ✅ Chiffrement AES-256 des données sensibles
 - ✅ Protection CSRF avec tokens
@@ -118,6 +129,7 @@ Commit → Build → Tests Unitaires → Tests Intégration → Tests E2E → De
 **📍 Référence** : [STRATEGIE_TESTS.md](./STRATEGIE_TESTS.md#tests-unitaires)
 
 **Couverture actuelle** :
+
 - ✅ **Backend** : 85% (PHPUnit + Behat)
 - ✅ **Frontend** : 80% (Vitest + Testing Library)
 - ✅ **API** : 90% (Tests d'intégration)
@@ -127,6 +139,7 @@ Commit → Build → Tests Unitaires → Tests Intégration → Tests E2E → De
 **📍 Référence** : [CAHIER_RECETTES.md](./CAHIER_RECETTES.md#tests-de-sécurité-owasp)
 
 **OWASP Top 10 couvert** :
+
 - ✅ **A01 - Injection** : Requêtes préparées, validation stricte
 - ✅ **A02 - Broken Authentication** : JWT sécurisé, rate limiting
 - ✅ **A03 - Sensitive Data** : Chiffrement AES-256, pas de données en clair
@@ -145,6 +158,7 @@ Commit → Build → Tests Unitaires → Tests Intégration → Tests E2E → De
 **Référentiel choisi** : **WCAG 2.1 niveau AA**
 
 **Justification** :
+
 - Standard international reconnu
 - Compatibilité avec la législation française (RGAA 4.1)
 - Niveau AA : équilibre entre accessibilité et faisabilité technique
@@ -153,6 +167,7 @@ Commit → Build → Tests Unitaires → Tests Intégration → Tests E2E → De
 ### ✅ **"Le prototype permet de répondre aux exigences du référentiel d'accessibilité préalablement établi"**
 
 **Conformité WCAG 2.1 AA** :
+
 - ✅ **Perceptible** : Contrastes 4.5:1, alternatives textuelles
 - ✅ **Utilisable** : Navigation clavier, timeouts configurables
 - ✅ **Compréhensible** : Messages d'erreur clairs, aide contextuelle
@@ -165,6 +180,7 @@ Commit → Build → Tests Unitaires → Tests Intégration → Tests E2E → De
 ### ✅ **"Un système de gestion de versions est utilisé"**
 
 **Git + GitHub** :
+
 - ✅ **Branches** : feature/develop/main avec protection
 - ✅ **Tags** : Versioning sémantique (v1.2.3)
 - ✅ **Hooks** : Pre-commit pour qualité code
@@ -172,6 +188,7 @@ Commit → Build → Tests Unitaires → Tests Intégration → Tests E2E → De
 ### ✅ **"Les évolutions du prototype sont tracées"**
 
 **Traçabilité complète** :
+
 - ✅ **Commits conventionnels** : feat:, fix:, docs:, test:
 - ✅ **Changelog automatique** : Génération via conventional-changelog
 - ✅ **Issues/PRs** : Liaison code ↔ fonctionnalités
@@ -180,6 +197,7 @@ Commit → Build → Tests Unitaires → Tests Intégration → Tests E2E → De
 ### ✅ **"Le logiciel est fonctionnel et manipulable en autonomie par un utilisateur"**
 
 **Autonomie utilisateur** :
+
 - ✅ **Documentation utilisateur** : Guide step-by-step
 - ✅ **Interface intuitive** : Design Material, UX testée
 - ✅ **Self-service** : Création compte, reset mot de passe
@@ -194,6 +212,7 @@ Commit → Build → Tests Unitaires → Tests Intégration → Tests E2E → De
 **📍 Référence** : [CAHIER_RECETTES.md](./CAHIER_RECETTES.md)
 
 **Fonctionnalités couvertes** :
+
 - ✅ 13 scénarios de tests fonctionnels détaillés
 - ✅ Tests de régression automatisés
 - ✅ Tests de performance et charge
@@ -202,6 +221,7 @@ Commit → Build → Tests Unitaires → Tests Intégration → Tests E2E → De
 ### ✅ **"Les tests fonctionnels, structurels et de sécurité exécutés sont conformes au plan défini"**
 
 **Types de tests** :
+
 - ✅ **Fonctionnels** : User journeys, happy paths, edge cases
 - ✅ **Structurels** : Architecture, qualité code, patterns
 - ✅ **Sécurité** : OWASP Top 10, penetration testing
@@ -215,6 +235,7 @@ Commit → Build → Tests Unitaires → Tests Intégration → Tests E2E → De
 **📍 Référence** : [PLAN_CORRECTION_BOGUES.md](./PLAN_CORRECTION_BOGUES.md)
 
 **Processus défini** :
+
 - ✅ **Détection** : Monitoring automatique + rapports utilisateurs
 - ✅ **Qualification** : 4 niveaux de criticité (P0 à P3)
 - ✅ **Traitement** : SLA définis (4h critique, 24h majeur)
@@ -222,6 +243,7 @@ Commit → Build → Tests Unitaires → Tests Intégration → Tests E2E → De
 ### ✅ **"Une analyse des points d'amélioration est réalisée pour chaque test en échec"**
 
 **Root Cause Analysis** :
+
 - ✅ **Méthode 5 Pourquoi** : Investigation systématique
 - ✅ **Plan d'action** : Corrective + préventive
 - ✅ **Métriques** : MTTR, taux de réouverture
@@ -229,6 +251,7 @@ Commit → Build → Tests Unitaires → Tests Intégration → Tests E2E → De
 ### ✅ **"Les corrections et améliorations proposées sont conformes à l'attendu et garantissent le bon fonctionnement du logiciel"**
 
 **Processus qualité** :
+
 - ✅ **Tests de régression** : Avant chaque correction
 - ✅ **Review obligatoire** : Validation par les pairs
 - ✅ **Validation utilisateur** : Tests en staging
@@ -240,6 +263,7 @@ Commit → Build → Tests Unitaires → Tests Intégration → Tests E2E → De
 ### ✅ **"Les manuels sont rédigés avec clarté"**
 
 **Documentation structurée** :
+
 - ✅ **Guide utilisateur** : Screenshots, étapes détaillées
 - ✅ **Documentation technique** : Architecture, API, déploiement
 - ✅ **Runbooks** : Procédures opérationnelles
@@ -249,6 +273,7 @@ Commit → Build → Tests Unitaires → Tests Intégration → Tests E2E → De
 **📍 Référence** : [DOCUMENTATION_EXPLOITATION.md](./DOCUMENTATION_EXPLOITATION.md#choix-technologiques)
 
 **Choix justifiés** :
+
 - ✅ **Vue.js 3** : Réactivité, composition API, écosystème mature
 - ✅ **Symfony 7** : Architecture hexagonale, DI container, sécurité
 - ✅ **PostgreSQL** : ACID, performances, JSON natif
