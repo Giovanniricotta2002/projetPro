@@ -44,16 +44,7 @@ final class LoginController extends AbstractController
 
     #[Route('/login', name: '_log', methods: ['POST'])]
     #[IsCsrfTokenValid('authenticate', tokenKey: 'X-CSRF-Token', methods: ['POST'])]
-    #[LogLogin(
-        enabled: true,
-        usernameField: 'login',
-        passwordField: 'password',
-        checkBlocking: true,
-        maxIpAttempts: 5,
-        maxLoginAttempts: 3,
-        ipBlockDuration: 60,
-        loginBlockDuration: 30
-    )]
+    #[LogLogin(enabled: true, usernameField: 'login', passwordField: 'password', checkBlocking: true, maxIpAttempts: 5, maxLoginAttempts: 3, ipBlockDuration: 60, loginBlockDuration: 30)]
     #[OA\Post(
         path: '/api/login',
         operationId: 'authenticateUser',

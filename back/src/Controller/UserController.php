@@ -2,8 +2,6 @@
 
 namespace App\Controller;
 
-use App\DTO\ErrorResponseDTO;
-use App\DTO\LoginUserDTO;
 use App\Entity\Utilisateur;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -56,34 +54,6 @@ final class UserController extends AbstractController
     public function me(Request $request): Response
     {
         return new JsonResponse([$request->cookies->all(), $this->getUser()]);
-        //     return new JsonResponse([$request->cookies->all(), $this->getUser()
-        // ], Response::HTTP_OK, [
-        //         'Access-Control-Allow-Origin' => '*',
-        //         'Access-Control-Allow-Methods' => 'POST, OPTIONS',
-        //         'Access-Control-Allow-Headers' => 'Content-Type, X-CSRF-Token',
-        //     ]);
-
-        // Récupération de l'utilisateur authentifié via le token JWT
-        /** @var Utilisateur */
-        $user = $this->getUser();
-
-        // Vérification que l'utilisateur est bien authentifié
-        if (!$user) {
-            $errorDto = ErrorResponseDTO::withMessage('UNAUTHORIZED', 'User not authenticated');
-
-            return $this->json($errorDto->toArray(), Response::HTTP_UNAUTHORIZED);
-        }
-
-        // Création du DTO avec les informations utilisateur
-        $uderDto = new LoginUserDTO(
-            id: $user->getId(),
-            username: $user->getUsername(),
-            roles: $user->getRoles(),
-            lastVisit: $user->getLastVisit()->format('Y-m-d H:i:s'),
-        );
-
-        // Retour des données utilisateur en JSON
-        return $this->json($uderDto->toArray(), Response::HTTP_OK);
     }
 
     #[Route('/me', name: '_me_options', methods: ['OPTIONS'])]

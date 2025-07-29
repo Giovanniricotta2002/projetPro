@@ -36,13 +36,6 @@ final class PostController extends AbstractController
         $this->serializer = $init->serializerAndDate();
     }
 
-    public function index(): Response
-    {
-        return $this->render('post/index.html.twig', [
-            'controller_name' => 'PostController',
-        ]);
-    }
-
     #[Route('/{forum<\d*>}/posts', name: '_forum_posts', methods: ['GET'])]
     #[OA\Get(
         path: '/api/post/{forum}/posts',

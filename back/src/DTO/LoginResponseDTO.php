@@ -23,6 +23,8 @@ final readonly class LoginResponseDTO
 
     /**
      * Convertit le DTO en tableau pour la sérialisation JSON.
+     *
+     * @return array{message: string, success: bool, user: array}
      */
     public function toArray(): array
     {

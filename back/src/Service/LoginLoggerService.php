@@ -3,20 +3,18 @@
 namespace App\Service;
 
 use App\Entity\LogLogin;
+use App\Repository\LogLoginRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class LoginLoggerService
 {
-    private EntityManagerInterface $entityManager;
-    private RequestStack $requestStack;
-
     public function __construct(
-        EntityManagerInterface $entityManager,
-        RequestStack $requestStack,
+        private readonly EntityManagerInterface $entityManager,
+        private readonly LogLoginRepository $llRepository,
+        private RequestStack $requestStack,
     ) {
-        $this->entityManager = $entityManager;
-        $this->requestStack = $requestStack;
     }
 
     /**
@@ -61,7 +59,7 @@ class LoginLoggerService
     /**
      * Récupère l'adresse IP du client en tenant compte des proxies.
      */
-    private function getClientIpAddress($request): string
+    private function getClientIpAddress(Request $request): string
     {
         if (!$request) {
             return '0.0.0.0';
@@ -100,13 +98,12 @@ class LoginLoggerService
     {
         $since = new \DateTime("-{$minutes} minutes");
 
-        return $this->entityManager
-            ->getRepository(LogLogin::class)
-            ->createQueryBuilder('l')
-            ->select('COUNT(l.id)')
-            ->andWhere('l.ipPublic = :ip')
-            ->andWhere('l.success = :success')
-            ->andWhere('l.date >= :since')
+        return $this->llRepository
+            ->createQueryBuilder('ll')
+            ->select('COUNT(ll.id)')
+            ->andWhere('ll.ipPublic = :ip')
+            ->andWhere('ll.success = :success')
+            ->andWhere('ll.date >= :since')
             ->setParameter('ip', $ipAddress)
             ->setParameter('success', false)
             ->setParameter('since', $since)
@@ -121,13 +118,12 @@ class LoginLoggerService
     {
         $since = new \DateTime("-{$minutes} minutes");
 
-        return $this->entityManager
-            ->getRepository(LogLogin::class)
-            ->createQueryBuilder('l')
-            ->select('COUNT(l.id)')
-            ->andWhere('l.login = :login')
-            ->andWhere('l.success = :success')
-            ->andWhere('l.date >= :since')
+        return $this->llRepository
+            ->createQueryBuilder('ll')
+            ->select('COUNT(ll.id)')
+            ->andWhere('ll.login = :login')
+            ->andWhere('ll.success = :success')
+            ->andWhere('ll.date >= :since')
             ->setParameter('login', $login)
             ->setParameter('success', false)
             ->setParameter('since', $since)
@@ -160,13 +156,12 @@ class LoginLoggerService
      */
     public function getLoginStatistics(\DateTime $from, \DateTime $to): array
     {
-        $result = $this->entityManager
-            ->getRepository(LogLogin::class)
-            ->createQueryBuilder('l')
-            ->select('COUNT(l.id) as total')
-            ->addSelect('SUM(CASE WHEN l.success = true THEN 1 ELSE 0 END) as successful')
-            ->addSelect('SUM(CASE WHEN l.success = false THEN 1 ELSE 0 END) as failed')
-            ->andWhere('l.date BETWEEN :from AND :to')
+        $result = $this->llRepository
+            ->createQueryBuilder('ll')
+            ->select('COUNT(ll.id) as total')
+            ->addSelect('SUM(CASE WHEN ll.success = true THEN 1 ELSE 0 END) as successful')
+            ->addSelect('SUM(CASE WHEN ll.success = false THEN 1 ELSE 0 END) as failed')
+            ->andWhere('ll.date BETWEEN :from AND :to')
             ->setParameter('from', $from)
             ->setParameter('to', $to)
             ->getQuery()

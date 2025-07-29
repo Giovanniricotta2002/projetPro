@@ -33,6 +33,8 @@ final readonly class TokenRefreshResponseDTO
 
     /**
      * Convertit le DTO en tableau associatif.
+     *
+     * @return array{message: string, success: bool, tokens: array}
      */
     public function toArray(): array
     {

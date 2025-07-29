@@ -73,6 +73,8 @@ final readonly class ErrorResponseDTO
 
     /**
      * Convertit le DTO en tableau pour la sérialisation JSON.
+     *
+     * @return array<array|int|null>|array{error: string}
      */
     public function toArray(): array
     {

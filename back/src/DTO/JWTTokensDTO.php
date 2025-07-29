@@ -34,6 +34,8 @@ final readonly class JWTTokensDTO
 
     /**
      * Convertit le DTO en tableau associatif.
+     *
+     * @return array{access_token: string, expires_in: int, refresh_token: string, token_type: string|null[]}
      */
     public function toArray(): array
     {

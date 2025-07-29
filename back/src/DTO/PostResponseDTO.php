@@ -27,6 +27,12 @@ class PostResponseDTO
     #[OA\Property(type: 'array', items: new OA\Items(ref: MessageResponseDTO::class))]
     public array $messages;
 
+    /**
+     * Summary of __construct.
+     *
+     * @param mixed $dateCreation
+     * @param mixed $vues
+     */
     public function __construct(
         int $id,
         string $titre,

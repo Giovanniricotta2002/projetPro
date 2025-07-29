@@ -51,6 +51,11 @@ class ForumResponseDTO
         );
     }
 
+    /**
+     * Summary of toArray.
+     *
+     * @return array{createdAt: string, dateCreation: string, description: string, id: int, ordreAffichage: int, slug: string, titre: string, visible: bool}
+     */
     public function toArray(): array
     {
         return [

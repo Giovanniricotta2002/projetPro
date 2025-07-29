@@ -41,6 +41,8 @@ final readonly class TokenRequestDTO
 
     /**
      * Convertit le DTO en tableau associatif.
+     *
+     * @return array{refresh_token: string}
      */
     public function toArray(): array
     {

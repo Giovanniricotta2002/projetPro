@@ -41,13 +41,6 @@ final class MachinesController extends AbstractController
         $this->serializer = $init->serializerAndDate();
     }
 
-    public function index(): Response
-    {
-        return $this->render('machines/index.html.twig', [
-            'controller_name' => 'MachinesController',
-        ]);
-    }
-
     #[Route('/', name: '_create_machine', methods: ['POST'])]
     #[OA\Post(
         summary: 'Créer une machine',

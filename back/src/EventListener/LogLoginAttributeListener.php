@@ -21,7 +21,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
  * vérifie les blocages IP/login, et logue automatiquement les tentatives de connexion
  * après traitement de la réponse.
  *
- * @author Votre nom
+ * @author Ricotta Giovanni
  *
  * @since 1.0.0
  */

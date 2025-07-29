@@ -23,7 +23,7 @@ namespace App\Attribute;
  * }
  * ```
  *
- * @author Votre nom
+ * @author Giovanni Ricotta
  *
  * @since 1.0.0
  */

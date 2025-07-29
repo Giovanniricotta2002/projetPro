@@ -20,6 +20,11 @@ class CsrfTokenVerificationResponseDTO
         return new self(false, 'Token CSRF invalide');
     }
 
+    /**
+     * Summary of toArray.
+     *
+     * @return array{message: string, valid: bool}
+     */
     public function toArray(): array
     {
         return [

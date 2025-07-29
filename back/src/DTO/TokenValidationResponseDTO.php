@@ -68,6 +68,8 @@ final readonly class TokenValidationResponseDTO
 
     /**
      * Convertit le DTO en tableau associatif.
+     *
+     * @return array<array|string|null>|array{valid: bool}
      */
     public function toArray(): array
     {

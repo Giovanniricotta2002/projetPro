@@ -7,6 +7,9 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\User\UserInterface;
 
+/**
+ * Summary of MachineVoter.
+ */
 final class MachineVoter extends Voter
 {
     public const EDIT = 'MACHINE_EDIT';

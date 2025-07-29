@@ -53,6 +53,8 @@ final readonly class LoginUserDTO
 
     /**
      * Convertit le DTO en tableau pour la sérialisation JSON.
+     *
+     * @return array{id: int, roles: array, username: string|null[]}
      */
     public function toArray(): array
     {

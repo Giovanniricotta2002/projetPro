@@ -23,6 +23,12 @@ class MachineResponseDTO
     #[OA\Property(type: 'array', items: new OA\Items(type: 'object', properties: [new OA\Property(property: 'id', type: 'integer', example: 1), new OA\Property(property: 'text', type: 'string', example: 'RAM 16Go'), new OA\Property(property: 'type', type: 'string', example: 'hardware')]))]
     public array $infoMachines;
 
+    /**
+     * Summary of __construct.
+     *
+     * @param mixed $description
+     * @param mixed $forum
+     */
     public function __construct(
         int $id,
         string $name,

@@ -2,6 +2,7 @@
 
 namespace App\DTO;
 
+use App\Entity\CategorieForum;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
@@ -26,11 +27,16 @@ class CategorieForumResponseDTO
         $this->ordre = $ordre;
     }
 
-    public static function fromEntity($entity): self
+    public static function fromEntity(CategorieForum $entity): self
     {
         return new self($entity->getId(), $entity->getName(), $entity->getOrdre());
     }
 
+    /**
+     * Summary of toArray.
+     *
+     * @return array{id: int, name: string, ordre: int}
+     */
     public function toArray(): array
     {
         return [

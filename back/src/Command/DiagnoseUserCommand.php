@@ -17,15 +17,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class DiagnoseUserCommand extends Command
 {
-    private EntityManagerInterface $em;
-
     public function __construct(
-        EntityManagerInterface $em,
+        private readonly EntityManagerInterface $em,
         private readonly UtilisateurRepository $uRepository,
         private readonly LogLoginRepository $llRepository,
     ) {
         parent::__construct();
-        $this->em = $em;
     }
 
     protected function configure(): void

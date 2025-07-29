@@ -66,6 +66,8 @@ final readonly class AzureUploadResponseDTO
 
     /**
      * Convertit le DTO en tableau associatif.
+     *
+     * @return array{blob_name: string, expires_at: string, headers: array, upload_url: string}
      */
     public function toArray(): array
     {

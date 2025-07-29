@@ -43,6 +43,8 @@ final readonly class CsrfTokenResponseDTO
 
     /**
      * Convertit le DTO en tableau pour la sérialisation JSON.
+     *
+     * @return array{csrfToken: string}
      */
     public function toArray(): array
     {

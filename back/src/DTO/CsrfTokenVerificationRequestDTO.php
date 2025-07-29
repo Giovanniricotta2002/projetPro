@@ -24,6 +24,9 @@ final class CsrfTokenVerificationRequestDTO
     ) {
     }
 
+    /**
+     * Summary of fromArray.
+     */
     public static function fromArray(array $data): self
     {
         return new self(
@@ -38,6 +41,11 @@ final class CsrfTokenVerificationRequestDTO
         );
     }
 
+    /**
+     * Summary of toArray.
+     *
+     * @return array{csrfToken: string}
+     */
     public function toArray(): array
     {
         return [

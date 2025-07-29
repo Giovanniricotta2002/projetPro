@@ -14,11 +14,9 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('ROLE_ADMIN')]
 class LoginStatsController extends AbstractController
 {
-    private LoginLoggerService $loginLogger;
-
-    public function __construct(LoginLoggerService $loginLogger)
-    {
-        $this->loginLogger = $loginLogger;
+    public function __construct(
+        private readonly LoginLoggerService $loginLogger,
+    ) {
     }
 
     /**

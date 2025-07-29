@@ -20,6 +20,9 @@ final class TokenRefreshRequestDTO
     ) {
     }
 
+    /**
+     * Summary of fromArray.
+     */
     public static function fromArray(array $data): self
     {
         return new self(
@@ -39,6 +42,11 @@ final class TokenRefreshRequestDTO
         return !empty($this->refreshToken) && str_contains($this->refreshToken, '.');
     }
 
+    /**
+     * Summary of toArray.
+     *
+     * @return array{refreshToken: string}
+     */
     public function toArray(): array
     {
         return [

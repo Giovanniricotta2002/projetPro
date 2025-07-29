@@ -27,6 +27,11 @@ class UtilisateurResponseDTO
     #[OA\Property(type: 'string', format: 'date-time', example: '2025-07-27T10:00:00')]
     public string $createdAt;
 
+    /**
+     * Summary of __construct.
+     *
+     * @param mixed $lastVisit
+     */
     public function __construct(
         int $id,
         string $username,

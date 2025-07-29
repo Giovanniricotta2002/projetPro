@@ -14,7 +14,7 @@ use App\Attribute\LogLogin;
  * le cycle de vie de la requête, évitant ainsi les modifications accidentelles
  * ou malveillantes des informations de logging.
  *
- * @author Votre nom
+ * @author Giovanni Ricotta
  *
  * @since 1.0.0
  */
@@ -54,16 +54,6 @@ readonly class PendingLoginLogDTO
      */
     public function shouldLog(bool $isSuccess): bool
     {
-        // if ($this->attribute->logSuccessOnly && !$isSuccess) {
-        //     return false;
-        // }
-
-        // if ($this->attribute->logFailureOnly && $isSuccess) {
-        //     return false;
-        // }
-
-        // return true;
-
         return match (true) {
             $this->attribute->logSuccessOnly && !$isSuccess => false,
             $this->attribute->logFailureOnly && $isSuccess => false,

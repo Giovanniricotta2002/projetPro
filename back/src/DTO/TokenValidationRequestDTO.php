@@ -20,6 +20,9 @@ final class TokenValidationRequestDTO
     ) {
     }
 
+    /**
+     * Summary of fromArray.
+     */
     public static function fromArray(array $data): self
     {
         return new self(
@@ -39,6 +42,11 @@ final class TokenValidationRequestDTO
         return !empty($this->token) && str_contains($this->token, '.');
     }
 
+    /**
+     * Summary of toArray.
+     *
+     * @return array{token: string}
+     */
     public function toArray(): array
     {
         return [
