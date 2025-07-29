@@ -18,6 +18,7 @@ return (new Config())
         'phpdoc_to_comment' => true,
         'explicit_string_variable' => true,
         'concat_space' => ['spacing' => 'one'],
+        'array_syntax' => ['syntax' => 'long'],
     ])
     ->setFinder($finder)
 ;
