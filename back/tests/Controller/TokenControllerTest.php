@@ -4,8 +4,7 @@ namespace App\Tests\Controller;
 
 use App\Entity\Utilisateur;
 use App\Repository\UtilisateurRepository;
-use App\Service\HttpOnlyCookieService;
-use App\Service\JWTService;
+use App\Service\{HttpOnlyCookieService, JWTService};
 use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;

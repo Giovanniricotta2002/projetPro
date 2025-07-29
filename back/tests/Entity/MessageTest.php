@@ -2,9 +2,7 @@
 
 namespace App\Tests\Entity;
 
-use App\Entity\Message;
-use App\Entity\Post;
-use App\Entity\Utilisateur;
+use App\Entity\{Message, Post, Utilisateur};
 use PHPUnit\Framework\TestCase;
 
 class MessageTest extends TestCase

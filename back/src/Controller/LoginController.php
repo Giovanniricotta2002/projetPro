@@ -3,24 +3,18 @@
 namespace App\Controller;
 
 use App\Attribute\LogLogin;
-use App\DTO\ErrorResponseDTO;
-use App\DTO\JWTLoginResponseDTO;
-use App\DTO\JWTTokensDTO;
-use App\DTO\LoginUserDTO;
+use App\DTO\{ErrorResponseDTO, JWTLoginResponseDTO, JWTTokensDTO, LoginUserDTO};
 use App\Entity\Utilisateur;
 use App\Enum\UserStatus;
 use App\Repository\UtilisateurRepository;
-use App\Service\HttpOnlyCookieService;
-use App\Service\InitSerializerService;
-use App\Service\JWTService;
+use App\Service\{HttpOnlyCookieService, InitSerializerService, JWTService};
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\{Request, Response};
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsCsrfTokenValid;

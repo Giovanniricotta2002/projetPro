@@ -2,23 +2,14 @@
 
 namespace App\Controller;
 
-use App\DTO\ErrorResponseDTO;
-use App\DTO\JWTTokensDTO;
-use App\DTO\TokenInfoResponseDTO;
-use App\DTO\TokenRefreshRequestDTO;
-use App\DTO\TokenRefreshResponseDTO;
-use App\DTO\TokenValidationRequestDTO;
-use App\DTO\TokenValidationResponseDTO;
+use App\DTO\{ErrorResponseDTO, JWTTokensDTO, TokenInfoResponseDTO, TokenRefreshRequestDTO, TokenRefreshResponseDTO, TokenValidationRequestDTO, TokenValidationResponseDTO};
 use App\Repository\UtilisateurRepository;
-use App\Service\HttpOnlyCookieService;
-use App\Service\InitSerializerService;
-use App\Service\JWTService;
+use App\Service\{HttpOnlyCookieService, InitSerializerService, JWTService};
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\{Request, Response};
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\Serializer;
 

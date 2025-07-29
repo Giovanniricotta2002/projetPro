@@ -4,10 +4,7 @@ namespace App\Service;
 
 use App\DTO\TokenInfoResponseDTO;
 use App\Entity\Utilisateur;
-use Firebase\JWT\ExpiredException;
-use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
-use Firebase\JWT\SignatureInvalidException;
+use Firebase\JWT\{ExpiredException, JWT, Key, SignatureInvalidException};
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 

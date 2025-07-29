@@ -2,9 +2,7 @@
 
 namespace App\Service;
 
-use Symfony\Component\HttpFoundation\Cookie;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\{Cookie, Request, Response};
 
 /**
  * Service pour la gestion des cookies httpOnly sécurisés pour les tokens JWT.

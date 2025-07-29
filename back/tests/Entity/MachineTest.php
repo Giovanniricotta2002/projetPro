@@ -2,9 +2,7 @@
 
 namespace App\Tests\Entity;
 
-use App\Entity\Forum;
-use App\Entity\InfoMachine;
-use App\Entity\Machine;
+use App\Entity\{Forum, InfoMachine, Machine};
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Uid\Uuid;
 

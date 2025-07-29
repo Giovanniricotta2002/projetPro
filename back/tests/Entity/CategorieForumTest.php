@@ -2,8 +2,7 @@
 
 namespace App\Tests\Entity;
 
-use App\Entity\CategorieForum;
-use App\Entity\Forum;
+use App\Entity\{CategorieForum, Forum};
 use PHPUnit\Framework\TestCase;
 
 class CategorieForumTest extends TestCase
