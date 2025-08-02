@@ -1,5 +1,90 @@
 # 🎓 Rendu d'Examen - Expert en Développement Logiciel
 
+<style>
+/* Styles pour la pagination PDF */
+h2 {
+    page-break-before: always;
+    margin-top: 0;
+    padding-top: 20px;
+}
+
+/* Exception pour le premier h2 (Sommaire Exécutif) */
+h2:first-of-type {
+    page-break-before: auto;
+}
+
+/* Éviter les coupures dans les sections */
+h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+    break-after: avoid;
+}
+
+/* Garder les blocs de code ensemble */
+pre, code {
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+/* Garder les tableaux ensemble */
+table {
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+/* Éviter les orphelins et veuves */
+p {
+    orphans: 3;
+    widows: 3;
+}
+
+/* Style pour les diagrammes mermaid */
+.mermaid {
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+/* Amélioration de la lisibilité en PDF */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+}
+
+/* Style pour les notes importantes */
+blockquote {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    border-left: 4px solid #007acc;
+    padding-left: 16px;
+    margin: 16px 0;
+    background-color: #f8f9fa;
+}
+
+@media print {
+    /* Optimisations spécifiques pour l'impression */
+    body {
+        font-size: 11pt;
+    }
+
+    h1 {
+        font-size: 24pt;
+    }
+
+    h2 {
+        font-size: 18pt;
+    }
+
+    h3 {
+        font-size: 14pt;
+    }
+
+    /* Masquer les éléments non nécessaires à l'impression */
+    .no-print {
+        display: none;
+    }
+}
+</style>
+
 ## Compétences C2 : Conception et Développement d'Applications
 
 ---
@@ -19,6 +104,7 @@ Le projet démontre la maîtrise des huit compétences clés C2 à travers une a
 ### 🔍 Note sur la Structure du Document
 
 Ce document distingue clairement entre :
+
 - ✅ **Implémentations réelles** : Code, scripts et configurations existants dans le projet
 - 🚀 **Évolutions futures** : Concepts avancés et outils prévus pour les prochaines itérations
 - 📖 **Exemples conceptuels** : Démonstrations de compétences techniques et architecturales
