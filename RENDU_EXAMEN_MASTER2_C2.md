@@ -6,7 +6,6 @@
 
 **Étudiant** : Ricotta Giovanni
 **Projet** : MuscuScope - Plateforme Collaborative de Musculation
-**Date** : 2 Août 2025
 **Titre RNCP** : Expert en développement logiciel (RNCP39583)
 
 ---
