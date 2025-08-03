@@ -2,7 +2,10 @@
 
 namespace App\Tests\Entity;
 
-use App\Entity\{Droit, Forum, Message, Utilisateur};
+use App\Entity\Droit;
+use App\Entity\Forum;
+use App\Entity\Message;
+use App\Entity\Utilisateur;
 use PHPUnit\Framework\TestCase;
 
 class UtilisateurTest extends TestCase

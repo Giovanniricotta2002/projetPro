@@ -3,7 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\PostRepository;
-use Doctrine\Common\Collections\{ArrayCollection, Collection};
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: PostRepository::class)]
@@ -37,6 +38,9 @@ class Post
 
     #[ORM\ManyToOne(inversedBy: 'post')]
     private ?Forum $forum = null;
+
+    #[ORM\ManyToOne(inversedBy: 'posts')]
+    private ?Utilisateur $utilisateur = null;
 
     public function __construct()
     {
@@ -148,6 +152,18 @@ class Post
     public function setForum(?Forum $forum): static
     {
         $this->forum = $forum;
+
+        return $this;
+    }
+
+    public function getUtilisateur(): ?Utilisateur
+    {
+        return $this->utilisateur;
+    }
+
+    public function setUtilisateur(?Utilisateur $utilisateur): static
+    {
+        $this->utilisateur = $utilisateur;
 
         return $this;
     }

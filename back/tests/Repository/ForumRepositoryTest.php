@@ -2,7 +2,8 @@
 
 namespace App\Tests\Repository;
 
-use App\Entity\{Forum, Utilisateur};
+use App\Entity\Forum;
+use App\Entity\Utilisateur;
 use App\Repository\ForumRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;

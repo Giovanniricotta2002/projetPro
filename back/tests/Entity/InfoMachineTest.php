@@ -2,7 +2,8 @@
 
 namespace App\Tests\Entity;
 
-use App\Entity\{InfoMachine, Machine};
+use App\Entity\InfoMachine;
+use App\Entity\Machine;
 use PHPUnit\Framework\TestCase;
 
 class InfoMachineTest extends TestCase

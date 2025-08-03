@@ -182,7 +182,8 @@ function openForum(forum: Forum) {
 async function submitNewForum() {
   if (!newForumTitle.value.trim() || !newForumCategory.value) return
   try {
-    const response = await authStore.apiRequest<Forum>('/api/forum', {
+    
+    const response = await authStore.apiRequest<Forum>('/api/forum/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -192,7 +193,7 @@ async function submitNewForum() {
         categories: newForumCategory.value,
         description: newForumDescription.value.trim(),
         ordreAffichage: forums.value.length + 1,
-        utilisateur: authStore.user?.id,
+        // utilisateur: authStore.user.value.id,
       })
     })
     if (response.success && response.data) {

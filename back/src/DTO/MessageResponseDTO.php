@@ -19,7 +19,7 @@ class MessageResponseDTO
     #[OA\Property(type: 'boolean', example: true)]
     public bool $visible;
     #[OA\Property(type: 'object', ref: MessageUserResponseDTO::class)]
-    public $utilisateur;
+    public ?MessageUserResponseDTO $utilisateur;
 
     public function __construct(
         int $id,
@@ -27,7 +27,7 @@ class MessageResponseDTO
         ?string $dateCreation,
         ?string $dateModification,
         bool $visible,
-        MessageUserResponseDTO $utilisateur,
+        ?MessageUserResponseDTO $utilisateur,
     ) {
         $this->id = $id;
         $this->text = $text;

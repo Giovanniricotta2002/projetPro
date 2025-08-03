@@ -4,9 +4,13 @@ namespace App\Tests\Service;
 
 use App\Entity\LogLogin;
 use App\Service\LoginLoggerService;
-use Doctrine\ORM\{AbstractQuery, EntityManagerInterface, EntityRepository, QueryBuilder};
+use Doctrine\ORM\AbstractQuery;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\HttpFoundation\{Request, RequestStack};
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class LoginLoggerServiceTest extends TestCase
 {

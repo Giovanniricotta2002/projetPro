@@ -3,8 +3,11 @@
 namespace App\Controller;
 
 use App\DTO\CategorieForumResponseDTO;
-use App\Repository\{CategorieForumRepository, UtilisateurRepository};
-use App\Service\{HttpOnlyCookieService, InitSerializerService, JWTService};
+use App\Repository\CategorieForumRepository;
+use App\Repository\UtilisateurRepository;
+use App\Service\HttpOnlyCookieService;
+use App\Service\InitSerializerService;
+use App\Service\JWTService;
 use Doctrine\ORM\EntityManagerInterface;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;

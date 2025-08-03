@@ -98,7 +98,6 @@ async function postMessage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         text: newMessage.value,
-        utilisateurId: currentUser.value.id,
       })
     })
     if (response.success && response.data) {

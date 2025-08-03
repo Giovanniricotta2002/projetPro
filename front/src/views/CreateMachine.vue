@@ -65,7 +65,7 @@ function addBulle() {
   form.bulles.push({ text: '', type: types[0].value } as InfoMachine)
 }
 function removeBulle(i: number) {
-  form.bulles[i].remove = true
+  form.bulles.splice(i, 1)
 }
 async function save() {
   try {

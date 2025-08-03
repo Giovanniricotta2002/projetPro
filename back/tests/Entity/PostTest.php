@@ -2,7 +2,9 @@
 
 namespace App\Tests\Entity;
 
-use App\Entity\{Forum, Message, Post};
+use App\Entity\Forum;
+use App\Entity\Message;
+use App\Entity\Post;
 use PHPUnit\Framework\TestCase;
 
 class PostTest extends TestCase

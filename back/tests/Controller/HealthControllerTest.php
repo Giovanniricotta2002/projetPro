@@ -2,7 +2,8 @@
 
 namespace App\Tests\Controller;
 
-use Doctrine\DBAL\{Connection, Exception};
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;

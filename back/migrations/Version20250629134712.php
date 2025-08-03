@@ -22,15 +22,15 @@ final class Version20250629134712 extends AbstractMigration
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql('ALTER TABLE categorie_forum ADD slug VARCHAR(50) NOT NULL');
         $this->addSql('ALTER TABLE categorie_forum ADD created_at DATE NOT NULL');
-        $this->addSql('ALTER TABLE categorie_forum ADD updated_at DATE NOT NULL');
+        $this->addSql('ALTER TABLE categorie_forum ADD updated_at DATE');
         $this->addSql('ALTER TABLE droit ADD scope VARCHAR(30) NOT NULL');
         $this->addSql('ALTER TABLE droit ADD created_at DATE NOT NULL');
         $this->addSql('ALTER TABLE forum ADD slug VARCHAR(50) NOT NULL');
         $this->addSql('ALTER TABLE forum ADD created_at DATE NOT NULL');
-        $this->addSql('ALTER TABLE forum ADD updated_at DATE NOT NULL');
-        $this->addSql('ALTER TABLE forum ADD deleted_at DATE NOT NULL');
-        $this->addSql('ALTER TABLE utilisateur ADD updated_at DATE NOT NULL');
-        $this->addSql('ALTER TABLE utilisateur ADD deleted_at DATE NOT NULL');
+        $this->addSql('ALTER TABLE forum ADD updated_at DATE');
+        $this->addSql('ALTER TABLE forum ADD deleted_at DATE');
+        $this->addSql('ALTER TABLE utilisateur ADD updated_at DATE');
+        $this->addSql('ALTER TABLE utilisateur ADD deleted_at DATE');
         $this->addSql('ALTER TABLE utilisateur ADD created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL');
         $this->addSql('COMMENT ON COLUMN utilisateur.created_at IS \'(DC2Type:datetime_immutable)\'');
     }

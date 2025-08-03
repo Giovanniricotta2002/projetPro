@@ -31,7 +31,6 @@ final class Version20250720113327 extends AbstractMigration
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
-        $this->addSql('CREATE SCHEMA public');
         $this->addSql('ALTER TABLE utilisateur ADD creation_machine_id INT DEFAULT NULL');
         $this->addSql('ALTER TABLE utilisateur ADD CONSTRAINT fk_1d1c63b3763ce8cc FOREIGN KEY (creation_machine_id) REFERENCES machine (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('CREATE INDEX idx_1d1c63b3763ce8cc ON utilisateur (creation_machine_id)');

@@ -2,7 +2,8 @@
 
 namespace App\Tests\DTO;
 
-use App\DTO\{LoginSuccessResponseDTO, LoginUserDTO};
+use App\DTO\LoginSuccessResponseDTO;
+use App\DTO\LoginUserDTO;
 use PHPUnit\Framework\TestCase;
 
 /**

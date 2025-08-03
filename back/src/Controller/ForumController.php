@@ -2,15 +2,25 @@
 
 namespace App\Controller;
 
-use App\DTO\{ForumCreateRequestDTO, ForumResponseDTO};
+use App\DTO\ErrorResponseDTO;
+use App\DTO\ForumCreateRequestDTO;
+use App\DTO\ForumResponseDTO;
 use App\Entity\Forum;
-use App\Repository\{CategorieForumRepository, ForumRepository, UtilisateurRepository};
-use App\Service\{HttpOnlyCookieService, InitSerializerService, JWTService};
+use App\Repository\CategorieForumRepository;
+use App\Repository\ForumRepository;
+use App\Repository\UtilisateurRepository;
+use App\Service\AuthenticatedUserService;
+use App\Service\HttpOnlyCookieService;
+use App\Service\InitSerializerService;
+use App\Service\JWTService;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Exception\ORMException;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\{ParameterBag, Request, Response};
+use Symfony\Component\HttpFoundation\ParameterBag;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\Serializer;
 
@@ -97,7 +107,7 @@ final class ForumController extends AbstractController
     public function createForum(Request $request, CategorieForumRepository $cfRepository, UtilisateurRepository $uRepository): Response
     {
         $datas = new ParameterBag($this->serializer->decode($request->getContent(), 'json'));
-        foreach (['titre', 'categories', 'description', 'ordreAffichage', 'utilisateur'] as $value) {
+        foreach (['titre', 'categories', 'description', 'ordreAffichage'] as $value) {
             if (!$datas->has($value)) {
                 return $this->json([
                     'success' => false,
@@ -115,8 +125,28 @@ final class ForumController extends AbstractController
         $forum->setOrdreAffichage($datas->get('ordreAffichage', 0));
         $forum->setVisible($datas->get('visible', true));
         $forum->addCategorieForum($categories);
-        // $forum->setSlug($datas->get('slug', ''));
-        $forum->setUtilisateur($uRepository->find($datas->get('utilisateur')));
+        $forum->setSlug($datas->get('slug', ''));
+        // Récupérer l'utilisateur connecté via le service dédié
+        $authenticatedUserService = new AuthenticatedUserService(
+            $uRepository,
+            $this->jwtService,
+            $this->cookieService
+        );
+        [$user, $error] = $authenticatedUserService->getAuthenticatedUser($request);
+        if ($error) {
+            return $this->json($error->toArray(), 401);
+        }
+        $forum->setUtilisateur($user);
+
+        try {
+            $this->entityManager->persist($forum);
+            $this->entityManager->flush();
+        } catch (ORMException $orm) {
+            return $this->json(
+                ErrorResponseDTO::withMessage('Erreur lors de la création du forum', $orm->getMessage())->toArray(),
+                400
+            );
+        }
 
         $dto = ForumResponseDTO::fromEntity($forum);
 

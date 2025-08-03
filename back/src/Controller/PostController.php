@@ -2,16 +2,24 @@
 
 namespace App\Controller;
 
+use App\DTO\ErrorResponseDTO;
 use App\DTO\PostResponseDTO;
-use App\Entity\{Forum, Post};
-use App\Repository\{ForumRepository, UtilisateurRepository};
-use App\Service\{HttpOnlyCookieService, InitSerializerService, JWTService};
+use App\Entity\Forum;
+use App\Entity\Post;
+use App\Repository\ForumRepository;
+use App\Repository\UtilisateurRepository;
+use App\Service\AuthenticatedUserService;
+use App\Service\HttpOnlyCookieService;
+use App\Service\InitSerializerService;
+use App\Service\JWTService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\{ParameterBag, Request, Response};
+use Symfony\Component\HttpFoundation\ParameterBag;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\Serializer;
 
@@ -129,10 +137,10 @@ final class PostController extends AbstractController
             ),
         ]
     )]
-    public function createPost(Request $request, ForumRepository $fRepository): Response
+    public function createPost(Request $request, ForumRepository $fRepository, AuthenticatedUserService $authenticatedUserService): Response
     {
         $datas = new ParameterBag($this->serializer->decode($request->getContent(), 'json'));
-        foreach (['titre', 'utilisateur', 'forum'] as $field) {
+        foreach (['titre', 'forum'] as $field) {
             if (!$datas->has($field)) {
                 return $this->json(['error' => "Le champ '{$field}' est requis."], 400);
             }
@@ -146,11 +154,26 @@ final class PostController extends AbstractController
             ->setDateCreation(new \DateTime())
             ->setVues(0)
             ->setVerrouille(false)
+            ->setEpingle(false)
             ->setForum($forum)
         ;
 
-        $this->entityManager->persist($post);
-        $this->entityManager->flush();
+        [$user, $error] = $authenticatedUserService->getAuthenticatedUser($request);
+        if ($error) {
+            return $this->json($error->toArray(), 401);
+        }
+
+        $post->setUtilisateur($user);
+
+        try {
+            $this->entityManager->persist($post);
+            $this->entityManager->flush();
+        } catch (ORMException $orm) {
+            return $this->json(
+                ErrorResponseDTO::withMessage('Erreur lors de la création du post', $orm->getMessage())->toArray(),
+                400
+            );
+        }
 
         // Retourne le DTO du post créé
         $dto = PostResponseDTO::fromEntity($post);

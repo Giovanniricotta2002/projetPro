@@ -9,7 +9,7 @@ use OpenApi\Attributes as OA;
 class ForumResponseDTO
 {
     #[OA\Property(type: 'integer', example: 1)]
-    public int $id;
+    public ?int $id;
     #[OA\Property(type: 'string', example: 'Forum général')]
     public string $titre;
     #[OA\Property(type: 'string', format: 'date-time', example: '2025-07-27T10:00:00')]
@@ -25,7 +25,7 @@ class ForumResponseDTO
     #[OA\Property(type: 'string', format: 'date-time', example: '2025-07-27T10:00:00')]
     public string $createdAt;
 
-    public function __construct(int $id, string $titre, ?string $dateCreation, ?string $description, int $ordreAffichage, bool $visible, ?string $slug, ?string $createdAt)
+    public function __construct(?int $id, string $titre, ?string $dateCreation, ?string $description, int $ordreAffichage, bool $visible, ?string $slug, ?string $createdAt)
     {
         $this->id = $id;
         $this->titre = $titre;

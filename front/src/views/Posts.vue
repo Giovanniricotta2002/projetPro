@@ -62,10 +62,12 @@
                               <v-chip v-if="post.verrouille" class="ml-2" color="error" size="small" label>Verrouillé</v-chip>
                             </v-list-item-subtitle>
                           </v-list-item-content>
-                          <v-list-item-action v-if="canModerate">
+                          <v-list-item-action>
                             <v-btn icon color="primary" @click="openDiscussion(post)">
                               <v-icon>mdi-forum</v-icon>
                             </v-btn>
+                          </v-list-item-action>
+                          <v-list-item-action v-if="canModerate">
                             <v-btn
                               icon
                               color="warning"
@@ -131,7 +133,7 @@ const posts = ref<Post[]>([])
 onMounted(async () => {
   // GET posts
   try {
-    const postsRes = await authStore.apiRequest<Post[]>(`/api/post/forum/${forumId.value}/posts`, {
+    const postsRes = await authStore.apiRequest<Post[]>(`/api/post/${forumId.value}/posts`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
     })

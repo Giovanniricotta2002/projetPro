@@ -2,17 +2,26 @@
 
 namespace App\Controller;
 
-use App\DTO\{MachineCreateRequestDTO, MachineResponseDTO, MachineUpdateRequestDTO};
-use App\Entity\{InfoMachine, Machine};
-use App\Repository\{MachineRepository, UtilisateurRepository};
-use App\Service\{HttpOnlyCookieService, InitSerializerService, JWTService};
+use App\DTO\MachineCreateRequestDTO;
+use App\DTO\MachineResponseDTO;
+use App\DTO\MachineUpdateRequestDTO;
+use App\Entity\InfoMachine;
+use App\Entity\Machine;
+use App\Repository\MachineRepository;
+use App\Repository\UtilisateurRepository;
+use App\Service\HttpOnlyCookieService;
+use App\Service\InitSerializerService;
+use App\Service\JWTService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\HttpFoundation\{JsonResponse, ParameterBag, Request, Response};
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\ParameterBag;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -231,50 +240,21 @@ final class MachinesController extends AbstractController
             ->setDescription($data->get('description'))
             ->setDateModif(new \DateTime())
         ;
+        $materielId->getInfoMachines()->clear();
         foreach ($data->get('infoMachines') as $infoMachine) {
-            $infoM = $this->serializer->denormalize($infoMachine, InfoMachine::class);
-            if ($materielId->getInfoMachines()->contains($infoM)) {
-                /**
-                 * @var InfoMachine
-                 */
-                $im = $materielId->getInfoMachines()->get($infoM);
-                if ($im->getText() !== $infoMachine['text']) {
-                    $im->setText($infoMachine['text']);
-                }
+            $im = new InfoMachine();
+            $im
+                ->setText($infoMachine['text'])
+                ->setType($infoMachine['type'])
+            ;
 
-                if ($im->getType() !== $infoMachine['type']) {
-                    $im->setType($infoMachine['type']);
-                }
-                try {
-                    $this->entityManager->persist($im);
-                    $this->entityManager->flush();
-                } catch (ORMException $orm) {
-                    return $this->json($orm->getMessage(), 404);
-                }
-            } elseif ($infoMachine['remove']) {
-                $materielId->removeInfoMachine($infoM);
-
-                try {
-                    $this->entityManager->persist($materielId);
-                    $this->entityManager->flush();
-                } catch (ORMException $orm) {
-                    return $this->json($orm->getMessage(), 404);
-                }
-            } else {
-                $im = new InfoMachine();
-                $im
-                    ->setText($infoMachine['text'])
-                    ->setType($infoMachine['type'])
-                ;
-
-                try {
-                    $this->entityManager->persist($im);
-                    $this->entityManager->flush();
-                } catch (ORMException $orm) {
-                    return $this->json($orm->getMessage(), 404);
-                }
-                $materielId->addInfoMachine($im);
+            try {
+                $this->entityManager->persist($im);
+                $this->entityManager->flush();
+            } catch (ORMException $orm) {
+                return $this->json($orm->getMessage(), 404);
             }
+            $materielId->addInfoMachine($im);
         }
 
         try {

@@ -4,10 +4,12 @@ namespace App\Entity;
 
 use App\Enum\UserStatus;
 use App\Repository\UtilisateurRepository;
-use Doctrine\Common\Collections\{ArrayCollection, Collection};
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Security\Core\User\{PasswordAuthenticatedUserInterface, UserInterface};
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UtilisateurRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_USERNAME', fields: ['username'])]
@@ -84,6 +86,12 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Machine::class, mappedBy: 'utilisateur')]
     private Collection $creationMachine;
 
+    /**
+     * @var Collection<int, Post>
+     */
+    #[ORM\OneToMany(targetEntity: Post::class, mappedBy: 'utilisateur')]
+    private Collection $posts;
+
     public function __construct()
     {
         $this->dateCreation = new \DateTime();
@@ -94,6 +102,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         $this->droits = new ArrayCollection();
         $this->forums = new ArrayCollection();
         $this->creationMachine = new ArrayCollection();
+        $this->posts = new ArrayCollection();
     }
 
     public function getRoles(): array
@@ -468,6 +477,36 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($creationMachine->getUtilisateur() === $this) {
                 $creationMachine->setUtilisateur(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Post>
+     */
+    public function getPosts(): Collection
+    {
+        return $this->posts;
+    }
+
+    public function addPost(Post $post): static
+    {
+        if (!$this->posts->contains($post)) {
+            $this->posts->add($post);
+            $post->setUtilisateur($this);
+        }
+
+        return $this;
+    }
+
+    public function removePost(Post $post): static
+    {
+        if ($this->posts->removeElement($post)) {
+            // set the owning side to null (unless already changed)
+            if ($post->getUtilisateur() === $this) {
+                $post->setUtilisateur(null);
             }
         }
 

@@ -2,7 +2,8 @@
 
 namespace App\DTO;
 
-use App\Entity\{Message, Post};
+use App\Entity\Message;
+use App\Entity\Post;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(description: 'Post', required: ['id', 'titre', 'dateCreation', 'vues', 'epingle', 'verrouille', 'messages'])]
@@ -17,7 +18,8 @@ class PostResponseDTO
     #[OA\Property(type: 'integer', example: 42)]
     public ?int $vues;
     #[OA\Property(type: 'boolean', example: false)]
-    public bool $epingle;
+    public ?bool $epingle;
+
     #[OA\Property(type: 'boolean', example: false)]
     public bool $verrouille;
     /**
@@ -37,7 +39,7 @@ class PostResponseDTO
         string $titre,
         ?string $dateCreation,
         ?int $vues,
-        bool $epingle,
+        ?bool $epingle,
         bool $verrouille,
         array $messages,
     ) {

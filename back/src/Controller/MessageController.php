@@ -3,15 +3,22 @@
 namespace App\Controller;
 
 use App\DTO\MessageResponseDTO;
-use App\Entity\{Message, Post};
-use App\Repository\{MessageRepository, UtilisateurRepository};
-use App\Service\{HttpOnlyCookieService, InitSerializerService, JWTService};
+use App\Entity\Message;
+use App\Entity\Post;
+use App\Repository\MessageRepository;
+use App\Repository\UtilisateurRepository;
+use App\Service\AuthenticatedUserService;
+use App\Service\HttpOnlyCookieService;
+use App\Service\InitSerializerService;
+use App\Service\JWTService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\{ParameterBag, Request, Response};
+use Symfony\Component\HttpFoundation\ParameterBag;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\Serializer;
 
@@ -107,27 +114,32 @@ final class MessageController extends AbstractController
             ),
         ]
     )]
-    public function createMessage(Post $post, Request $request, MessageRepository $mRepository): Response
+    public function createMessage(Post $post, Request $request, MessageRepository $mRepository, AuthenticatedUserService $authenticatedUserService): Response
     {
         $datas = new ParameterBag($this->serializer->decode($request->getContent(), 'json'));
-        foreach (['text', 'utilisateurId'] as $value) {
+        foreach (['text'] as $value) {
             if (!$datas->has($value)) {
                 return $this->json(['error' => "Missing parameter: {$value}"], Response::HTTP_BAD_REQUEST);
             }
         }
 
-        $utilisateur = $this->userRepository->find($datas->get('utilisateurId'));
-
         $message = new Message();
         $message
             ->setText($datas->get('text'))
-            ->setUtilisateur($utilisateur)
             ->setPost($post)
         ;
+
+        [$user, $error] = $authenticatedUserService->getAuthenticatedUser($request);
+        if ($error) {
+            return $this->json($error->toArray(), 401);
+        }
+
+        $message->setUtilisateur($user);
 
         try {
             $this->entityManager->persist($message);
             $this->entityManager->flush();
+            dd($message);
             $dto = MessageResponseDTO::fromEntity($message);
 
             return $this->json($this->serializer->normalize($dto, 'json'), Response::HTTP_CREATED);

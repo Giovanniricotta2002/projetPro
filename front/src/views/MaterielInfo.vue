@@ -2,20 +2,27 @@
   <v-app>
     <v-container class="d-flex flex-column align-center justify-center" style="min-height: 90vh;">
       <v-card class="pa-6" elevation="3" max-width="2400">
-        <v-card-title class="headline text-center mb-4">{{ machine.nom }}</v-card-title>
-        <div class="machine-cercle">
+      <v-row class="mb-2" align="center" justify="space-between">
+        <v-col cols="10">
+          <v-card-title class="headline text-center">{{ machine && machine.name || '' }}</v-card-title>
+        </v-col>
+        <v-col cols="2" class="d-flex justify-end">
+          <v-btn color="primary" @click="$router.push('/materiels')" flat variant="text">Retour à la liste</v-btn>
+        </v-col>
+      </v-row>
+        <div class="machine-cercle" v-if="machine && machine.infoMachines">
           <!-- SVG pour les traits entre l'image et les bulles -->
           <svg class="bulle-lines" width="800" height="800" viewBox="0 0 800 800" style="position:absolute;top:0;left:0;pointer-events:none;z-index:0;">
-            <line v-for="(bulle, i) in machine.bulles" :key="'line-'+bulle.id"
+            <line v-for="(bulle, i) in machine.infoMachines" :key="'line-'+bulle.id"
               :x1="400" :y1="400"
               :x2="getBullePos(i).x" :y2="getBullePos(i).y"
               stroke="#1976d2" stroke-width="2" stroke-linecap="round" />
           </svg>
           <v-avatar size="100" class="machine-img">
-            <v-img :src="machine.image" :alt="machine.nom" width="100%" height="100%" cover />
+            <v-img :src="machine.image" :alt="machine.name" width="100%" height="100%" cover />
           </v-avatar>
           <transition-group name="bulle-fade" tag="div">
-            <div v-for="(bulle, i) in machine.bulles" :key="bulle.id" :class="['bulle', bulle.type]"
+            <div v-for="(bulle, i) in machine.infoMachines" :key="bulle.id" :class="['bulle', bulle.type]"
               :style="bulleStyle(i, showBulles[i])">
               <span>{{ bulle.text }}</span>
             </div>
@@ -28,44 +35,46 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import type { InfoMachine } from '@/types/InfoMachine'
+import type { CSSProperties } from 'vue'
+import type { Machine } from '@/types/Machine'
 
-const machine = {
-  nom: 'Haltère hexagonale',
-  image: 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fimages.ctfassets.net%2Fipjoepkmtnha%2F5fQCLXzP2H5BG5VcODED43%2Fc3d521f38437d3181c1705bb9979568f%2Fhex-dumbbell_hero&f=1&nofb=1&ipt=15dc359e6340d1aa00a421d911774013ca9723ab3180ca199263745a24cd805f',
-  bulles: [
-    // Haut : Usages principaux
-    { id: 1, text: 'Musculation variée', type: 'usage' },
-    { id: 2, text: 'Renforcement à domicile', type: 'usage' },
-    { id: 3, text: 'Convient à tous niveaux', type: 'usage' },
-    // Droite : Sécurité et praticité
-    { id: 4, text: 'Poids variable', type: 'carac' },
-    { id: 5, text: 'Forme hexagonale (ne roule pas)', type: 'sécurité' },
-    { id: 6, text: 'Revêtement anti-dérapant', type: 'sécurité' },
-    { id: 7, text: 'Compact & facile à ranger', type: 'carac' },
-    // Bas : Caractéristiques
-    { id: 8, text: 'Matériaux robustes', type: 'carac' },
-    { id: 9, text: 'Bonne répartition du poids', type: 'carac' },
-    // Gauche : Confort & exemples
-    { id: 10, text: 'Prise ergonomique', type: 'confort' },
-    { id: 11, text: 'Surface lisse', type: 'confort' },
-    { id: 12, text: 'Facile à nettoyer', type: 'confort' },
-    { id: 13, text: 'Développé couché', type: 'usage' },
-    { id: 14, text: 'Fentes', type: 'usage' },
-    { id: 15, text: 'Rowing', type: 'usage' },
-  ] as InfoMachine[],
+const route = useRoute()
+const authStore = useAuthStore()
+
+const machine = ref<Machine | null>(null)
+const showBulles = ref<boolean[]>([])
+
+async function fetchMachine() {
+  const materielId = route.params.materielId
+  try {
+    const response = await authStore.apiRequest<Machine>(`/api/machines/${materielId}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    })
+    if (response.success && response.data) {
+      machine.value = response.data
+      showBulles.value = Array(machine.value?.infoMachines.length || 0).fill(false)
+      // Animation bulles après chargement
+      machine.value?.infoMachines.forEach((_, i) => {
+        setTimeout(() => showBulles.value[i] = true, 200 + i * 120)
+      })
+    } else {
+      machine.value = null
+      showBulles.value = []
+    }
+  } catch (e) {
+    machine.value = null
+    showBulles.value = []
+  }
 }
 
-const showBulles = ref<boolean[]>(Array(machine.bulles.length).fill(false))
-
-onMounted(() => {
-  machine.bulles.forEach((_, i) => {
-    setTimeout(() => showBulles.value[i] = true, 200 + i * 120)
-  })
-})
+onMounted(fetchMachine)
 
 function getBullePos(i: number) {
-  const n = machine.bulles.length
+  const n = machine.value?.infoMachines.length || 0
   const angle = (2 * Math.PI * i) / n - Math.PI / 2
   const r = 300
   const x = 400 + r * Math.cos(angle)
@@ -73,7 +82,6 @@ function getBullePos(i: number) {
   return { x, y }
 }
 
-import type { CSSProperties } from 'vue'
 function bulleStyle(i: number, visible: boolean): CSSProperties {
   const { x, y } = getBullePos(i)
   return {
@@ -168,4 +176,5 @@ function bulleStyle(i: number, visible: boolean): CSSProperties {
     height: 90px !important;
   }
 }
+
 </style>

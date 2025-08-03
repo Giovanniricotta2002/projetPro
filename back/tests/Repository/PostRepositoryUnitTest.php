@@ -2,9 +2,12 @@
 
 namespace App\Tests\Repository;
 
-use App\Entity\{Forum, Post};
+use App\Entity\Forum;
+use App\Entity\Post;
 use App\Repository\PostRepository;
-use Doctrine\ORM\{AbstractQuery, EntityManagerInterface, QueryBuilder};
+use Doctrine\ORM\AbstractQuery;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use PHPUnit\Framework\TestCase;
 
