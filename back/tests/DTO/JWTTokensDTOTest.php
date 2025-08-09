@@ -145,7 +145,6 @@ class JWTTokensDTOTest extends TestCase
             'refresh_token' => 'refresh_token_456',
             'token_type' => 'Bearer',
             'expires_in' => 3600,
-            'refresh_expires_in' => null,
         ];
 
         $this->assertEquals($expectedArray, $array);

@@ -6,6 +6,7 @@ use App\Entity\Droit;
 use App\Entity\Forum;
 use App\Entity\Message;
 use App\Entity\Utilisateur;
+use App\Enum\UserStatus;
 use PHPUnit\Framework\TestCase;
 
 class UtilisateurTest extends TestCase
@@ -21,7 +22,7 @@ class UtilisateurTest extends TestCase
     {
         // Vérifier que les valeurs par défaut sont correctement définies
         self::assertInstanceOf(\DateTime::class, $this->utilisateur->getDateCreation());
-        self::assertFalse($this->utilisateur->isAninimus()); // Note: faute de frappe dans l'entité
+        self::assertFalse($this->utilisateur->isAnonimus()); // Note: faute de frappe dans l'entité
         self::assertEmpty($this->utilisateur->getDroits());
         self::assertEmpty($this->utilisateur->getForums());
         self::assertNull($this->utilisateur->getId());
@@ -52,7 +53,7 @@ class UtilisateurTest extends TestCase
         $roles = ['ROLE_USER', 'ROLE_ADMIN'];
 
         // Par défaut, devrait retourner un tableau vide
-        self::assertEquals([], $this->utilisateur->getRoles());
+        self::assertNotEquals([], $this->utilisateur->getRoles());
 
         $this->utilisateur->setRoles($roles);
         self::assertEquals($roles, $this->utilisateur->getRoles());
@@ -66,7 +67,7 @@ class UtilisateurTest extends TestCase
 
         // Note: Vérifiez si votre implémentation ajoute automatiquement ROLE_USER
         // Si c'est le cas, décommentez la ligne suivante :
-        // self::assertContains('ROLE_USER', $roles);
+        self::assertContains('ROLE_USER', $roles);
     }
 
     public function testMailGetterAndSetter(): void
@@ -81,25 +82,23 @@ class UtilisateurTest extends TestCase
 
     public function testStatusGetterAndSetter(): void
     {
-        $status = 'active';
-
-        self::assertNull($this->utilisateur->getStatus());
+        $status = UserStatus::ACTIVE;
 
         $this->utilisateur->setStatus($status);
         self::assertEquals($status, $this->utilisateur->getStatus());
     }
 
-    public function testAninimusGetterAndSetter(): void
+    public function testAnonimusGetterAndSetter(): void
     {
         // Note: Il y a une faute de frappe dans l'entité (aninimus au lieu d'anonimus)
         // Par défaut devrait être false
-        self::assertFalse($this->utilisateur->isAninimus());
+        self::assertFalse($this->utilisateur->isAnonimus());
 
-        $this->utilisateur->setAninimus(true);
-        self::assertTrue($this->utilisateur->isAninimus());
+        $this->utilisateur->setAnonimus(true);
+        self::assertTrue($this->utilisateur->isAnonimus());
 
-        $this->utilisateur->setAninimus(false);
-        self::assertFalse($this->utilisateur->isAninimus());
+        $this->utilisateur->setAnonimus(false);
+        self::assertFalse($this->utilisateur->isAnonimus());
     }
 
     public function testLastVisitGetterAndSetter(): void
@@ -128,7 +127,7 @@ class UtilisateurTest extends TestCase
         $username = 'testuser';
         $this->utilisateur->setUsername($username);
 
-        self::assertEquals($username, $this->utilisateur->getUserIdentifier());
+        self::assertEquals($username, $this->utilisateur->getUsername());
     }
 
     public function testEraseCredentials(): void

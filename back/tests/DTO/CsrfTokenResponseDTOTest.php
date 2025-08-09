@@ -3,6 +3,7 @@
 namespace App\Tests\DTO;
 
 use App\DTO\CsrfTokenResponseDTO;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -90,9 +91,8 @@ class CsrfTokenResponseDTOTest extends TestCase
 
     /**
      * Test avec différents types de tokens.
-     *
-     * @dataProvider tokenProvider
      */
+    #[DataProvider('tokenProvider')]
     public function testWithVariousTokens(string $token): void
     {
         $dto = CsrfTokenResponseDTO::create($token);

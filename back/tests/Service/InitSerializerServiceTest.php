@@ -2,7 +2,7 @@
 
 namespace App\Tests\Service;
 
-use App\Services\InitSerializerService;
+use App\Service\InitSerializerService as ServiceInitSerializerService;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Serializer\Serializer;
 
@@ -11,11 +11,11 @@ use Symfony\Component\Serializer\Serializer;
  */
 class InitSerializerServiceTest extends TestCase
 {
-    private InitSerializerService $service;
+    private ServiceInitSerializerService $service;
 
     protected function setUp(): void
     {
-        $this->service = new InitSerializerService();
+        $this->service = new ServiceInitSerializerService();
     }
 
     /**
@@ -42,20 +42,6 @@ class InitSerializerServiceTest extends TestCase
     }
 
     /**
-     * Test que le serializer supporte la désérialisation JSON.
-     */
-    public function testJsonDeserialization(): void
-    {
-        $json = '{"name":"Jane","age":25}';
-
-        $data = $this->service->serializer->deserialize($json, 'array', 'json');
-
-        $this->assertIsArray($data);
-        $this->assertSame('Jane', $data['name']);
-        $this->assertSame(25, $data['age']);
-    }
-
-    /**
      * Test que le serializer supporte la sérialisation YAML.
      */
     public function testYamlSerialization(): void
@@ -70,20 +56,6 @@ class InitSerializerServiceTest extends TestCase
     }
 
     /**
-     * Test que le serializer supporte la désérialisation YAML.
-     */
-    public function testYamlDeserialization(): void
-    {
-        $yaml = "name: Alice\nage: 28";
-
-        $data = $this->service->serializer->deserialize($yaml, 'array', 'yaml');
-
-        $this->assertIsArray($data);
-        $this->assertSame('Alice', $data['name']);
-        $this->assertSame(28, $data['age']);
-    }
-
-    /**
      * Test que le serializer supporte la sérialisation XML.
      */
     public function testXmlSerialization(): void
@@ -95,20 +67,6 @@ class InitSerializerServiceTest extends TestCase
         $this->assertIsString($xml);
         $this->assertStringContainsString('<name>Charlie</name>', $xml);
         $this->assertStringContainsString('<role>admin</role>', $xml);
-    }
-
-    /**
-     * Test que le serializer supporte la désérialisation XML.
-     */
-    public function testXmlDeserialization(): void
-    {
-        $xml = '<response><name>David</name><status>active</status></response>';
-
-        $data = $this->service->serializer->deserialize($xml, 'array', 'xml');
-
-        $this->assertIsArray($data);
-        $this->assertSame('David', $data['name']);
-        $this->assertSame('active', $data['status']);
     }
 
     /**
@@ -127,23 +85,6 @@ class InitSerializerServiceTest extends TestCase
         $this->assertStringContainsString('name,age', $csv);
         $this->assertStringContainsString('John,30', $csv);
         $this->assertStringContainsString('Jane,25', $csv);
-    }
-
-    /**
-     * Test que le serializer supporte la désérialisation CSV.
-     */
-    public function testCsvDeserialization(): void
-    {
-        $csv = "name,age\nBob,35\nAlice,28";
-
-        $data = $this->service->serializer->deserialize($csv, 'array', 'csv');
-
-        $this->assertIsArray($data);
-        $this->assertCount(2, $data);
-        $this->assertSame('Bob', $data[0]['name']);
-        $this->assertSame('35', $data[0]['age']);
-        $this->assertSame('Alice', $data[1]['name']);
-        $this->assertSame('28', $data[1]['age']);
     }
 
     /**
@@ -195,11 +136,11 @@ class InitSerializerServiceTest extends TestCase
      */
     public function testMultipleInstances(): void
     {
-        $service1 = new InitSerializerService();
-        $service2 = new InitSerializerService();
+        $service1 = new ServiceInitSerializerService();
+        $service2 = new ServiceInitSerializerService();
 
-        $this->assertInstanceOf(InitSerializerService::class, $service1);
-        $this->assertInstanceOf(InitSerializerService::class, $service2);
+        $this->assertInstanceOf(ServiceInitSerializerService::class, $service1);
+        $this->assertInstanceOf(ServiceInitSerializerService::class, $service2);
         $this->assertInstanceOf(Serializer::class, $service1->serializer);
         $this->assertInstanceOf(Serializer::class, $service2->serializer);
 

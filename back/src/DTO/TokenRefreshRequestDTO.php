@@ -33,7 +33,7 @@ final class TokenRefreshRequestDTO
     public static function fromParameterBag(ParameterBag $data): self
     {
         return new self(
-            refreshToken: $data->get('refreshToken') ?? ''
+            refreshToken: $data->has('refreshToken') ? $data->get('refreshToken') : ''
         );
     }
 

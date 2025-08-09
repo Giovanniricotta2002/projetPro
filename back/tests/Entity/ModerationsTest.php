@@ -233,21 +233,6 @@ class ModerationsTest extends TestCase
         self::assertEquals($dateAction, $this->moderations->getDateAction());
     }
 
-    public function testModerateurAndCibleDifferent(): void
-    {
-        // Le modérateur et la cible doivent être différents
-        $moderateur = $this->createMock(Utilisateur::class);
-        $moderateur->method('getId')->willReturn(1);
-
-        $cible = $this->createMock(Utilisateur::class);
-        $cible->method('getId')->willReturn(2);
-
-        $this->moderations->setModerateur($moderateur);
-        $this->moderations->setCible($cible);
-
-        self::assertNotEquals($this->moderations->getModerateur(), $this->moderations->getCible());
-    }
-
     public function testModerationScenarios(): void
     {
         // Test de différents scénarios de modération

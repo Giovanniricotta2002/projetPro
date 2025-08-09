@@ -135,9 +135,9 @@ class PendingLoginLogDTOTest extends TestCase
             $this->testDateTime
         );
 
-        $this->assertEquals('testuser', $dto->getUsername());
-        $this->assertSame($this->defaultAttribute, $dto->getAttribute());
-        $this->assertSame($this->testDateTime, $dto->getRequestTime());
+        $this->assertEquals('testuser', $dto->username);
+        $this->assertSame($this->defaultAttribute, $dto->attribute);
+        $this->assertSame($this->testDateTime, $dto->requestTime);
     }
 
     /**
@@ -157,7 +157,6 @@ class PendingLoginLogDTOTest extends TestCase
         foreach ($specialUsernames as $username) {
             $dto = PendingLoginLogDTO::create($username, $this->defaultAttribute);
             $this->assertEquals($username, $dto->username);
-            $this->assertEquals($username, $dto->getUsername());
         }
     }
 

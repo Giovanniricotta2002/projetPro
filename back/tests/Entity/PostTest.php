@@ -75,8 +75,8 @@ class PostTest extends TestCase
 
         $dateCreation = new \DateTime('2024-01-01 10:00:00');
 
-        $result = $this->post->setDatCreation($dateCreation);
-        self::assertEquals($dateCreation, $this->post->getDatCreation());
+        $result = $this->post->setDateCreation($dateCreation);
+        self::assertEquals($dateCreation, $this->post->getDateCreation());
         self::assertInstanceOf(Post::class, $result);
     }
 
@@ -185,7 +185,7 @@ class PostTest extends TestCase
             ->setVues($vues)
             ->setVerrouille($verrouille)
             ->setEpingle($epingle)
-            ->setDatCreation($dateCreation)
+            ->setDateCreation($dateCreation)
             ->setForum($forum);
 
         self::assertInstanceOf(Post::class, $result);
@@ -193,7 +193,7 @@ class PostTest extends TestCase
         self::assertEquals($vues, $this->post->getVues());
         self::assertTrue($this->post->isVerrouille());
         self::assertFalse($this->post->isEpingle());
-        self::assertEquals($dateCreation, $this->post->getDatCreation());
+        self::assertEquals($dateCreation, $this->post->getDateCreation());
         self::assertEquals($forum, $this->post->getForum());
     }
 
@@ -212,7 +212,7 @@ class PostTest extends TestCase
             ->setVues($vues)
             ->setVerrouille($verrouille)
             ->setEpingle($epingle)
-            ->setDatCreation($dateCreation)
+            ->setDateCreation($dateCreation)
             ->setForum($forum);
 
         // Vérifications
@@ -220,7 +220,7 @@ class PostTest extends TestCase
         self::assertEquals($vues, $this->post->getVues());
         self::assertFalse($this->post->isVerrouille());
         self::assertTrue($this->post->isEpingle());
-        self::assertEquals($dateCreation, $this->post->getDatCreation());
+        self::assertEquals($dateCreation, $this->post->getDateCreation());
         self::assertEquals($forum, $this->post->getForum());
     }
 
@@ -400,22 +400,6 @@ class PostTest extends TestCase
 
         self::assertGreaterThanOrEqual($beforeCreation, $post->getDateCreation());
         self::assertLessThanOrEqual($afterCreation, $post->getDateCreation());
-    }
-
-    public function testPropertyNameInconsistency(): void
-    {
-        // Test pour documenter l'incohérence dans les noms
-        // Propriété: $dateCreation
-        // Getter: getDatCreation() (manque le 'e')
-        // Setter: setDatCreation() (manque le 'e')
-
-        $date = new \DateTime('2024-01-01');
-        $this->post->setDatCreation($date);
-
-        self::assertEquals($date, $this->post->getDatCreation());
-
-        // Note: $this->post->getDateCreation() retourne la valeur du constructeur
-        self::assertNotEquals($date, $this->post->getDateCreation());
     }
 
     public function testToString(): void

@@ -81,7 +81,7 @@ class Machine
         return $this->name;
     }
 
-    public function setName(string $name): static
+    public function setName(?string $name): static
     {
         $this->name = $name;
 
@@ -117,7 +117,7 @@ class Machine
         return $this->visible;
     }
 
-    public function setVisible(bool $visible): static
+    public function setVisible(?bool $visible): static
     {
         $this->visible = $visible;
 

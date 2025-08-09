@@ -27,7 +27,7 @@ class InitSerializerService
     {
         $normalizer = [
             new DateTimeNormalizer([DateTimeNormalizer::FORMAT_KEY => 'Y-m-d H:i:s']),
-            ...$this->normalizers
+            ...$this->normalizers,
         ];
 
         $this->normalizers = $normalizer;

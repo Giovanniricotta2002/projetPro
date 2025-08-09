@@ -100,6 +100,7 @@ class MachineTest extends TestCase
 
     public function testVisibleGetterAndSetter(): void
     {
+        $this->machine->setVisible(null);
         self::assertNull($this->machine->isVisible());
 
         $this->machine->setVisible(true);

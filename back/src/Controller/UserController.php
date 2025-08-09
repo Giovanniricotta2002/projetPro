@@ -18,6 +18,7 @@ use Symfony\Component\Serializer\Serializer;
 final class UserController extends AbstractController
 {
     private Serializer $serializer;
+
     public function __construct(
         private readonly AuthenticatedUserService $authenticatedUserService,
     ) {
@@ -70,13 +71,12 @@ final class UserController extends AbstractController
             return new JsonResponse(['error' => 'User not authenticated'], Response::HTTP_UNAUTHORIZED);
         }
 
-
         return $this->json($this->serializer->normalize($user, null, [
             'ignored_attributes' => ['password'],
             'circular_reference_handler' => function ($object) {
                 // Retourne seulement l'id pour les objets liés
                 return method_exists($object, 'getId') ? $object->getId() : null;
-            }
+            },
         ]));
     }
 

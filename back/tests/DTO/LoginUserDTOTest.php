@@ -3,6 +3,7 @@
 namespace App\Tests\DTO;
 
 use App\DTO\LoginUserDTO;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -142,9 +143,8 @@ class LoginUserDTOTest extends TestCase
 
     /**
      * Test avec différents formats de lastVisit.
-     *
-     * @dataProvider lastVisitProvider
      */
+    #[DataProvider('lastVisitProvider')]
     public function testWithVariousLastVisitFormats(?string $lastVisit): void
     {
         $dto = new LoginUserDTO(1, 'test', ['ROLE_USER'], $lastVisit);
@@ -176,9 +176,8 @@ class LoginUserDTOTest extends TestCase
 
     /**
      * Test avec des IDs négatifs ou zéro.
-     *
-     * @dataProvider idProvider
      */
+    #[DataProvider('idProvider')]
     public function testWithVariousIds(int $id): void
     {
         $dto = new LoginUserDTO($id, 'test', ['ROLE_USER']);
@@ -202,9 +201,8 @@ class LoginUserDTOTest extends TestCase
 
     /**
      * Test avec différents noms d'utilisateur.
-     *
-     * @dataProvider usernameProvider
      */
+    #[DataProvider('usernameProvider')]
     public function testWithVariousUsernames(string $username): void
     {
         $dto = new LoginUserDTO(1, $username, ['ROLE_USER']);
