@@ -3,17 +3,28 @@
 namespace App\Controller;
 
 use App\Entity\Utilisateur;
+use App\Service\AuthenticatedUserService;
+use App\Service\InitSerializerService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Serializer\Serializer;
 
 #[Route('/api', name: 'app_api')]
 #[OA\Tag(name: 'User', description: 'Gestion des utilisateurs')]
 final class UserController extends AbstractController
 {
+    private Serializer $serializer;
+    public function __construct(
+        private readonly AuthenticatedUserService $authenticatedUserService,
+    ) {
+        $serializer = new InitSerializerService();
+        $this->serializer = $serializer->serializerAndDate();
+    }
+
     /**
      * Récupère les informations de l'utilisateur authentifié.
      *
@@ -53,7 +64,20 @@ final class UserController extends AbstractController
     )]
     public function me(Request $request): Response
     {
-        return new JsonResponse([$request->cookies->all(), $this->getUser()]);
+        [$user, $error] = $this->authenticatedUserService->getAuthenticatedUser($request);
+
+        if ($error) {
+            return new JsonResponse(['error' => 'User not authenticated'], Response::HTTP_UNAUTHORIZED);
+        }
+
+
+        return $this->json($this->serializer->normalize($user, null, [
+            'ignored_attributes' => ['password'],
+            'circular_reference_handler' => function ($object) {
+                // Retourne seulement l'id pour les objets liés
+                return method_exists($object, 'getId') ? $object->getId() : null;
+            }
+        ]));
     }
 
     #[Route('/me', name: '_me_options', methods: ['OPTIONS'])]

@@ -1,12 +1,5 @@
 // types/auth.ts
-export interface User {
-  id: string
-  username: string
-  email: string
-  roles?: string[]
-  createdAt?: string
-  updatedAt?: string
-}
+import type { Utilisateur } from './Utilisateur'
 
 export interface LoginData {
   login: string
@@ -34,32 +27,26 @@ export interface ApiResponse<T = any> {
   errors?: Record<string, string[]>
 }
 
-export interface AuthState {
-  user: User | null
-  isLoading: boolean
-  error: string
-  isInitialized: boolean
-}
-
 // Types pour les réponses d'authentification
 export interface AuthResponse {
-  user: User
+  user: Utilisateur
   message?: string
 }
 
 export interface RefreshResponse {
-  user: User
+  user: Utilisateur
   expiresIn?: number
 }
 
-// Types pour les erreurs d'API
-export interface ValidationError {
-  field: string
-  message: string
+export interface AuthState {
+  user: Utilisateur | null;
+  isLoading: boolean;
+  error: string;
+  isInitialized: boolean;
 }
 
 export interface ApiError {
-  code: string
-  message: string
-  details?: ValidationError[]
+  code: string;
+  message: string;
+  details?: { field: string; message: string }[];
 }

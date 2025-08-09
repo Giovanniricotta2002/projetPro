@@ -58,6 +58,9 @@ const form = reactive({
   bulles: [] as InfoMachine[],
 })
 
+
+const user = computed(() => authStore.user)
+
 const types = typesBulle
 const authStore = useAuthStore()
 
@@ -79,14 +82,9 @@ async function save() {
         description: form.description,
         image: form.image,
         infoMachines: form.bulles,
+        utilisateur: user.value?.id,
       }),
     })
-    console.log(response, authStore.$id, JSON.stringify({
-        nom: form.nom,
-        description: form.description,
-        image: form.image,
-        infoMachines: form.bulles,
-      }));
     
     if (!response.success) throw new Error(response.message || 'Erreur lors de la création')
     snackbar.value = { show: true, color: 'success', text: 'Machine créée avec succès !' }

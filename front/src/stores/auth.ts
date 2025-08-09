@@ -2,12 +2,13 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch, readonly } from 'vue'
 import { apiEndpoint, corsRequestHeaders } from '../config'
-import type { ApiResponse, LoginData, User } from '../types/auth'
+import type { ApiResponse, LoginData } from '../types/auth'
 import type { RegisterData } from '../types/auth'
+import type { Utilisateur } from '@/types/Utilisateur'
 
 export const useAuthStore = defineStore('auth', () => {
   // État
-  const user = ref<User | null>(null)
+  const user = ref<Utilisateur | null>(null)
   const isLoading = ref(false)
   const error = ref('')
   const isInitialized = ref(false)
@@ -15,7 +16,7 @@ export const useAuthStore = defineStore('auth', () => {
   // Getters
   const isAuthenticated = computed(() => !!user.value && isInitialized.value)
   const userName = computed(() => user.value?.username || '')
-  const userEmail = computed(() => user.value?.email || '')
+  const userEmail = computed(() => user.value?.mail || '')
   const hasRole = computed(() => (role: string) => user.value?.roles?.includes(role) ?? false)
 
   // Watcher pour nettoyer les erreurs automatiquement
@@ -88,9 +89,9 @@ export const useAuthStore = defineStore('auth', () => {
   let authCheckInterval: ReturnType<typeof setInterval> | null = null
 
   // Fonction pour refresh automatique du token
-  async function refreshToken(): Promise<ApiResponse<User>> {
+  async function refreshToken(): Promise<ApiResponse<Utilisateur>> {
     try {
-      const response = await fetch(new URL('/api/refresh', apiEndpoint), {
+      const response = await fetch(new URL('/api/tokensrefresh', apiEndpoint), {
         method: 'POST',
         credentials: 'include', // Les cookies HTTPOnly seront envoyés automatiquement
         headers: {
@@ -151,7 +152,7 @@ export const useAuthStore = defineStore('auth', () => {
     isLoading.value = true
     error.value = ''
     
-    const result = await apiRequest<User>('/api/login', {
+    const result = await apiRequest<Utilisateur>('/api/login', {
       method: 'POST',
       headers: {
         'X-CSRF-Token': loginData.csrfToken,
@@ -199,7 +200,7 @@ export const useAuthStore = defineStore('auth', () => {
     isLoading.value = true
     
     // Essayer d'abord /api/me
-    let result = await apiRequest<User>('/api/me', {
+    let result = await apiRequest<Utilisateur>('/api/me', {
       method: 'GET',
       credentials: 'include', // Pour envoyer les cookies HTTPOnly
       headers: {
@@ -257,13 +258,13 @@ export const useAuthStore = defineStore('auth', () => {
     return result
   }
 
-  async function updateProfile(profileData: Partial<User>) {
+  async function updateProfile(profileData: Partial<Utilisateur>) {
     if (isLoading.value || !user.value) return { success: false, error: 'Non authentifié' }
 
     isLoading.value = true
     error.value = ''
 
-    const result = await apiRequest<User>('/api/profile', {
+    const result = await apiRequest<Utilisateur>('/api/profile', {
       method: 'PUT',
       body: JSON.stringify(profileData)
     })

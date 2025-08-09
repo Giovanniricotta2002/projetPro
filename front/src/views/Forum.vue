@@ -94,6 +94,9 @@ import type { CategorieForum } from '@/types/CategorieForum'
 const forums = ref<Forum[]>([])
 const authStore = useAuthStore()
 
+const user = computed(() => authStore.user)
+
+
 const snackbar = ref<{ show: boolean; color: string; text: string }>({ show: false, color: 'success', text: '' })
 const showSnackbar = (msg: string, color: 'error'|'success' = 'error') => {
   return { show: true, color: color, text: msg }
@@ -193,7 +196,7 @@ async function submitNewForum() {
         categories: newForumCategory.value,
         description: newForumDescription.value.trim(),
         ordreAffichage: forums.value.length + 1,
-        // utilisateur: authStore.user.value.id,
+        utilisateur: user.value?.id,
       })
     })
     if (response.success && response.data) {

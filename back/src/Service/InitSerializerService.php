@@ -25,7 +25,12 @@ class InitSerializerService
 
     public function serializerAndDate(): Serializer
     {
-        $this->normalizers[] = new DateTimeNormalizer([DateTimeNormalizer::FORMAT_KEY => 'Y-m-d H:i:s']);
+        $normalizer = [
+            new DateTimeNormalizer([DateTimeNormalizer::FORMAT_KEY => 'Y-m-d H:i:s']),
+            ...$this->normalizers
+        ];
+
+        $this->normalizers = $normalizer;
 
         return new Serializer($this->normalizers, $this->encoders);
     }

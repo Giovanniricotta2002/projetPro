@@ -56,7 +56,6 @@ final class MachinesController extends AbstractController
     public function create(
         Request $request,
         ValidatorInterface $validator,
-        ParameterBagInterface $bag,
     ): JsonResponse {
         $data = new ParameterBag($this->serializer->decode($request->getContent(), 'json'));
         foreach (['nom', 'image', 'infoMachines'] as $field) {
@@ -81,6 +80,7 @@ final class MachinesController extends AbstractController
             ->setName($data->get('nom'))
             ->setImage($data->get('image'))
             ->setDescription($data->get('description'))
+            ->setUtilisateur($this->userRepository->find($data->get('utilisateur'))) // Utilisateur par défaut, à adapter
         ;
 
         foreach ($data->get('infoMachines') as $infoMachine) {
