@@ -81,10 +81,23 @@ final class Version20250609153320 extends AbstractMigration
             CREATE UNIQUE INDEX UNIQ_CA754290A96E5E09 ON moderations (cible_id)
         SQL);
         $this->addSql(<<<'SQL'
-            CREATE TABLE post (id SERIAL NOT NULL, forum_id INT DEFAULT NULL, titre VARCHAR(30) NOT NULL, date_creation TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, vues INT NOT NULL, verrouille BOOLEAN DEFAULT NULL, epingle BOOLEAN DEFAULT NULL, PRIMARY KEY(id))
+            CREATE TABLE post (
+                id SERIAL NOT NULL,
+                forum_id INT DEFAULT NULL,
+                utilisateur_id INT DEFAULT NULL,
+                titre VARCHAR(30) NOT NULL,
+                date_creation TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
+                vues INT NOT NULL,
+                verrouille BOOLEAN DEFAULT NULL,
+                epingle BOOLEAN DEFAULT NULL,
+                PRIMARY KEY(id)
+            )
         SQL);
         $this->addSql(<<<'SQL'
             CREATE INDEX IDX_5A8A6C8D29CCBAD0 ON post (forum_id)
+        SQL);
+        $this->addSql(<<<'SQL'
+            CREATE INDEX IDX_5A8A6C8DFB88E14F ON post (utilisateur_id)
         SQL);
         $this->addSql(<<<'SQL'
             CREATE TABLE utilisateur (id SERIAL NOT NULL, username VARCHAR(180) NOT NULL, roles JSON NOT NULL, password VARCHAR(255) NOT NULL, date_creation DATE NOT NULL, anonimus BOOLEAN NOT NULL, last_visit TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NULL, mail VARCHAR(100) DEFAULT NULL, status VARCHAR(255) NOT NULL, PRIMARY KEY(id))
@@ -124,6 +137,9 @@ final class Version20250609153320 extends AbstractMigration
         SQL);
         $this->addSql(<<<'SQL'
             ALTER TABLE post ADD CONSTRAINT FK_5A8A6C8D29CCBAD0 FOREIGN KEY (forum_id) REFERENCES forum (id) NOT DEFERRABLE INITIALLY IMMEDIATE
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE post ADD CONSTRAINT FK_5A8A6C8DFB88E14F FOREIGN KEY (utilisateur_id) REFERENCES utilisateur (id) NOT DEFERRABLE INITIALLY IMMEDIATE
         SQL);
     }
 
@@ -165,6 +181,12 @@ final class Version20250609153320 extends AbstractMigration
         SQL);
         $this->addSql(<<<'SQL'
             ALTER TABLE post DROP CONSTRAINT FK_5A8A6C8D29CCBAD0
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE post DROP CONSTRAINT FK_5A8A6C8DFB88E14F
+        SQL);
+        $this->addSql(<<<'SQL'
+            DROP INDEX IF EXISTS IDX_5A8A6C8DFB88E14F
         SQL);
         $this->addSql(<<<'SQL'
             DROP TABLE categorie_forum

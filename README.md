@@ -137,9 +137,6 @@ docker compose exec -itu 1000 backen bash
 # Tests unitaires
 ./bin/phpunit
 
-# Tests BDD avec Behat
-./vendor/bin/behat
-
 # Analyse statique
 ./vendor/bin/phpstan analyse
 
@@ -154,12 +151,6 @@ cd front/
 
 # Tests unitaires
 npm run test
-
-# Tests avec couverture
-npm run test:coverage
-
-# Linting
-npm run lint
 ```
 
 **Couverture de tests** : Le projet maintient une couverture de tests élevée sur les composants critiques (authentification, logging, API).
@@ -297,10 +288,12 @@ projetPro/
 - **Staging** : Kubernetes (Kind) + Azure Container Registry
 - **Production** : Azure Kubernetes Service (AKS)
 
-### CI/CD Pipeline (prêt)
+### CI/CD Pipeline (évolution future)
+
+> ⚠️ Le fichier `.github/workflows/ci.yml` n'est pas encore présent dans le projet. Le template ci-dessous est fourni pour une évolution future de l'intégration continue.
 
 ```yaml
-# .github/workflows/ci.yml (template)
+# .github/workflows/ci.yml (exemple/template)
 name: CI/CD Pipeline
 on: [push, pull_request]
 

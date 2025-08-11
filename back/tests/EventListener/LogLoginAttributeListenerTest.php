@@ -38,7 +38,7 @@ class LogLoginAttributeListenerTest extends TestCase
 
         $event = new ControllerEvent(
             $kernel,
-            function () { return new Response(); }, // Callable au lieu d'array
+            fn () => new Response(), // Callable au lieu d'array
             $request,
             HttpKernelInterface::MAIN_REQUEST
         );
@@ -178,7 +178,12 @@ class LogLoginAttributeListenerTest extends TestCase
             }
         };
 
-        $request = Request::create('/api/login', 'POST', [], [], [],
+        $request = Request::create(
+            '/api/login',
+            'POST',
+            [],
+            [],
+            [],
             ['REMOTE_ADDR' => '192.168.1.1'],
             '{"login":"test","password":"test"}'
         );
@@ -226,7 +231,12 @@ class LogLoginAttributeListenerTest extends TestCase
             }
         };
 
-        $request = Request::create('/api/login', 'POST', [], [], [],
+        $request = Request::create(
+            '/api/login',
+            'POST',
+            [],
+            [],
+            [],
             ['REMOTE_ADDR' => '192.168.1.1'],
             '{"login":"blockeduser","password":"test"}'
         );
@@ -280,7 +290,12 @@ class LogLoginAttributeListenerTest extends TestCase
             }
         };
 
-        $request = Request::create('/api/login', 'POST', [], [], [],
+        $request = Request::create(
+            '/api/login',
+            'POST',
+            [],
+            [],
+            [],
             ['REMOTE_ADDR' => '192.168.1.1'],
             '{"login":"validuser","password":"validpass"}'
         );
@@ -324,7 +339,12 @@ class LogLoginAttributeListenerTest extends TestCase
             }
         };
 
-        $request = Request::create('/api/login', 'POST', [], [], [],
+        $request = Request::create(
+            '/api/login',
+            'POST',
+            [],
+            [],
+            [],
             ['REMOTE_ADDR' => '192.168.1.1'],
             '{"login":"user","password":"pass"}'
         );
@@ -379,7 +399,12 @@ class LogLoginAttributeListenerTest extends TestCase
             }
         };
 
-        $request = Request::create('/api/login', 'POST', [], [], [],
+        $request = Request::create(
+            '/api/login',
+            'POST',
+            [],
+            [],
+            [],
             ['REMOTE_ADDR' => '192.168.1.1'],
             '{"login":"user","password":"wrongpass"}'
         );
@@ -431,7 +456,13 @@ class LogLoginAttributeListenerTest extends TestCase
             }
         };
 
-        $request = Request::create('/api/login', 'POST', [], [], [], [],
+        $request = Request::create(
+            '/api/login',
+            'POST',
+            [],
+            [],
+            [],
+            [],
             '{"login":"test"password":"invalid json}'
         );
         $kernel = $this->createMock(HttpKernelInterface::class);

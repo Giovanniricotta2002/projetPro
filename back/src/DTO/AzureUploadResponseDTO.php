@@ -15,6 +15,9 @@ use OpenApi\Attributes as OA;
 )]
 final readonly class AzureUploadResponseDTO
 {
+    /**
+     * @param array<int,mixed> $headers
+     */
     public function __construct(
         #[OA\Property(
             property: 'upload_url',
@@ -23,7 +26,6 @@ final readonly class AzureUploadResponseDTO
             example: 'https://storage.blob.core.windows.net/container/blob?sig=...'
         )]
         public readonly string $uploadUrl,
-
         #[OA\Property(
             property: 'blob_name',
             type: 'string',
@@ -31,7 +33,6 @@ final readonly class AzureUploadResponseDTO
             example: 'images/uuid-photo.jpg'
         )]
         public readonly string $blobName,
-
         #[OA\Property(
             property: 'expires_at',
             type: 'string',
@@ -40,7 +41,6 @@ final readonly class AzureUploadResponseDTO
             example: '2025-06-29T15:30:00Z'
         )]
         public readonly string $expiresAt,
-
         #[OA\Property(
             property: 'headers',
             type: 'object',
@@ -53,6 +53,7 @@ final readonly class AzureUploadResponseDTO
 
     /**
      * Crée un DTO depuis les données du service Azure.
+     * @param array<int,mixed> $data
      */
     public static function fromServiceData(array $data): self
     {

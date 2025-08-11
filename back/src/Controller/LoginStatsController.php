@@ -9,7 +9,6 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use OpenApi\Attributes as OA;
 
-
 #[Route('/api/admin/login-logs', name: 'app_admin_login_logs')]
 #[IsGranted('ROLE_ADMIN')]
 #[OA\Tag(name: 'Admin Login Logs', description: 'Endpoints d\'administration pour les statistiques et blocages de connexion')]

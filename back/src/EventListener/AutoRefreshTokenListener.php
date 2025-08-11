@@ -40,8 +40,10 @@ class AutoRefreshTokenListener implements EventSubscriberInterface
         $request = $event->getRequest();
 
         // Ne traiter que les routes API protégées
-        if (!str_starts_with($request->getPathInfo(), '/api/')
-            || in_array($request->getPathInfo(), ['/api/login', '/api/tokens/refresh', '/api/tokens/logout'])) {
+        if (
+            !str_starts_with($request->getPathInfo(), '/api/')
+            || in_array($request->getPathInfo(), ['/api/login', '/api/tokens/refresh', '/api/tokens/logout'])
+        ) {
             return;
         }
 
