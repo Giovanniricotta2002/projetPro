@@ -9,12 +9,32 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\{InputArgument, InputInterface};
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * Commande pour diagnostiquer un utilisateur spécifique.
+ *
+ * Cette commande affiche les informations principales d'un utilisateur,
+ * ainsi que ses derniers logs de connexion.
+ *
+ * @example
+ *   php bin/console app:diagnose:user 42
+ *
+ * @author Giovanni Ricotta
+ *
+ * @since 1.0.0
+ */
 #[AsCommand(
     name: 'app:diagnose:user',
     description: 'Affiche des informations de diagnostic sur un utilisateur.'
 )]
 class DiagnoseUserCommand extends Command
 {
+    /**
+     * Constructeur de la commande DiagnoseUserCommand.
+     *
+     * @param EntityManagerInterface $em           EntityManager Doctrine
+     * @param UtilisateurRepository  $uRepository  Repository des utilisateurs
+     * @param LogLoginRepository     $llRepository Repository des logs de connexion
+     */
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly UtilisateurRepository $uRepository,
@@ -23,11 +43,22 @@ class DiagnoseUserCommand extends Command
         parent::__construct();
     }
 
+    /**
+     * Configure les arguments de la commande.
+     */
     protected function configure(): void
     {
         $this->addArgument('user_id', InputArgument::REQUIRED, 'ID de l\'utilisateur à diagnostiquer');
     }
 
+    /**
+     * Exécute la commande de diagnostic utilisateur.
+     *
+     * @param InputInterface  $input  Interface d'entrée de la commande
+     * @param OutputInterface $output Interface de sortie de la commande
+     *
+     * @return int Code de statut de la commande (SUCCESS ou FAILURE)
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $userId = $input->getArgument('user_id');

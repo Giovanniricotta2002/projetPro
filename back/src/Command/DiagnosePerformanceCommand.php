@@ -7,17 +7,41 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\{InputInterface, InputOption};
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * Commande pour diagnostiquer les performances d'une route API spécifique.
+ *
+ * Cette commande lit les logs Symfony pour extraire les appels à une route donnée,
+ * affiche le nombre d'appels et les derniers timestamps associés.
+ *
+ * @example
+ *   php bin/console app:diagnose:performance --route=api_login
+ *
+ * @author Giovanni Ricotta
+ *
+ * @since 1.0.0
+ */
 #[AsCommand(
     name: 'app:diagnose:performance',
     description: 'Affiche des métriques de performance pour une route API.'
 )]
 class DiagnosePerformanceCommand extends Command
 {
+    /**
+     * Configure les options de la commande.
+     */
     protected function configure(): void
     {
         $this->addOption('route', null, InputOption::VALUE_REQUIRED, 'Route API à diagnostiquer');
     }
 
+    /**
+     * Exécute la commande de diagnostic de performance.
+     *
+     * @param InputInterface  $input  Interface d'entrée de la commande
+     * @param OutputInterface $output Interface de sortie de la commande
+     *
+     * @return int Code de statut de la commande (SUCCESS ou FAILURE)
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $route = $input->getOption('route');

@@ -7,12 +7,28 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\{InputInterface, InputOption};
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * Commande pour rechercher dans les logs applicatifs.
+ *
+ * Permet de filtrer les logs par niveau (error, warning, info, etc.)
+ * et par date (ex: "1 hour ago").
+ *
+ * @example
+ *   php bin/console app:logs:search --level=error --since="2 days ago"
+ *
+ * @author Giovanni Ricotta
+ *
+ * @since 1.0.0
+ */
 #[AsCommand(
     name: 'app:logs:search',
     description: 'Recherche dans les logs applicatifs.'
 )]
 class LogsSearchCommand extends Command
 {
+    /**
+     * Configure les options de la commande.
+     */
     protected function configure(): void
     {
         $this
@@ -20,6 +36,14 @@ class LogsSearchCommand extends Command
             ->addOption('since', null, InputOption::VALUE_OPTIONAL, 'Depuis quand (ex: "1 hour ago")');
     }
 
+    /**
+     * Exécute la commande de recherche dans les logs applicatifs.
+     *
+     * @param InputInterface  $input  Interface d'entrée de la commande
+     * @param OutputInterface $output Interface de sortie de la commande
+     *
+     * @return int Code de statut de la commande (SUCCESS ou FAILURE)
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $level = $input->getOption('level');
