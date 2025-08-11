@@ -2,20 +2,15 @@
 
 namespace App\Controller;
 
-use App\DTO\CsrfTokenResponseDTO;
-use App\DTO\CsrfTokenVerificationRequestDTO;
-use App\DTO\CsrfTokenVerificationResponseDTO;
-use App\DTO\ErrorResponseDTO;
+use App\DTO\{CsrfTokenResponseDTO, CsrfTokenVerificationRequestDTO, CsrfTokenVerificationResponseDTO, ErrorResponseDTO};
 use App\Service\InitSerializerService;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\{Request, Response};
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Csrf\CsrfToken;
-use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
+use Symfony\Component\Security\Csrf\{CsrfToken, CsrfTokenManagerInterface};
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 

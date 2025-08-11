@@ -2,25 +2,16 @@
 
 namespace App\Controller;
 
-use App\DTO\MachineCreateRequestDTO;
-use App\DTO\MachineResponseDTO;
-use App\DTO\MachineUpdateRequestDTO;
-use App\Entity\InfoMachine;
-use App\Entity\Machine;
-use App\Repository\MachineRepository;
-use App\Repository\UtilisateurRepository;
-use App\Service\HttpOnlyCookieService;
-use App\Service\InitSerializerService;
-use App\Service\JWTService;
+use App\DTO\{MachineCreateRequestDTO, MachineResponseDTO, MachineUpdateRequestDTO};
+use App\Entity\{InfoMachine, Machine};
+use App\Repository\{MachineRepository, UtilisateurRepository};
+use App\Service\{HttpOnlyCookieService, InitSerializerService, JWTService};
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\ParameterBag;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\{JsonResponse, ParameterBag, Request, Response};
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Validator\Validator\ValidatorInterface;

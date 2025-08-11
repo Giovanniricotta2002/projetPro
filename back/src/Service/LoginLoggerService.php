@@ -5,8 +5,7 @@ namespace App\Service;
 use App\Entity\LogLogin;
 use App\Repository\LogLoginRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\{Request, RequestStack};
 
 class LoginLoggerService
 {

@@ -2,24 +2,16 @@
 
 namespace App\Controller;
 
-use App\DTO\ErrorResponseDTO;
-use App\DTO\PostResponseDTO;
-use App\Entity\Forum;
-use App\Entity\Post;
-use App\Repository\ForumRepository;
-use App\Repository\UtilisateurRepository;
-use App\Service\AuthenticatedUserService;
-use App\Service\HttpOnlyCookieService;
-use App\Service\InitSerializerService;
-use App\Service\JWTService;
+use App\DTO\{ErrorResponseDTO, PostResponseDTO};
+use App\Entity\{Forum, Post};
+use App\Repository\{ForumRepository, UtilisateurRepository};
+use App\Service\{AuthenticatedUserService, HttpOnlyCookieService, InitSerializerService, JWTService};
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\ParameterBag;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\{ParameterBag, Request, Response};
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\Serializer;
 

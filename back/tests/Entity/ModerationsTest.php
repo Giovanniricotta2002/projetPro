@@ -2,8 +2,7 @@
 
 namespace App\Tests\Entity;
 
-use App\Entity\Moderations;
-use App\Entity\Utilisateur;
+use App\Entity\{Moderations, Utilisateur};
 use PHPUnit\Framework\TestCase;
 
 class ModerationsTest extends TestCase

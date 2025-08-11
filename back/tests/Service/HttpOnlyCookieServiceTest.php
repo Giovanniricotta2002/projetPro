@@ -4,9 +4,7 @@ namespace App\Tests\Service;
 
 use App\Service\HttpOnlyCookieService;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\HttpFoundation\Cookie;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\{Cookie, Request, Response};
 
 class HttpOnlyCookieServiceTest extends TestCase
 {

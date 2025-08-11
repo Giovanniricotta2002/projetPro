@@ -2,8 +2,7 @@
 
 namespace App\Tests\Entity;
 
-use App\Entity\Droit;
-use App\Entity\Utilisateur;
+use App\Entity\{Droit, Utilisateur};
 use PHPUnit\Framework\TestCase;
 
 class DroitTest extends TestCase

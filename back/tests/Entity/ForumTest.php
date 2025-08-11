@@ -2,11 +2,7 @@
 
 namespace App\Tests\Entity;
 
-use App\Entity\CategorieForum;
-use App\Entity\Forum;
-use App\Entity\Machine;
-use App\Entity\Post;
-use App\Entity\Utilisateur;
+use App\Entity\{CategorieForum, Forum, Machine, Post, Utilisateur};
 use PHPUnit\Framework\TestCase;
 
 class ForumTest extends TestCase
