@@ -93,6 +93,40 @@ docker compose up -d
 
 #### Backend
 
+##### Génération des clés JWT (obligatoire pour l'authentification)
+
+<details>
+<summary><strong>Linux / MacOS (Bash)</strong></summary>
+
+```bash
+# Depuis le dossier back/config/jwt
+mkdir -p back/config/jwt
+cd back/config/jwt
+openssl genrsa -out private.pem 2048
+openssl rsa -pubout -in private.pem -out public.pem
+# Générer une passphrase forte (exemple)
+openssl rand -hex 32
+```
+
+</details>
+
+<details>
+<summary><strong>Windows (PowerShell)</strong></summary>
+
+```powershell
+# Depuis le dossier back/config/jwt
+New-Item -ItemType Directory -Force -Path back\config\jwt
+cd back\config\jwt
+openssl genrsa -out private.pem 2048
+openssl rsa -pubout -in private.pem -out public.pem
+# Générer une passphrase forte (exemple)
+[guid]::NewGuid().ToString('N')
+```
+
+</details>
+
+Copiez la passphrase générée dans la variable `JWT_PASSPHRASE` de votre fichier `.env`.
+
 ```bash
 cd docker/
 
