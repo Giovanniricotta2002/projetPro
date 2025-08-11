@@ -17,6 +17,7 @@ use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/api/machines', name: 'app_machines')]
+#[OA\Tag(name: 'Machine', description: 'Endpoints pour la gestion des machines')]
 final class MachinesController extends AbstractController
 {
     private Serializer $serializer;

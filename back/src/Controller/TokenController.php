@@ -120,6 +120,30 @@ final class TokenController extends AbstractController
     }
 
     #[Route('/validate', name: '_validate', methods: ['POST'])]
+    #[OA\Post(
+        path: '/api/tokens/validate',
+        operationId: 'validateToken',
+        summary: 'Valider un token JWT',
+        description: 'Vérifie la validité d\'un token JWT et retourne ses informations.',
+        tags: ['JWT Tokens'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            description: 'Token à valider',
+            content: new OA\JsonContent(ref: new Model(type: TokenValidationRequestDTO::class))
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Token valide',
+                content: new OA\JsonContent(ref: new Model(type: TokenValidationResponseDTO::class))
+            ),
+            new OA\Response(
+                response: 400,
+                description: 'Token invalide',
+                content: new OA\JsonContent(ref: new Model(type: TokenValidationResponseDTO::class))
+            ),
+        ]
+    )]
     public function validate(Request $request): Response
     {
         $data = new ParameterBag($this->serializer->normalize(json_decode($request->getContent()), 'json'));
@@ -154,6 +178,30 @@ final class TokenController extends AbstractController
     }
 
     #[Route('/info', name: '_info', methods: ['GET'])]
+    #[OA\Get(
+        path: '/api/tokens/info',
+        operationId: 'getTokenInfo',
+        summary: 'Obtenir les informations d\'un token JWT',
+        description: 'Retourne les informations détaillées du token JWT transmis via cookie ou header.',
+        tags: ['JWT Tokens'],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Informations du token',
+                content: new OA\JsonContent(ref: new Model(type: TokenInfoResponseDTO::class))
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Token manquant ou invalide',
+                content: new OA\JsonContent(ref: new Model(type: ErrorResponseDTO::class))
+            ),
+            new OA\Response(
+                response: 500,
+                description: 'Erreur serveur',
+                content: new OA\JsonContent(ref: new Model(type: ErrorResponseDTO::class))
+            ),
+        ]
+    )]
     public function info(Request $request): Response
     {
         // Extraire le token depuis les cookies ou les headers

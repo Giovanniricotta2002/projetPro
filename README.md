@@ -78,8 +78,10 @@ cd projetPro
 # Configurer les variables d'environnement
 cp .env.example .env
 
+docker network create projetProNetcwork
+
 # Démarrer l'environnement
-docker-compose up -d
+docker compose up -d
 
 # Accéder à l'application
 # Frontend: http://localhost:3000
@@ -92,7 +94,7 @@ docker-compose up -d
 #### Backend
 
 ```bash
-cd back/
+cd docker/
 
 docker compose up -d
 
@@ -102,7 +104,7 @@ docker compose exec -itu 1000 backen bash
 composer install
 
 # Configuration de la base de données
-php bin/console doctrine:migrations:migrate
+bin/console doctrine:migrations:migrate
 
 ```
 
@@ -355,7 +357,6 @@ jobs:
 
 Ce projet de fin d'année démontre la maîtrise de :
 
-
 ### Compétences techniques
 
 1. **Développement Full-Stack** moderne (Symfony + Vue.js)
@@ -364,7 +365,6 @@ Ce projet de fin d'année démontre la maîtrise de :
 4. **Testing** (TDD, couverture, tests E2E)
 5. **DevOps** (Docker, Kubernetes, IaC)
 6. **Sécurité** (authentification, autorisation, audit)
-
 
 ### Compétences C2 - Développement et Déploiement
 
@@ -401,12 +401,14 @@ Ce projet de fin d'année démontre la maîtrise de :
 - **Prévention régressions** : Hooks pre-commit + CI/CD
 
 **C2.2.3 - Évolutivité et sécurisation** : [🔒 Documentation Technique](./DOCUMENTATION_EXPLOITATION.md)
+
 - ✅ **Architecture modulaire** : Services découplés, API-first
 - ✅ **Sécurité renforcée** : JWT, CSRF, Rate limiting, HTTPS
 - ✅ **Code évolutif** : SOLID principles, Clean Architecture
 - ✅ **Standards qualité** : PHPStan niveau 8, ESLint strict
 
 **C2.2.4 - Déploiement progressif** : [🚀 Guide Déploiement](./DOCUMENTATION_EXPLOITATION.md)
+
 - ✅ **Blue/Green deployment** : Zero-downtime sur Cloud Run
 - ✅ **Tests performance** : Validation automatique post-déploiement
 - ✅ **Monitoring utilisateur** : Métriques temps réel
@@ -415,12 +417,14 @@ Ce projet de fin d'année démontre la maîtrise de :
 #### C2.3 - Recette et Correction
 
 **C2.3.1 - Cahier de recettes** : [📋 Cahier de Recettes](./CAHIER_RECETTES.md)
+
 - ✅ **Scénarios détaillés** : 13 cas de tests fonctionnels
 - ✅ **Résultats attendus** : Critères de validation précis
 - ✅ **Tests multi-dispositifs** : Desktop, tablet, mobile
 - ✅ **Procédures automatisées** : Validation avant mise en production
 
 **C2.3.2 - Plan de correction** : [🛠️ Plan Correction Bogues](./PLAN_CORRECTION_BOGUES.md)
+
 - ✅ **Classification anomalies** : 4 niveaux de criticité (P0 à P3)
 - ✅ **SLA correction** : 4h critique, 24h majeur, 72h mineur
 - ✅ **Processus RCA** : Root Cause Analysis systématique
@@ -429,6 +433,7 @@ Ce projet de fin d'année démontre la maîtrise de :
 #### C2.4 - Documentation Technique
 
 **C2.4.1 - Documentation exploitation** : [📖 Documentation Exploitation](./DOCUMENTATION_EXPLOITATION.md)
+
 - ✅ **Architecture détaillée** : Diagrammes C4 + stack technique
 - ✅ **Procédures opérationnelles** : Déploiement, monitoring, maintenance
 - ✅ **Runbooks incidents** : P0/P1/P2 avec escalade automatique
@@ -439,6 +444,7 @@ Ce projet de fin d'année démontre la maîtrise de :
 #### C4.1 - Gestion des versions et supervision
 
 **C4.1.1 - Gestion des dépendances** :
+
 - ✅ **Surveillance automatisée** : Dependabot + GitHub Actions pour les mises à jour
 - ✅ **Évaluation d'impact** : Tests automatisés avant intégration
 - ✅ **Sécurité** : Audit des vulnérabilités avec `npm audit` et `composer audit`
@@ -454,6 +460,7 @@ npm audit --audit-level=moderate
 ```
 
 **C4.1.2 - Système de supervision et alertes** :
+
 - ✅ **Monitoring applicatif** : Logs structurés avec Monolog
 - ✅ **Métriques de performance** : Prêt pour Grafana
 - ✅ **Alertes proactives** : Seuils configurables pour CPU, mémoire, erreurs
@@ -472,6 +479,7 @@ livenessProbe:
 #### C4.2 - Correction des anomalies
 
 **C4.2.1 - Consignation des anomalies** :
+
 - ✅ **Collecte automatisée** : Event Listeners pour capturer les erreurs
 - ✅ **Informations contextuelles** : Stack traces, user context, requêtes
 - ✅ **Centralisation** : Logs agrégés prêts pour ELK Stack
@@ -496,6 +504,7 @@ class ExceptionListener
 ```
 
 **C4.2.2 - Déploiement de correctifs** :
+
 - ✅ **CI/CD automatisé** : Pipeline GitHub Actions + Azure DevOps
 - ✅ **Tests de régression** : Validation automatique avant déploiement
 - ✅ **Déploiement progressif** : Blue/Green deployment sur Kubernetes
@@ -525,6 +534,7 @@ jobs:
 #### C4.3 - Amélioration continue
 
 **C4.3.1 - Axes d'amélioration** :
+
 - ✅ **Indicateurs de performance** : Métriques utilisateur (temps de réponse, taux d'erreur)
 - ✅ **Analyse des retours** : System de feedback intégré dans l'interface
 - ✅ **Optimisation continue** : Profiling des performances API et frontend
@@ -549,6 +559,7 @@ export const usePerformanceTracking = () => {
 ```
 
 **C4.3.2 - Journal des versions** :
+
 - ✅ **Changelog automatisé** : Génération basée sur les commits conventionnels
 - ✅ **Documentation des correctifs** : Liens vers les issues et PRs
 - ✅ **Versioning sémantique** : Respect de SemVer (MAJOR.MINOR.PATCH)
@@ -572,6 +583,7 @@ export const usePerformanceTracking = () => {
 ```
 
 **C4.3.3 - Collaboration avec le support** :
+
 - ✅ **Documentation technique** : Wiki interne pour l'équipe support
 - ✅ **Outils de diagnostic** : Commandes CLI pour le troubleshooting
 - ✅ **Formation équipe** : Sessions de formation sur l'architecture
@@ -605,6 +617,7 @@ php bin/console app:logs:search --level=error --since="1 hour ago"
 ### Processus de maintenance et évolution
 
 #### Gestion des versions (C4.1.1)
+
 ```bash
 # Surveillance hebdomadaire des dépendances
 npm run security:audit
@@ -617,6 +630,7 @@ npm run test:full && composer run test:full
 ```
 
 #### Supervision et alertes (C4.1.2)
+
 ```yaml
 # Configuration des alertes (Grafana)
 alerts:
@@ -630,6 +644,7 @@ alerts:
 ```
 
 #### Gestion des anomalies (C4.2.1-C4.2.2)
+
 ```bash
 # Processus de correction d'anomalie
 git checkout -b hotfix/critical-bug-fix

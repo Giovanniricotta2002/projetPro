@@ -7,9 +7,12 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\{JsonResponse, Request, Response};
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use OpenApi\Attributes as OA;
+
 
 #[Route('/api/admin/login-logs', name: 'app_admin_login_logs')]
 #[IsGranted('ROLE_ADMIN')]
+#[OA\Tag(name: 'Admin Login Logs', description: 'Endpoints d\'administration pour les statistiques et blocages de connexion')]
 class LoginStatsController extends AbstractController
 {
     public function __construct(
@@ -21,6 +24,35 @@ class LoginStatsController extends AbstractController
      * Récupère les statistiques de connexion pour une période donnée.
      */
     #[Route('/statistics', name: '_statistics', methods: ['GET'])]
+    #[OA\Get(
+        path: '/api/admin/login-logs/statistics',
+        operationId: 'getLoginStatistics',
+        summary: 'Statistiques de connexion',
+        description: 'Récupère les statistiques de connexion pour une période donnée (paramètres from/to au format Y-m-d ou Y-m-d H:i:s).',
+        tags: ['Admin Login Logs'],
+        parameters: [
+            new OA\Parameter(name: 'from', in: 'query', required: false, description: 'Date de début', schema: new OA\Schema(type: 'string', example: '2025-08-01')),
+            new OA\Parameter(name: 'to', in: 'query', required: false, description: 'Date de fin', schema: new OA\Schema(type: 'string', example: '2025-08-11')),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Statistiques retournées',
+                content: new OA\JsonContent(
+                    type: 'object',
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'period', type: 'object'),
+                        new OA\Property(property: 'statistics', type: 'array', items: new OA\Items(type: 'object')),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 500,
+                description: 'Erreur serveur',
+            ),
+        ]
+    )]
     public function getStatistics(Request $request): JsonResponse
     {
         $from = $request->query->get('from');
@@ -54,6 +86,36 @@ class LoginStatsController extends AbstractController
      * Vérifie le statut de blocage pour une IP.
      */
     #[Route('/check-ip-status/{ip}', name: '_check_ip', methods: ['GET'])]
+    #[OA\Get(
+        path: '/api/admin/login-logs/check-ip-status/{ip}',
+        operationId: 'checkIpStatus',
+        summary: 'Vérifier le statut de blocage IP',
+        description: 'Vérifie si une IP est actuellement bloquée et retourne le nombre d\'échecs récents.',
+        tags: ['Admin Login Logs'],
+        parameters: [
+            new OA\Parameter(name: 'ip', in: 'path', required: true, description: 'Adresse IP à vérifier', schema: new OA\Schema(type: 'string', example: '192.168.1.1')),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Statut IP retourné',
+                content: new OA\JsonContent(
+                    type: 'object',
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'ip', type: 'string', example: '192.168.1.1'),
+                        new OA\Property(property: 'is_blocked', type: 'boolean', example: false),
+                        new OA\Property(property: 'recent_failed_attempts', type: 'integer', example: 2),
+                        new OA\Property(property: 'status', type: 'string', example: 'allowed'),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 500,
+                description: 'Erreur serveur',
+            ),
+        ]
+    )]
     public function checkIpStatus(string $ip): JsonResponse
     {
         try {
@@ -80,6 +142,36 @@ class LoginStatsController extends AbstractController
      * Vérifie le statut de blocage pour un login.
      */
     #[Route('/check-login-status/{login}', name: '_check_login', methods: ['GET'])]
+    #[OA\Get(
+        path: '/api/admin/login-logs/check-login-status/{login}',
+        operationId: 'checkLoginStatus',
+        summary: 'Vérifier le statut de blocage login',
+        description: 'Vérifie si un login est actuellement bloqué et retourne le nombre d\'échecs récents.',
+        tags: ['Admin Login Logs'],
+        parameters: [
+            new OA\Parameter(name: 'login', in: 'path', required: true, description: 'Login à vérifier', schema: new OA\Schema(type: 'string', example: 'john.doe')),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Statut login retourné',
+                content: new OA\JsonContent(
+                    type: 'object',
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'login', type: 'string', example: 'john.doe'),
+                        new OA\Property(property: 'is_blocked', type: 'boolean', example: false),
+                        new OA\Property(property: 'recent_failed_attempts', type: 'integer', example: 1),
+                        new OA\Property(property: 'status', type: 'string', example: 'allowed'),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 500,
+                description: 'Erreur serveur',
+            ),
+        ]
+    )]
     public function checkLoginStatus(string $login): JsonResponse
     {
         try {
@@ -106,6 +198,31 @@ class LoginStatsController extends AbstractController
      * Endpoint pour obtenir des statistiques en temps réel.
      */
     #[Route('/real-time-stats', name: '_realtime', methods: ['GET'])]
+    #[OA\Get(
+        path: '/api/admin/login-logs/real-time-stats',
+        operationId: 'getRealTimeLoginStats',
+        summary: 'Statistiques de connexion en temps réel',
+        description: 'Retourne les statistiques de connexion pour la dernière heure, 24h et semaine.',
+        tags: ['Admin Login Logs'],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Statistiques temps réel retournées',
+                content: new OA\JsonContent(
+                    type: 'object',
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'timestamp', type: 'string', example: '2025-08-11 14:00:00'),
+                        new OA\Property(property: 'statistics', type: 'object'),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 500,
+                description: 'Erreur serveur',
+            ),
+        ]
+    )]
     public function getRealTimeStats(): JsonResponse
     {
         try {
@@ -140,6 +257,30 @@ class LoginStatsController extends AbstractController
      * Endpoint pour réinitialiser les tentatives échouées d'une IP (déblocage manuel).
      */
     #[Route('/unblock-ip/{ip}', name: '_unblock_ip', methods: ['POST'])]
+    #[OA\Post(
+        path: '/api/admin/login-logs/unblock-ip/{ip}',
+        operationId: 'unblockIp',
+        summary: 'Débloquer une IP',
+        description: 'Réinitialise les tentatives échouées pour une IP (fonctionnalité non implémentée).',
+        tags: ['Admin Login Logs'],
+        parameters: [
+            new OA\Parameter(name: 'ip', in: 'path', required: true, description: 'Adresse IP à débloquer', schema: new OA\Schema(type: 'string', example: '192.168.1.1')),
+        ],
+        responses: [
+            new OA\Response(
+                response: 501,
+                description: 'Fonctionnalité non implémentée',
+                content: new OA\JsonContent(
+                    type: 'object',
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: false),
+                        new OA\Property(property: 'message', type: 'string', example: 'IP unblocking feature not yet implemented'),
+                        new OA\Property(property: 'suggestion', type: 'string', example: 'This would require additional database logic to clear recent failed attempts'),
+                    ]
+                )
+            ),
+        ]
+    )]
     public function unblockIp(string $ip): JsonResponse
     {
         // Note: Cette fonctionnalité nécessiterait une méthode dans le service
@@ -156,6 +297,30 @@ class LoginStatsController extends AbstractController
      * Endpoint pour réinitialiser les tentatives échouées d'un login.
      */
     #[Route('/unblock-login/{login}', name: '_unblock_login', methods: ['POST'])]
+    #[OA\Post(
+        path: '/api/admin/login-logs/unblock-login/{login}',
+        operationId: 'unblockLogin',
+        summary: 'Débloquer un login',
+        description: 'Réinitialise les tentatives échouées pour un login (fonctionnalité non implémentée).',
+        tags: ['Admin Login Logs'],
+        parameters: [
+            new OA\Parameter(name: 'login', in: 'path', required: true, description: 'Login à débloquer', schema: new OA\Schema(type: 'string', example: 'john.doe')),
+        ],
+        responses: [
+            new OA\Response(
+                response: 501,
+                description: 'Fonctionnalité non implémentée',
+                content: new OA\JsonContent(
+                    type: 'object',
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: false),
+                        new OA\Property(property: 'message', type: 'string', example: 'Login unblocking feature not yet implemented'),
+                        new OA\Property(property: 'suggestion', type: 'string', example: 'This would require additional database logic to clear recent failed attempts'),
+                    ]
+                )
+            ),
+        ]
+    )]
     public function unblockLogin(string $login): JsonResponse
     {
         // Note: Cette fonctionnalité nécessiterait une méthode dans le service

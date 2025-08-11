@@ -47,6 +47,14 @@ final class LoginController extends AbstractController
         security: [['csrfToken' => []]],
         tags: ['Authentication']
     )]
+    #[OA\Options(
+        path: '/api/login',
+        operationId: 'loginOptions',
+        summary: 'Options pour l\'authentification utilisateur',
+        description: 'Retourne les options disponibles pour l\'authentification utilisateur.',
+        security: [['csrfToken' => []]],
+        tags: ['Authentication']
+    )]
     #[OA\RequestBody(
         required: true,
         description: 'Identifiants de connexion utilisateur',
@@ -164,6 +172,27 @@ final class LoginController extends AbstractController
     }
 
     #[Route('/login', name: '_log_options', methods: ['OPTIONS'])]
+    #[OA\Options(
+        path: '/api/login',
+        operationId: 'loginOptions',
+        summary: 'Options pour l\'authentification utilisateur',
+        description: 'Retourne les options disponibles pour l\'authentification utilisateur (CORS, headers, etc).',
+        tags: ['Authentication'],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Options retournées',
+                content: new OA\JsonContent(
+                    type: 'object',
+                    properties: [
+                        new OA\Property(property: 'Access-Control-Allow-Origin', type: 'string', example: '*'),
+                        new OA\Property(property: 'Access-Control-Allow-Methods', type: 'string', example: 'POST, OPTIONS'),
+                        new OA\Property(property: 'Access-Control-Allow-Headers', type: 'string', example: 'Content-Type, X-CSRF-Token'),
+                    ]
+                )
+            ),
+        ]
+    )]
     public function loginOptions(Request $request): Response
     {
         return new Response('', Response::HTTP_OK, [
@@ -175,6 +204,52 @@ final class LoginController extends AbstractController
 
     #[Route('/register', name: '_register', methods: ['POST'])]
     #[IsCsrfTokenValid('authenticate', tokenKey: 'X-CSRF-Token', methods: ['POST'])]
+    #[OA\Post(
+        path: '/api/register',
+        operationId: 'registerUser',
+        summary: 'Inscrire un nouvel utilisateur',
+        description: 'Crée un nouvel utilisateur avec un login et un mot de passe. Vérifie la validité et l\'unicité du login.',
+        tags: ['Authentication'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            description: 'Identifiants pour l\'inscription',
+            content: new OA\JsonContent(
+                type: 'object',
+                required: ['username', 'password'],
+                properties: [
+                    new OA\Property(property: 'username', type: 'string', description: 'Nom d\'utilisateur', example: 'john.doe'),
+                    new OA\Property(property: 'password', type: 'string', description: 'Mot de passe', format: 'password', example: 'motDePasseSecret123'),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 201,
+                description: 'Utilisateur inscrit avec succès',
+                content: new OA\JsonContent(
+                    type: 'object',
+                    properties: [
+                        new OA\Property(property: 'message', type: 'string', example: 'User registered successfully'),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 400,
+                description: 'Paramètres invalides ou manquants',
+                content: new OA\JsonContent(ref: new Model(type: ErrorResponseDTO::class))
+            ),
+            new OA\Response(
+                response: 409,
+                description: 'Nom d\'utilisateur déjà existant',
+                content: new OA\JsonContent(ref: new Model(type: ErrorResponseDTO::class))
+            ),
+            new OA\Response(
+                response: 500,
+                description: 'Erreur serveur',
+                content: new OA\JsonContent(ref: new Model(type: ErrorResponseDTO::class))
+            ),
+        ]
+    )]
     public function register(Request $request): Response
     {
         $data = new ParameterBag($this->serializer->normalize(json_decode($request->getContent()), 'json'));
@@ -249,7 +324,7 @@ final class LoginController extends AbstractController
         operationId: 'logoutUser',
         summary: 'Déconnecter un utilisateur',
         description: 'Supprime les cookies de session et invalide les tokens',
-        tags: ['JWT Tokens']
+        tags: ['Authentication']
     )]
     #[OA\Response(
         response: 200,

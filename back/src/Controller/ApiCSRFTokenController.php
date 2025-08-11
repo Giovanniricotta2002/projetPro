@@ -34,6 +34,13 @@ final class ApiCSRFTokenController extends AbstractController
         description: 'Génère un nouveau token CSRF pour sécuriser les formulaires de l\'application',
         tags: ['CSRF Token']
     )]
+    #[OA\Options(
+        path: '/api/csrfToken',
+        operationId: 'optionsCsrfToken',
+        summary: 'Options pour le token CSRF',
+        description: 'Retourne les options disponibles pour l\'endpoint de génération de token CSRF',
+        tags: ['CSRF Token']
+    )]
     #[OA\Response(
         response: 200,
         description: 'Token CSRF généré avec succès',

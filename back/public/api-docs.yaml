@@ -35,10 +35,24 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponseDTO'
     options:
-      operationId: options__generate
+      tags:
+        - 'CSRF Token'
+      summary: 'Options pour le token CSRF'
+      description: "Retourne les options disponibles pour l'endpoint de génération de token CSRF"
+      operationId: optionsCsrfToken
       responses:
-        default:
-          description: ''
+        '200':
+          description: 'Token CSRF généré avec succès'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CsrfTokenResponseDTO'
+        '500':
+          description: 'Erreur serveur lors de la génération du token'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDTO'
   /api/csrfToken/verify:
     post:
       tags:
@@ -165,10 +179,35 @@ paths:
                 type: object
   /api/health:
     get:
+      tags:
+        - Health
+      summary: "Vérifie la santé de l'API"
+      description: "Retourne le statut de santé du backend, la base de données, l'environnement et l'espace disque."
       operationId: get_health_check
       responses:
-        default:
-          description: ''
+        '200':
+          description: 'Statut de santé OK'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: healthy }
+                  timestamp: { type: string, example: '2025-08-11T12:34:56+00:00' }
+                  service: { type: string, example: 'MuscuScope Backend' }
+                  version: { type: string, example: 1.0.0 }
+                  database: { type: string, example: connected }
+                  environment: { type: string, example: dev }
+                  disk_usage: { properties: { free: { type: integer, example: 123456789 }, total: { type: integer, example: 987654321 }, percentage_used: { type: number, format: float, example: 12.34 } }, type: object }
+                type: object
+        '503':
+          description: 'Base de données inaccessible'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: { type: string, example: unhealthy }
+                  error: { type: string, example: 'SQLSTATE[HY000] ...' }
+                type: object
   /api/images/upload-url:
     post:
       tags:
@@ -205,53 +244,166 @@ paths:
           description: 'Paramètres invalides ou extension non autorisée'
   /api/images/verify:
     post:
-      summary: "Vérifie qu'un upload a bien eu lieu et retourne l'URL publique."
-      operationId: post_api_images_verify
+      tags:
+        - Images
+      summary: "Vérifier un upload d'image"
+      description: "Vérifie qu'un upload a bien eu lieu sur Azure Blob Storage et retourne l'URL publique de l'image."
+      operationId: verifyImageUpload
+      requestBody:
+        description: 'Nom du blob à vérifier'
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - blob_name
+              properties:
+                blob_name:
+                  description: 'Nom du blob/image'
+                  type: string
+                  example: photo.jpg
+              type: object
       responses:
-        default:
-          description: ''
+        '200':
+          description: 'Image trouvée, URL retournée'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success: { type: boolean, example: true }
+                  image_url: { type: string, example: 'https://storageaccount.blob.core.windows.net/container/photo.jpg' }
+                  blob_name: { type: string, example: photo.jpg }
+                type: object
+        '400':
+          description: 'Paramètre blob_name manquant'
+          content:
+            application/json:
+              schema:
+                properties:
+                  error: { type: string, example: 'blob_name is required' }
+                type: object
+        '404':
+          description: 'Image non trouvée ou upload échoué'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success: { type: boolean, example: false }
+                  error: { type: string, example: 'Image not found or upload failed' }
+                type: object
   '/api/images/signed-url/{blobName}':
     get:
-      summary: 'Génère une URL présignée pour accéder à une image privée.'
-      operationId: get_api_images_signed_url
+      tags:
+        - Images
+      summary: 'Obtenir une URL signée pour une image privée'
+      description: 'Génère une URL temporaire signée pour accéder à une image privée sur Azure Blob Storage.'
+      operationId: getSignedImageUrl
       parameters:
         -
           name: blobName
           in: path
+          description: 'Nom du blob/image'
           required: true
           schema:
             type: string
+            example: photo.jpg
+        -
+          name: expiry
+          in: query
+          description: "Durée de validité de l'URL en secondes"
+          required: false
+          schema:
+            type: integer
+            example: 3600
       responses:
-        default:
-          description: ''
+        '200':
+          description: 'URL signée générée'
+          content:
+            application/json:
+              schema:
+                properties:
+                  signed_url: { type: string, example: 'https://...' }
+                  expires_at: { type: string, example: '2025-08-11T13:00:00Z' }
+                type: object
+        '500':
+          description: "Erreur lors de la génération de l'URL"
+          content:
+            application/json:
+              schema:
+                properties:
+                  error: { type: string, example: 'Failed to generate signed URL' }
+                  message: { type: string, example: ... }
+                type: object
   '/api/images/{blobName}':
     delete:
-      summary: "Supprime une image d'Azure Blob Storage."
-      operationId: delete_api_images_delete
+      tags:
+        - Images
+      summary: 'Supprimer une image'
+      description: "Supprime une image d'Azure Blob Storage."
+      operationId: deleteImage
       parameters:
         -
           name: blobName
           in: path
+          description: 'Nom du blob/image à supprimer'
           required: true
           schema:
             type: string
+            example: photo.jpg
       responses:
-        default:
-          description: ''
+        '200':
+          description: 'Image supprimée'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success: { type: boolean, example: true }
+                  message: { type: string, example: 'Image deleted successfully' }
+                type: object
+        '404':
+          description: 'Image non trouvée'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success: { type: boolean, example: false }
+                  error: { type: string, example: 'Failed to delete image' }
+                type: object
+        '500':
+          description: 'Erreur serveur'
+          content:
+            application/json:
+              schema:
+                properties:
+                  error: { type: string, example: 'Failed to delete image' }
+                  message: { type: string, example: ... }
+                type: object
   '/api/images/url/{blobName}':
     get:
-      summary: "Retourne l'URL publique d'une image."
-      operationId: get_api_images_public_url
+      tags:
+        - Images
+      summary: "Obtenir l'URL publique d'une image"
+      description: "Retourne l'URL publique d'une image stockée sur Azure Blob Storage."
+      operationId: getPublicImageUrl
       parameters:
         -
           name: blobName
           in: path
+          description: 'Nom du blob/image'
           required: true
           schema:
             type: string
+            example: photo.jpg
       responses:
-        default:
-          description: ''
+        '200':
+          description: 'URL publique retournée'
+          content:
+            application/json:
+              schema:
+                properties:
+                  image_url: { type: string, example: 'https://storageaccount.blob.core.windows.net/container/photo.jpg' }
+                  blob_name: { type: string, example: photo.jpg }
+                type: object
   /api/login:
     post:
       tags:
@@ -302,16 +454,76 @@ paths:
         -
           csrfToken: []
     options:
-      operationId: options_app_login_log_options
+      tags:
+        - Authentication
+      summary: "Options pour l'authentification utilisateur"
+      description: "Retourne les options disponibles pour l'authentification utilisateur (CORS, headers, etc)."
+      operationId: loginOptions
       responses:
-        default:
-          description: ''
+        '200':
+          description: 'Options retournées'
+          content:
+            application/json:
+              schema:
+                properties:
+                  Access-Control-Allow-Origin: { type: string, example: '*' }
+                  Access-Control-Allow-Methods: { type: string, example: 'POST, OPTIONS' }
+                  Access-Control-Allow-Headers: { type: string, example: 'Content-Type, X-CSRF-Token' }
+                type: object
   /api/register:
     post:
-      operationId: post_app_login_register
+      tags:
+        - Authentication
+      summary: 'Inscrire un nouvel utilisateur'
+      description: "Crée un nouvel utilisateur avec un login et un mot de passe. Vérifie la validité et l'unicité du login."
+      operationId: registerUser
+      requestBody:
+        description: "Identifiants pour l'inscription"
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  description: "Nom d'utilisateur"
+                  type: string
+                  example: john.doe
+                password:
+                  description: 'Mot de passe'
+                  type: string
+                  format: password
+                  example: motDePasseSecret123
+              type: object
       responses:
-        default:
-          description: ''
+        '201':
+          description: 'Utilisateur inscrit avec succès'
+          content:
+            application/json:
+              schema:
+                properties:
+                  message: { type: string, example: 'User registered successfully' }
+                type: object
+        '400':
+          description: 'Paramètres invalides ou manquants'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDTO'
+        '409':
+          description: "Nom d'utilisateur déjà existant"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDTO'
+        '500':
+          description: 'Erreur serveur'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDTO'
   /api/logout:
     post:
       operationId: post_app_login_logout
@@ -320,74 +532,177 @@ paths:
           description: ''
   /api/admin/login-logs/statistics:
     get:
-      summary: 'Récupère les statistiques de connexion pour une période donnée.'
-      operationId: get_app_admin_login_logs_statistics
+      tags:
+        - 'Admin Login Logs'
+      summary: 'Statistiques de connexion'
+      description: 'Récupère les statistiques de connexion pour une période donnée (paramètres from/to au format Y-m-d ou Y-m-d H:i:s).'
+      operationId: getLoginStatistics
+      parameters:
+        -
+          name: from
+          in: query
+          description: 'Date de début'
+          required: false
+          schema:
+            type: string
+            example: '2025-08-01'
+        -
+          name: to
+          in: query
+          description: 'Date de fin'
+          required: false
+          schema:
+            type: string
+            example: '2025-08-11'
       responses:
-        default:
-          description: ''
+        '200':
+          description: 'Statistiques retournées'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success: { type: boolean, example: true }
+                  period: { type: object }
+                  statistics: { type: array, items: { type: object } }
+                type: object
+        '500':
+          description: 'Erreur serveur'
   '/api/admin/login-logs/check-ip-status/{ip}':
     get:
-      summary: 'Vérifie le statut de blocage pour une IP.'
-      operationId: get_app_admin_login_logs_check_ip
+      tags:
+        - 'Admin Login Logs'
+      summary: 'Vérifier le statut de blocage IP'
+      description: "Vérifie si une IP est actuellement bloquée et retourne le nombre d'échecs récents."
+      operationId: checkIpStatus
       parameters:
         -
           name: ip
           in: path
+          description: 'Adresse IP à vérifier'
           required: true
           schema:
             type: string
+            example: 192.168.1.1
       responses:
-        default:
-          description: ''
+        '200':
+          description: 'Statut IP retourné'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success: { type: boolean, example: true }
+                  ip: { type: string, example: 192.168.1.1 }
+                  is_blocked: { type: boolean, example: false }
+                  recent_failed_attempts: { type: integer, example: 2 }
+                  status: { type: string, example: allowed }
+                type: object
+        '500':
+          description: 'Erreur serveur'
   '/api/admin/login-logs/check-login-status/{login}':
     get:
-      summary: 'Vérifie le statut de blocage pour un login.'
-      operationId: get_app_admin_login_logs_check_login
+      tags:
+        - 'Admin Login Logs'
+      summary: 'Vérifier le statut de blocage login'
+      description: "Vérifie si un login est actuellement bloqué et retourne le nombre d'échecs récents."
+      operationId: checkLoginStatus
       parameters:
         -
           name: login
           in: path
+          description: 'Login à vérifier'
           required: true
           schema:
             type: string
+            example: john.doe
       responses:
-        default:
-          description: ''
+        '200':
+          description: 'Statut login retourné'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success: { type: boolean, example: true }
+                  login: { type: string, example: john.doe }
+                  is_blocked: { type: boolean, example: false }
+                  recent_failed_attempts: { type: integer, example: 1 }
+                  status: { type: string, example: allowed }
+                type: object
+        '500':
+          description: 'Erreur serveur'
   /api/admin/login-logs/real-time-stats:
     get:
-      summary: 'Endpoint pour obtenir des statistiques en temps réel.'
-      operationId: get_app_admin_login_logs_realtime
+      tags:
+        - 'Admin Login Logs'
+      summary: 'Statistiques de connexion en temps réel'
+      description: 'Retourne les statistiques de connexion pour la dernière heure, 24h et semaine.'
+      operationId: getRealTimeLoginStats
       responses:
-        default:
-          description: ''
+        '200':
+          description: 'Statistiques temps réel retournées'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success: { type: boolean, example: true }
+                  timestamp: { type: string, example: '2025-08-11 14:00:00' }
+                  statistics: { type: object }
+                type: object
+        '500':
+          description: 'Erreur serveur'
   '/api/admin/login-logs/unblock-ip/{ip}':
     post:
-      summary: "Endpoint pour réinitialiser les tentatives échouées d'une IP (déblocage manuel)."
-      operationId: post_app_admin_login_logs_unblock_ip
+      tags:
+        - 'Admin Login Logs'
+      summary: 'Débloquer une IP'
+      description: 'Réinitialise les tentatives échouées pour une IP (fonctionnalité non implémentée).'
+      operationId: unblockIp
       parameters:
         -
           name: ip
           in: path
+          description: 'Adresse IP à débloquer'
           required: true
           schema:
             type: string
+            example: 192.168.1.1
       responses:
-        default:
-          description: ''
+        '501':
+          description: 'Fonctionnalité non implémentée'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success: { type: boolean, example: false }
+                  message: { type: string, example: 'IP unblocking feature not yet implemented' }
+                  suggestion: { type: string, example: 'This would require additional database logic to clear recent failed attempts' }
+                type: object
   '/api/admin/login-logs/unblock-login/{login}':
     post:
-      summary: "Endpoint pour réinitialiser les tentatives échouées d'un login."
-      operationId: post_app_admin_login_logs_unblock_login
+      tags:
+        - 'Admin Login Logs'
+      summary: 'Débloquer un login'
+      description: 'Réinitialise les tentatives échouées pour un login (fonctionnalité non implémentée).'
+      operationId: unblockLogin
       parameters:
         -
           name: login
           in: path
+          description: 'Login à débloquer'
           required: true
           schema:
             type: string
+            example: john.doe
       responses:
-        default:
-          description: ''
+        '501':
+          description: 'Fonctionnalité non implémentée'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success: { type: boolean, example: false }
+                  message: { type: string, example: 'Login unblocking feature not yet implemented' }
+                  suggestion: { type: string, example: 'This would require additional database logic to clear recent failed attempts' }
+                type: object
   /api/machines/:
     get:
       tags:
@@ -405,6 +720,8 @@ paths:
                 items:
                   $ref: '#/components/schemas/MachineResponseDTO'
     post:
+      tags:
+        - Machine
       summary: 'Créer une machine'
       operationId: post_app_machines_create_machine
       requestBody:
@@ -722,16 +1039,57 @@ paths:
                 $ref: '#/components/schemas/ErrorResponseDTO'
   /api/tokens/validate:
     post:
-      operationId: post_app_tokens_validate
+      tags:
+        - 'JWT Tokens'
+      summary: 'Valider un token JWT'
+      description: "Vérifie la validité d'un token JWT et retourne ses informations."
+      operationId: validateToken
+      requestBody:
+        description: 'Token à valider'
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenValidationRequestDTO'
       responses:
-        default:
-          description: ''
+        '200':
+          description: 'Token valide'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenValidationResponseDTO'
+        '400':
+          description: 'Token invalide'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenValidationResponseDTO'
   /api/tokens/info:
     get:
-      operationId: get_app_tokens_info
+      tags:
+        - 'JWT Tokens'
+      summary: "Obtenir les informations d'un token JWT"
+      description: 'Retourne les informations détaillées du token JWT transmis via cookie ou header.'
+      operationId: getTokenInfo
       responses:
-        default:
-          description: ''
+        '200':
+          description: 'Informations du token'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenInfoResponseDTO'
+        '401':
+          description: 'Token manquant ou invalide'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDTO'
+        '500':
+          description: 'Erreur serveur'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDTO'
   /api/me:
     get:
       tags:
@@ -1141,6 +1499,124 @@ components:
         tokens:
           $ref: '#/components/schemas/JWTTokensDTO'
       type: object
+    TokenValidationRequestDTO:
+      required:
+        - token
+        - validFormat
+      properties:
+        token:
+          type: string
+          maxLength: 2048
+          minLength: 50
+        validFormat:
+          type: boolean
+      type: object
+    TokenValidationResponseDTO:
+      required:
+        - valid
+      properties:
+        valid:
+          title: 'Crée un DTO pour un token valide.'
+          type: boolean
+        tokenId:
+          type: string
+          default: null
+          nullable: true
+        userId:
+          type: string
+          default: null
+          nullable: true
+        username:
+          type: string
+          default: null
+          nullable: true
+        tokenType:
+          type: string
+          default: null
+          nullable: true
+        issuedAt:
+          type: string
+          nullable: true
+        expiresAt:
+          type: string
+          default: null
+          nullable: true
+        roles:
+          type: array
+          items: {  }
+          default: null
+          nullable: true
+        error:
+          type: string
+          default: null
+          nullable: true
+      type: object
+    TokenInfoResponseDTO:
+      required:
+        - valid
+        - stillValid
+      properties:
+        valid:
+          type: boolean
+        tokenId:
+          type: string
+          default: null
+          nullable: true
+        userId:
+          type: string
+          default: null
+          nullable: true
+        username:
+          type: string
+          default: null
+          nullable: true
+        tokenType:
+          type: string
+          default: null
+          nullable: true
+        issuedAt:
+          type: string
+          nullable: true
+        expiresAt:
+          type: string
+          default: null
+          nullable: true
+        roles:
+          type: array
+          items: {  }
+          default: null
+          nullable: true
+        issuer:
+          type: string
+          nullable: true
+        audience:
+          type: string
+          default: null
+          nullable: true
+        loginTime:
+          type: integer
+          default: null
+          nullable: true
+        ipAddress:
+          type: string
+          default: null
+          nullable: true
+        userAgent:
+          type: string
+          default: null
+          nullable: true
+        error:
+          type: string
+          default: null
+          nullable: true
+        stillValid:
+          title: 'Vérifie si le token est encore valide (non expiré).'
+          type: boolean
+        timeUntilExpiration:
+          title: 'Obtient le temps restant avant expiration en secondes.'
+          type: integer
+          nullable: true
+      type: object
     LoginUserDTO:
       title: 'Informations utilisateur'
       description: "Données utilisateur dans les réponses d'authentification"
@@ -1236,14 +1712,20 @@ tags:
     name: Forum
     description: 'Gestion des forums'
   -
+    name: Health
+    description: 'Endpoints de vérification de santé'
+  -
+    name: 'Admin Login Logs'
+    description: "Endpoints d'administration pour les statistiques et blocages de connexion"
+  -
+    name: Machine
+    description: 'Endpoints pour la gestion des machines'
+  -
     name: Message
     description: 'Gestion des messages'
   -
     name: User
     description: 'Gestion des utilisateurs'
-  -
-    name: Machine
-    description: Machine
   -
     name: Post
     description: Post
