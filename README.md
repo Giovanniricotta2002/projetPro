@@ -151,6 +151,9 @@ cd front/
 
 # Tests unitaires
 npm run test
+
+# Linting
+npm run lint
 ```
 
 **Couverture de tests** : Le projet maintient une couverture de tests élevée sur les composants critiques (authentification, logging, API).
