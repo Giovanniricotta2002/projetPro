@@ -32,6 +32,57 @@ final class MachinesController extends AbstractController
         $this->serializer = $init->serializerAndDate();
     }
 
+    #[Route('/{materielId}', name: '_delete_machine', methods: ['DELETE'])]
+    #[OA\Delete(
+        path: '/api/machines/{materielId}',
+        summary: 'Supprimer une machine',
+        description: 'Supprime une machine par son ID',
+        tags: ['Machine'],
+        parameters: [
+            new OA\Parameter(
+                name: 'materielId',
+                in: 'path',
+                required: true,
+                description: 'ID de la machine',
+                schema: new OA\Schema(type: 'integer')
+            ),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Machine supprimée avec succès',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'message', type: 'string', example: 'Machine supprimée avec succès'),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 404,
+                description: 'Machine non trouvée',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'error', type: 'string', example: 'Machine non trouvée'),
+                    ]
+                )
+            ),
+        ]
+    )]
+    public function deleteMachine(Machine $materielId): Response
+    {
+        try {
+            foreach ($materielId->getInfoMachines() as $infoMachine) {
+                $this->entityManager->remove($infoMachine);
+            }
+            $this->entityManager->remove($materielId);
+            $this->entityManager->flush();
+
+            return $this->json(['message' => 'Machine supprimée avec succès']);
+        } catch (ORMException $orm) {
+            return $this->json(['error' => $orm->getMessage()], 404);
+        }
+    }
+
     #[Route('/', name: '_create_machine', methods: ['POST'])]
     #[OA\Post(
         summary: 'Créer une machine',

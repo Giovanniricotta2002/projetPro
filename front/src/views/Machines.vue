@@ -29,7 +29,7 @@
           </v-card-text>
           <v-card-actions>
             <v-btn v-if="mat.canEdit" color="secondary" @click="$router.push(`/materiel/${mat.id}/edit`)">Modifier</v-btn>
-            <v-btn color="error" @click="$router.push(`/materiel/${mat.id}/delete`)" v-if="mat.canEdit">Supprimer</v-btn>
+            <v-btn color="error" @click="deleteMachine(mat)" v-if="mat.canEdit">Supprimer</v-btn>
           </v-card-actions>
         </v-card>
       </v-col>
@@ -98,7 +98,7 @@ onMounted(async () => {
 
 
 const { hasRole } = useAuth()
-const canCreateMachine = computed(() => hasRole('admin') || hasRole('editor') || true)
+const canCreateMachine = computed(() => hasRole('ROLE_ADMIN') || hasRole('ROLE_EDITEUR') || true)
 
 const search = ref('')
 const filteredMateriels = computed(() => {
@@ -109,4 +109,20 @@ const filteredMateriels = computed(() => {
     return name.includes(search.value.toLowerCase()) || description.includes(search.value.toLowerCase())
   })
 })
+async function deleteMachine(mat: Machine) {
+  try {
+    const result = await authStore.apiRequest(`/api/machines/${mat.id}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' }
+    })
+    if (result.success) {
+      materiels.value = materiels.value.filter(m => m.id !== mat.id)
+      snackbar.value = showSnackbar('Matériel supprimé', 'success')
+    } else {
+      snackbar.value = showSnackbar(result.message || 'Erreur lors de la suppression du matériel')
+    }
+  } catch (e) {
+    snackbar.value = showSnackbar('Erreur lors de la suppression du matériel')
+  }
+}
 </script>
