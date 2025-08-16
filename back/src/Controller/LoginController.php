@@ -100,7 +100,9 @@ final class LoginController extends AbstractController
 
         try {
             // Rechercher l'utilisateur
+            /** @var Utilisateur $user */
             $user = $this->userRepository->findOneBy(['username' => $login]);
+            $isBanned = $user->getStatus() === UserStatus::BANNED;
 
             if (!$user) {
                 // Utilisateur non trouvé - le logging sera automatique via l'attribut
@@ -113,6 +115,12 @@ final class LoginController extends AbstractController
             if (!$this->passwordHasher->isPasswordValid($user, $password)) {
                 // Mot de passe incorrect - le logging sera automatique via l'attribut
                 $errorDto = ErrorResponseDTO::create('Invalid credentials');
+
+                return $this->json($errorDto->toArray(), Response::HTTP_UNAUTHORIZED);
+            }
+
+            if ($isBanned) {
+                $errorDto = ErrorResponseDTO::create('User is banned');
 
                 return $this->json($errorDto->toArray(), Response::HTTP_UNAUTHORIZED);
             }

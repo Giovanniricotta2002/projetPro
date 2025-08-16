@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\DTO\{ErrorResponseDTO, PostResponseDTO};
 use App\Entity\{Forum, Post};
-use App\Repository\{ForumRepository, UtilisateurRepository};
+use App\Repository\{ForumRepository, PostRepository, UtilisateurRepository};
 use App\Service\{AuthenticatedUserService, HttpOnlyCookieService, InitSerializerService, JWTService};
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
@@ -22,6 +22,7 @@ final class PostController extends AbstractController
 
     public function __construct(
         private readonly UtilisateurRepository $userRepository,
+        private readonly PostRepository $pRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly JWTService $jwtService,
         private readonly HttpOnlyCookieService $cookieService,
@@ -95,6 +96,10 @@ final class PostController extends AbstractController
     )]
     public function removePost(Post $post): Response
     {
+        $post->getMessages();
+        foreach ($post->getMessages() as $message) {
+            $this->entityManager->remove($message);
+        }
         $this->entityManager->remove($post);
         $this->entityManager->flush();
 
@@ -235,5 +240,14 @@ final class PostController extends AbstractController
         } catch (ORMException $orm) {
             return $this->json(['error' => $orm->getMessage()], 500);
         }
+    }
+
+    #[Route('/all', name: '_all_posts', methods: ['GET'])]
+    public function getAllPosts(): Response
+    {
+        $posts = $this->pRepository->findAll();
+        $dtos = array_map(fn ($post) => PostResponseDTO::fromEntity($post), $posts);
+
+        return $this->json($this->serializer->normalize($dtos, 'json'));
     }
 }

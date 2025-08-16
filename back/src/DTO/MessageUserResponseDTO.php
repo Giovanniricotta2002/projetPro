@@ -22,12 +22,12 @@ class MessageUserResponseDTO
         $this->anonimus = $anonimus;
     }
 
-    public static function fromEntity(Utilisateur $user): self
+    public static function fromEntity(?Utilisateur $user): self
     {
         return new self(
-            $user->getId(),
-            $user->getUsername(),
-            $user->isAnonimus(),
+            $user?->getId() ?? 0,
+            $user?->getUsername() ?? '',
+            $user?->isAnonimus() ?? false,
         );
     }
 }

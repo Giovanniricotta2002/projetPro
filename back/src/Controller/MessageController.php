@@ -132,7 +132,6 @@ final class MessageController extends AbstractController
         try {
             $this->entityManager->persist($message);
             $this->entityManager->flush();
-            dd($message);
             $dto = MessageResponseDTO::fromEntity($message);
 
             return $this->json($this->serializer->normalize($dto, 'json'), Response::HTTP_CREATED);
@@ -177,5 +176,32 @@ final class MessageController extends AbstractController
         } catch (ORMException $orm) {
             return $this->json(['error' => $orm->getMessage()], 404);
         }
+    }
+
+    #[Route('/all', name: '_all', methods: ['GET'])]
+    #[OA\Get(
+        path: '/api/messages/all',
+        summary: 'Liste de tous les messages',
+        description: 'Retourne la liste de tous les messages',
+        tags: ['Message'],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Liste des messages',
+                content: new OA\JsonContent(
+                    type: 'array',
+                    items: new OA\Items(
+                        ref: new Model(type: MessageResponseDTO::class)
+                    )
+                )
+            ),
+        ]
+    )]
+    public function getAllMessages(): Response
+    {
+        $messages = $this->entityManager->getRepository(Message::class)->findAll();
+        $dtos = array_map(fn ($message) => MessageResponseDTO::fromEntity($message), $messages);
+
+        return $this->json($this->serializer->normalize($dtos, 'json'));
     }
 }

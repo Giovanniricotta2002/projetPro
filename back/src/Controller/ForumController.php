@@ -173,11 +173,20 @@ final class ForumController extends AbstractController
     )]
     public function deleteForum(Forum $forum): Response
     {
-        $forum
-            ->setVisible(false)
-            ->setDateCloture(new \DateTime())
-        ;
+        try {
+            $forum
+                ->setVisible(false)
+                ->setDateCloture(new \DateTime())
+            ;
 
-        return $this->json(['success' => true]);
+            $this->entityManager->flush();
+
+            return $this->json(['success' => true]);
+        } catch (ORMException $orm) {
+            return $this->json(
+                ErrorResponseDTO::withMessage('Erreur lors de la suppression du forum', $orm->getMessage())->toArray(),
+                400
+            );
+        }
     }
 }

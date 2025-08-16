@@ -21,7 +21,7 @@ class UtilisateurResponseDTO
     #[OA\Property(type: 'string', example: 'active')]
     public string $status;
     #[OA\Property(type: 'string', example: 'johndoe@example.com')]
-    public string $mail;
+    public ?string $mail;
     #[OA\Property(type: 'string', format: 'date', example: '2025-07-19')]
     public ?string $lastVisit;
     #[OA\Property(type: 'string', format: 'date-time', example: '2025-07-27T10:00:00')]
@@ -39,7 +39,7 @@ class UtilisateurResponseDTO
         string $dateCreation,
         bool $anonimus,
         string $status,
-        string $mail,
+        ?string $mail,
         ?string $lastVisit,
         string $createdAt,
     ) {

@@ -3,11 +3,11 @@
 namespace App\Controller;
 
 use App\Service\LoginLoggerService;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\{JsonResponse, Request, Response};
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use OpenApi\Attributes as OA;
 
 #[Route('/api/admin/login-logs', name: 'app_admin_login_logs')]
 #[IsGranted('ROLE_ADMIN')]

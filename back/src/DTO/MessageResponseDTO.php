@@ -39,13 +39,17 @@ class MessageResponseDTO
 
     public static function fromEntity(Message $message): self
     {
+        $dateCreation = $message->getDateCreation();
+        $dateModification = $message->getDateModification();
+        $utilisateur = $message->getUtilisateur();
+
         return new self(
             $message->getId(),
             $message->getText(),
-            $message->getDateCreation()?->format('Y-m-d H:i:s'),
-            $message->getDateModification()?->format('Y-m-d H:i:s'),
+            $dateCreation ? $dateCreation->format('Y-m-d H:i:s') : '',
+            $dateModification ? $dateModification->format('Y-m-d H:i:s') : '',
             $message->isVisible(),
-            MessageUserResponseDTO::fromEntity($message->getUtilisateur()),
+            $utilisateur ? MessageUserResponseDTO::fromEntity($utilisateur) : null,
         );
     }
 }

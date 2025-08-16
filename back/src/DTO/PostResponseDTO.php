@@ -27,6 +27,9 @@ class PostResponseDTO
     #[OA\Property(type: 'array', items: new OA\Items(ref: MessageResponseDTO::class))]
     public array $messages;
 
+    #[OA\Property(type: 'integer', example: 1)]
+    public int $forumId;
+
     /**
      * Summary of __construct.
      *
@@ -41,6 +44,7 @@ class PostResponseDTO
         ?bool $epingle,
         bool $verrouille,
         array $messages,
+        int $forumId,
     ) {
         $this->id = $id;
         $this->titre = $titre;
@@ -49,6 +53,7 @@ class PostResponseDTO
         $this->epingle = $epingle;
         $this->verrouille = $verrouille;
         $this->messages = $messages;
+        $this->forumId = $forumId;
     }
 
     public static function fromEntity(Post $post): self
@@ -61,6 +66,7 @@ class PostResponseDTO
             $post->isEpingle(),
             $post->isVerrouille(),
             array_map(fn (Message $message) => MessageResponseDTO::fromEntity($message), $post->getMessages()->toArray()),
+            $post->getForum()->getId()
         );
     }
 }

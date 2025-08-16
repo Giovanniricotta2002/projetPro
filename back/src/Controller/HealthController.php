@@ -3,10 +3,10 @@
 namespace App\Controller;
 
 use Doctrine\DBAL\Connection;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
-use OpenApi\Attributes as OA;
 
 #[OA\Tag(name: 'Health', description: 'Endpoints de vérification de santé')]
 class HealthController extends AbstractController

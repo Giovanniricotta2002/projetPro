@@ -53,6 +53,7 @@ final readonly class AzureUploadResponseDTO
 
     /**
      * Crée un DTO depuis les données du service Azure.
+     *
      * @param array<int,mixed> $data
      */
     public static function fromServiceData(array $data): self
