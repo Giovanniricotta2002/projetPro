@@ -33,7 +33,6 @@ export function roleGuard(...requiredRoles: string[]) {
     next: NavigationGuardNext
   ) => {
     const authStore = useAuthStore()
-    
     if (!authStore.isAuthenticated) {
       next({ name: 'login' })
       return

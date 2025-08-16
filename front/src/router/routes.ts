@@ -62,7 +62,7 @@ const routes: RouteConfig[] = [
     name: 'materiel_edit',
     component: EditMachine,
     meta: { requiresAuth: false, menu: false },
-    // beforeEnter: roleGuard('admin', 'editor') // Utilisation du roleGuard pour restreindre l'accès
+    beforeEnter: roleGuard('ROLE_ADMIN', 'ROLE_EDITEUR') // Utilisation du roleGuard pour restreindre l'accès
   },
   {
     path: '/materiel/:materielId',
@@ -77,24 +77,25 @@ const routes: RouteConfig[] = [
     meta: { requiresAuth: true, menu: false }
   },
   {
-    path: '/admin',
-    name: 'admin',
-    component: Admin,
-    meta: { requiresAuth: true, menu: true, admin: true },
-    // beforeEnter: roleGuard('admin') // Utilisation du roleGuard pour restreindre l'accès
-  },
-  {
     path: '/materiel/create',
     name: 'materiel_create',
     component: MachineCreate,
-    meta: { requiresAuth: true, menu: false }
+    meta: { requiresAuth: true, menu: false},
+    beforeEnter: roleGuard('ROLE_ADMIN', 'ROLE_EDITEUR')
   },
   {
     path: '/profil',
-    name: 'profil',
+    name: 'Profil',
     component: Utilisateur,
     meta: { requiresAuth: true, menu: true }
-  }
+  },
+  {
+    path: '/admin',
+    name: 'Admin',
+    component: Admin,
+    meta: { requiresAuth: true, menu: true, admin: true, allowedRoles: ['ROLE_ADMIN'] },
+    beforeEnter: roleGuard('ROLE_ADMIN')
+  },
   // Exemple d'utilisation du roleGuard pour une route admin
   // { 
   //   path: '/admin', 

@@ -12,7 +12,7 @@
       <v-navigation-drawer v-model="drawer" :location="$vuetify.display.mobile ? 'bottom' : undefined" temporary>
         <v-list>
           <router-link v-for="item in items" :key="item.value" :to="item.value" style="text-decoration: none; color: inherit">
-            <v-list-item :value="item.value">
+            <v-list-item :value="item.value" v-if="item.show">
               <v-list-item-title>{{ item.title }}</v-list-item-title>
             </v-list-item>
           </router-link>
@@ -35,12 +35,18 @@ import { useAuthStore } from '@/stores/auth'
 import { useRouter, useRoute } from 'vue-router'
 
 const drawer = ref(false)
-const items = routes.filter(route => route.meta?.menu).map(route => ({
-    title: route.name || 'Untitled',
-    value: route.path
-}))
-const group = ref(null)
+
 const auth = useAuthStore()
+console.log(auth.user);
+
+const items = routes
+  .filter(route => route.meta?.menu)
+  .map(route => ({
+    title: route.name || 'Untitled',
+    value: route.path,
+    show: !route.meta?.allowedRoles || route.meta.allowedRoles.some((role: string) => auth.user?.roles?.includes(role))
+  }))
+const group = ref(null)
 const router = useRouter()
 const route = useRoute()
 

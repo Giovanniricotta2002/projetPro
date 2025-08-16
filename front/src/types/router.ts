@@ -5,6 +5,7 @@ export interface MetaRoute extends RouteMeta {
   requiresAuth?: boolean;
   requiresGuest?: boolean;
   menu?: boolean;
+  allowedRoles?: string[];
 }
 
 export interface RouteConfig {
