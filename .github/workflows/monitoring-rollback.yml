@@ -1,11 +1,11 @@
 name: 🔄 Post-Release Monitoring & Rollback
 on:
   workflow_run:
-    workflows: ["🚨 Hotfix Pipeline - Correction Critique"]
-    types: [completed]
-  schedule:
+   workflows: ["🚨 Hotfix Pipeline - Correction Critique"]
+   types: [completed]
+  #schedule:
     # Monitoring automatique toutes les 5 minutes après un déploiement
-    - cron: '*/5 * * * *'
+   # - cron: '*/5 * * * *'
   workflow_dispatch:
     inputs:
       action:
